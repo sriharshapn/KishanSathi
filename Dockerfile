@@ -1,34 +1,37 @@
-# ==========================================
-# AgriMate Production Multi-Stage Dockerfile
-# ==========================================
+# AgriMate - Production Dockerfile for Google Cloud Run / Container Platforms
+FROM node:20-alpine AS builder
 
-# Stage 1: Build React 19 + TypeScript Vite Client
-FROM node:22-alpine AS client-builder
-WORKDIR /app/client
-COPY client/package*.json ./
-RUN npm ci
-COPY client/ ./
+WORKDIR /app
+
+# Copy root and subproject package files
+COPY package*.json ./
+COPY client/package*.json ./client/
+COPY server/package*.json ./server/
+
+# Install dependencies
+RUN npm run install:all
+
+# Copy source files
+COPY client/ ./client/
+COPY server/ ./server/
+
+# Build Vite client
 RUN npm run build
 
-# Stage 2: Prepare Server and Package
-FROM node:22-alpine AS runner
+# Production runtime stage
+FROM node:20-alpine AS runner
+
 WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=5001
 
-# Copy and install server dependencies
-COPY server/package*.json ./server/
-WORKDIR /app/server
-RUN npm ci --only=production
+# Copy build artifacts and server code
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/server ./server
+COPY --from=builder /app/client/dist ./client/dist
 
-# Copy server code
-COPY server/ ./
-
-# Copy built frontend assets from stage 1
-COPY --from=client-builder /app/client/dist /app/client/dist
-
-# Expose production port
+# Expose HTTP port for Google Cloud Run
 EXPOSE 5001
 
-# Start full-stack AgriMate service
-CMD ["node", "server.js"]
+# Start production Node.js Express server
+CMD ["node", "server/server.js"]

@@ -11,9 +11,9 @@ import {
   normalizeToQuintals, logSearch, getRecentSearches
 } from '../services/marketService.js';
 import { getPriceTrends } from '../services/trendService.js';
-import { generateMarketExplanation, TERMINOLOGY_EXPLANATIONS } from '../services/aiService.js';
-import { explainMarketWithBedrock, getBedrockConfig } from '../services/bedrockService.js';
-import { getDynamoConfig } from '../services/dynamoService.js';
+import { explainMarketWithGemini, getGoogleAiConfig } from '../services/googleAiService.js';
+import { getStorageConfig } from '../services/storageService.js';
+import { runIngestionPipeline } from '../handlers/syncPipeline.js';
 import { getSellingChecklist } from '../services/checklistService.js';
 import { parseNaturalLanguageQuery } from '../services/nlpService.js';
 import { syncMarketData, getSyncStatus } from '../services/syncService.js';
@@ -51,12 +51,39 @@ router.get('/health', (req, res) => {
   res.json({ status: "healthy", timestamp: new Date().toISOString() });
 });
 
+// System & Cloud Architecture Status (Google Cloud Platform / Standard Node.js)
+router.get('/cloud/status', (req, res) => {
+  res.json({
+    success: true,
+    platform: "Google Cloud Platform / Standard Node.js Architecture",
+    runtime: {
+      engine: "Node.js 20.x Express REST Architecture",
+      container: "Google Cloud Run / Cloud Build Ready",
+      dpg_interop: "ETSI GS CIM 009 NGSI-LD compliant"
+    },
+    ai_engine: getGoogleAiConfig(),
+    storage: getStorageConfig(),
+    scheduler: {
+      provider: "Google Cloud Scheduler / Cron Trigger",
+      endpoint: "/api/pipeline/sync",
+      active: true
+    }
+  });
+});
+
+router.get('/system/status', (req, res) => {
+  res.redirect('/api/cloud/status');
+});
+
+// Legacy backward compatibility route
 router.get('/aws/status', (req, res) => {
   res.json({
-    success: true, platform: "AWS",
-    bedrock: getBedrockConfig(), dynamodb: getDynamoConfig(),
-    lambda: { runtime: "nodejs20.x", architecture: "arm64" },
-    apiGateway: { type: "REST / HTTP API", cors: true }
+    success: true,
+    migrated: true,
+    platform: "Google Cloud Platform / Standard Node.js Architecture",
+    canonical_endpoint: "/api/cloud/status",
+    ai_engine: getGoogleAiConfig(),
+    storage: getStorageConfig()
   });
 });
 
@@ -100,11 +127,21 @@ router.post('/explain', async (req, res) => {
   const { market, trend, language = 'en', quantityQuintals = 0 } = req.body;
   if (!market) return res.status(400).json({ success: false, error: "Market data object is required." });
   try {
-    const explanation = await explainMarketWithBedrock({ market, trend, language, quantityQuintals: Number(quantityQuintals) || 0 });
+    const explanation = await explainMarketWithGemini({ market, trend, language, quantityQuintals: Number(quantityQuintals) || 0 });
     res.json({ success: true, explanation });
   } catch (err) {
     const explanation = generateMarketExplanation({ market, trend, language, quantityQuintals: Number(quantityQuintals) || 0 });
     res.json({ success: true, explanation });
+  }
+});
+
+// Scheduled Ingestion Pipeline (Google Cloud Scheduler / Cron Trigger)
+router.post('/pipeline/sync', async (req, res) => {
+  try {
+    const result = await runIngestionPipeline();
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 

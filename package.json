@@ -10,7 +10,7 @@
     "install:all": "npm install --prefix client && npm install --prefix server",
     "dev:server": "cd server && npm run dev",
     "dev:client": "cd client && npm run dev",
-    "test": "node tests/run-checks.js && node tests/hackathon-checks.js && node tests/api-integration-test.js"
+    "test": "node tests/run-checks.js && node tests/hackathon-checks.js && node tests/api-integration-test.js && node tests/test-google-architecture.js"
   },
   "engines": {
     "node": ">=20.0.0"

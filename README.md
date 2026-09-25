@@ -41,7 +41,7 @@ Small and marginal farmers often struggle to interpret complex agricultural mark
 AgriMate operates under a non-negotiable data integrity constraint:
 - **Numerical market data originates strictly from verified external sources** (Agmarknet / Directorate of Marketing & Inspection, Ministry of Agriculture, Govt. of India).
 - If verified data is not available for a given crop and market, the application explicitly states that no verified data is available rather than guessing or extrapolating.
-- **Amazon Bedrock / LLM layers serve strictly as an explanation and natural language translation layer**—they are never used to substitute or hallucinate numerical market data.
+- **Google Gemini 2.0 Flash / LLM layers serve strictly as an explanation and natural language translation layer**—they are never used to substitute or hallucinate numerical market data.
 
 ---
 
@@ -69,7 +69,7 @@ AgriMate operates under a non-negotiable data integrity constraint:
    - Computes real descriptive trends over 7, 15, and 30-day historical time series (price change, percentage change, period average, high, low).
    - Utilizes accessible symbols and text (`↑ Increasing`, `→ Stable`, `↓ Decreasing`) without relying on color alone.
 
-7. **Bedrock AI Explanation Layer**:
+7. **Google Gemini AI Explanation Layer**:
    - Generates contextual, farmer-friendly explanations in the user's selected language grounded purely in retrieved verified facts.
    - Natural language query parser with speech-to-text input (e.g., *"500 kg tomato in Ballari"*, *"15 क्विंटल प्याज नासिक"*, *"ಬಳ್ಳಾರಿಯಲ್ಲಿ 500 ಕೆಜಿ ಟೊಮೆಟೊ"*).
 
@@ -91,11 +91,11 @@ AgriMate operates under a non-negotiable data integrity constraint:
 Farmer Client (React 19 + TypeScript + Tailwind v4)
          │
          ▼
-API Gateway / Express REST Backend
+Google Cloud Run / Express REST Backend
          │
     ┌────┴──────────────────────────┐
     ▼                               ▼
-Verified APMC Dataset         Bedrock AI Layer
+Verified APMC Dataset         Google Gemini AI Layer
 (Agmarknet / DMI Records)     (Grounded Explanations & NLP)
     │                               │
     └───────────────┬───────────────┘

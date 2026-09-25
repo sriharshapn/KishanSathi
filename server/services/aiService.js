@@ -1,5 +1,5 @@
 // MandiMate AI Explanation Layer
-// Strict Principle: Bedrock/AI acts solely as an explanation layer for structured verified data.
+// Strict Principle: Google Gemini / AI acts solely as an explanation layer for structured verified data.
 // It NEVER invents prices and NEVER overrides verified numbers.
 
 export const TERMINOLOGY_EXPLANATIONS = {
@@ -109,7 +109,7 @@ const CROP_LOCAL_NAMES = {
   "chilli": { hi: "मिर्च", kn: "ಮೆಣಸಿನಕಾಯಿ" }
 };
 
-// Bedrock-style narrative explanation generator based strictly on retrieved verified facts
+// Google Gemini narrative explanation generator based strictly on retrieved verified facts
 export function generateMarketExplanation({ market, trend, language = 'en', quantityQuintals = 0 }) {
   const lang = (language === 'hi' || language === 'kn') ? language : 'en';
 
