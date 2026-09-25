@@ -232,12 +232,13 @@ router.get('/advisory/history', async (req, res) => {
 // ── Disease Diagnosis & Reports ───────────────────
 // POST /api/disease/diagnose  (multipart/form-data, field: image)
 router.post('/disease/diagnose', upload.single('image'), async (req, res) => {
-  const { language = 'en' } = req.body;
+  const { language = 'en', sampleName = '' } = req.body;
   if (!req.file) return res.status(400).json({ success: false, error: 'No image uploaded.' });
 
   const imagePath = req.file.path;
+  const specimenHint = sampleName || req.file.originalname || '';
   try {
-    const diagnosis = await diagnoseCropDisease({ imagePath, language });
+    const diagnosis = await diagnoseCropDisease({ imagePath, language, sampleName: specimenHint });
 
     // Persist into SQLite disease_reports table
     const primaryDiag = diagnosis.diagnoses?.[0] || {};

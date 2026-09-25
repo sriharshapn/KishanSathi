@@ -12,8 +12,503 @@ import {
   Pill, 
   PhoneCall,
   X,
-  History
+  History,
+  MapPin
 } from 'lucide-react';
+
+export interface DemoCase {
+  key: string;
+  name: string;
+  crop: string;
+  latin: string;
+  location: string;
+  farmer: string;
+  tag: string;
+  severity: 'moderate' | 'severe';
+  icon: string;
+  description: string;
+}
+
+export const DEMO_CASES: DemoCase[] = [
+  {
+    key: 'tomato_early_blight',
+    name: 'Tomato Early Blight',
+    crop: 'Tomato (Solanum lycopersicum)',
+    latin: 'Alternaria solani',
+    location: 'Ballari & Kolar, Karnataka',
+    farmer: 'Ramesh Gowda (3.5 ac)',
+    tag: 'Target-Board Rings',
+    severity: 'moderate',
+    icon: '🍅',
+    description: 'Concentric necrotic rings on lower foliage after post-monsoon humidity.'
+  },
+  {
+    key: 'paddy_rice_blast',
+    name: 'Paddy Rice Blast',
+    crop: 'Paddy (Oryza sativa)',
+    latin: 'Magnaporthe oryzae',
+    location: 'Thanjavur Delta, Tamil Nadu',
+    farmer: 'S. Murugesan (5 ac Kuruvai)',
+    tag: 'Spindle Eye Spots',
+    severity: 'severe',
+    icon: '🌾',
+    description: 'Acute spindle/diamond ash-gray eye spots threatening panicle neck breakage.'
+  },
+  {
+    key: 'chilli_leaf_curl',
+    name: 'Chilli Leaf Curl & Murda',
+    crop: 'Chilli (Capsicum annuum)',
+    latin: 'Begomovirus + Thrips Complex',
+    location: 'Guntur, AP & Byadgi, KA',
+    farmer: 'Venkat Reddy (4 ac Byadgi)',
+    tag: 'Upward Boat Cupping',
+    severity: 'severe',
+    icon: '🌶️',
+    description: 'Severe upward boat-cupping and apical clustering vectored by whiteflies/thrips.'
+  },
+  {
+    key: 'wheat_yellow_rust',
+    name: 'Wheat Yellow / Stripe Rust',
+    crop: 'Wheat (Triticum aestivum)',
+    latin: 'Puccinia striiformis',
+    location: 'Ludhiana, PB & Karnal, HR',
+    farmer: 'Harpreet Singh (8 ac PBW-725)',
+    tag: 'Linear Orange Stripes',
+    severity: 'severe',
+    icon: '🍞',
+    description: 'Parallel vertical stripe arrays of bright yellow-orange powdery urediniospores.'
+  },
+  {
+    key: 'onion_purple_blotch',
+    name: 'Onion Purple Blotch',
+    crop: 'Onion (Allium cepa)',
+    latin: 'Alternaria porri',
+    location: 'Lasalgaon & Nashik, Maharashtra',
+    farmer: 'Dnyaneshwar Shinde (2.5 ac)',
+    tag: 'Sunken Violet Blotch',
+    severity: 'moderate',
+    icon: '🧅',
+    description: 'Sunken elliptical purplish-violet spots on tubular scapes reducing bulb life.'
+  },
+  {
+    key: 'cotton_bacterial_blight',
+    name: 'Cotton Angular Leaf Spot',
+    crop: 'Bt-Cotton (Gossypium)',
+    latin: 'Xanthomonas pv. malvacearum',
+    location: 'Wardha, MH & Rajkot, Gujarat',
+    farmer: 'Pravin Patil (6 ac Bt-Cotton)',
+    tag: 'Vein-Bounded Angular',
+    severity: 'moderate',
+    icon: '☁️',
+    description: 'Vein-delimited dark polygonal water-soaked lesions risking blackarm stem cankers.'
+  }
+];
+
+function drawSpecimenCanvas(ctx: CanvasRenderingContext2D, demo: DemoCase) {
+  const w = ctx.canvas.width;
+  const h = ctx.canvas.height;
+
+  // Background - rich agricultural soil/canopy dark tone
+  const bgGrad = ctx.createLinearGradient(0, 0, w, h);
+  bgGrad.addColorStop(0, '#152417');
+  bgGrad.addColorStop(1, '#0C160E');
+  ctx.fillStyle = bgGrad;
+  ctx.fillRect(0, 0, w, h);
+
+  // Subtle grid/coordinate overlay simulating field diagnostic camera
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+  ctx.lineWidth = 1;
+  for (let x = 40; x < w; x += 40) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, h);
+    ctx.stroke();
+  }
+  for (let y = 40; y < h; y += 40) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(w, y);
+    ctx.stroke();
+  }
+
+  // Draw Specific Botanical Morphology & Pathogen Lesions
+  if (demo.key === 'tomato_early_blight') {
+    // Tomato Leaflet with serrated lobes
+    ctx.save();
+    ctx.translate(w / 2, h / 2 - 15);
+    
+    // Main Leaflet Body
+    ctx.fillStyle = '#3E6627';
+    ctx.beginPath();
+    ctx.moveTo(-160, 0);
+    ctx.bezierCurveTo(-110, -80, -20, -110, 80, -60);
+    ctx.lineTo(130, -80);
+    ctx.lineTo(110, -40);
+    ctx.bezierCurveTo(150, -30, 180, -10, 200, 0);
+    ctx.bezierCurveTo(180, 10, 150, 30, 110, 40);
+    ctx.lineTo(130, 80);
+    ctx.lineTo(80, 60);
+    ctx.bezierCurveTo(-20, 110, -110, 80, -160, 0);
+    ctx.closePath();
+    ctx.fill();
+
+    // Leaf vein structure
+    ctx.strokeStyle = '#5B8C3E';
+    ctx.lineWidth = 3.5;
+    ctx.beginPath();
+    ctx.moveTo(-160, 0);
+    ctx.lineTo(195, 0);
+    ctx.stroke();
+
+    ctx.lineWidth = 1.8;
+    for (let x = -100; x < 150; x += 35) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x + 28, -45);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x + 28, 45);
+      ctx.stroke();
+    }
+
+    // Primary Target-board concentric lesion
+    const drawTargetSpot = (cx: number, cy: number, r: number) => {
+      ctx.fillStyle = 'rgba(212, 198, 56, 0.85)';
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#6E3A18';
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 0.75, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#945524';
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 0.55, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#4B220B';
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 0.35, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#1D0B03';
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * 0.15, 0, Math.PI * 2);
+      ctx.fill();
+    };
+
+    drawTargetSpot(40, -15, 46);
+    drawTargetSpot(-70, 30, 24);
+    drawTargetSpot(120, 20, 16);
+
+    ctx.restore();
+  } else if (demo.key === 'paddy_rice_blast') {
+    // Rice blade diagonal
+    ctx.save();
+    ctx.translate(w / 2, h / 2 - 15);
+    ctx.rotate(-0.35);
+
+    // Rice blade
+    ctx.fillStyle = '#397838';
+    ctx.beginPath();
+    ctx.moveTo(-220, -32);
+    ctx.lineTo(220, -18);
+    ctx.lineTo(250, 0);
+    ctx.lineTo(220, 18);
+    ctx.lineTo(-220, 32);
+    ctx.closePath();
+    ctx.fill();
+
+    // Fine parallel venation lines
+    ctx.strokeStyle = '#4FA14D';
+    ctx.lineWidth = 1;
+    for (let y = -25; y <= 25; y += 7) {
+      ctx.beginPath();
+      ctx.moveTo(-220, y);
+      ctx.lineTo(220, y * 0.7);
+      ctx.stroke();
+    }
+
+    // Midrib vein
+    ctx.strokeStyle = '#68B866';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath();
+    ctx.moveTo(-220, 0);
+    ctx.lineTo(240, 0);
+    ctx.stroke();
+
+    // Classic Spindle/Diamond shaped lesions (ash gray center + brown margin)
+    const drawBlastSpindle = (cx: number, cy: number, wSpan: number, hSpan: number) => {
+      ctx.fillStyle = '#873216';
+      ctx.beginPath();
+      ctx.moveTo(cx - wSpan, cy);
+      ctx.lineTo(cx, cy - hSpan);
+      ctx.lineTo(cx + wSpan, cy);
+      ctx.lineTo(cx, cy + hSpan);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = '#B45722';
+      ctx.beginPath();
+      ctx.moveTo(cx - wSpan * 0.75, cy);
+      ctx.lineTo(cx, cy - hSpan * 0.75);
+      ctx.lineTo(cx + wSpan * 0.75, cy);
+      ctx.lineTo(cx, cy + hSpan * 0.75);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = '#CCD2CA';
+      ctx.beginPath();
+      ctx.moveTo(cx - wSpan * 0.5, cy);
+      ctx.lineTo(cx, cy - hSpan * 0.5);
+      ctx.lineTo(cx + wSpan * 0.5, cy);
+      ctx.lineTo(cx, cy + hSpan * 0.5);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = '#3A180E';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+    };
+
+    drawBlastSpindle(30, -2, 52, 16);
+    drawBlastSpindle(-80, 8, 36, 12);
+    drawBlastSpindle(130, -5, 28, 9);
+
+    ctx.restore();
+  } else if (demo.key === 'chilli_leaf_curl') {
+    // Upward-cupped distorted chilli leaf
+    ctx.save();
+    ctx.translate(w / 2, h / 2 - 15);
+
+    // Puckered distorted leaf body (boat/cup shaped)
+    ctx.fillStyle = '#497330';
+    ctx.beginPath();
+    ctx.moveTo(-150, 0);
+    ctx.bezierCurveTo(-110, -70, 0, -85, 140, -40);
+    ctx.bezierCurveTo(180, -20, 190, 0, 190, 0);
+    ctx.bezierCurveTo(190, 0, 180, 20, 140, 40);
+    ctx.bezierCurveTo(0, 85, -110, 70, -150, 0);
+    ctx.closePath();
+    ctx.fill();
+
+    // Inner cupped highlights simulating curling
+    ctx.fillStyle = '#6E963D';
+    ctx.beginPath();
+    ctx.moveTo(-110, 0);
+    ctx.bezierCurveTo(-60, -45, 40, -45, 120, -15);
+    ctx.bezierCurveTo(120, 15, -60, 45, -110, 0);
+    ctx.fill();
+
+    // Puckered chlorotic yellowing patches
+    ctx.fillStyle = 'rgba(215, 222, 92, 0.45)';
+    ctx.beginPath();
+    ctx.arc(-20, -15, 28, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.arc(45, 12, 22, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Main curled vein
+    ctx.strokeStyle = '#8EBA4D';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(-150, 0);
+    ctx.quadraticCurveTo(0, -15, 185, 0);
+    ctx.stroke();
+
+    // Thrips / whitefly vector micro-specks (chlorotic flecking)
+    ctx.fillStyle = '#FFF88A';
+    for (let i = 0; i < 45; i++) {
+      const rx = (Math.sin(i * 99) * 110) + 10;
+      const ry = (Math.cos(i * 47) * 35);
+      ctx.fillRect(rx, ry, 2, 2);
+    }
+
+    ctx.restore();
+  } else if (demo.key === 'wheat_yellow_rust') {
+    // Narrow wheat leaf with parallel stripes of bright yellow-orange pustules
+    ctx.save();
+    ctx.translate(w / 2, h / 2 - 15);
+
+    // Wheat leaf blade
+    ctx.fillStyle = '#557F37';
+    ctx.fillRect(-85, -155, 170, 310);
+
+    // Parallel venation lines
+    ctx.strokeStyle = '#689647';
+    ctx.lineWidth = 1.5;
+    for (let x = -75; x <= 75; x += 15) {
+      ctx.beginPath();
+      ctx.moveTo(x, -155);
+      ctx.lineTo(x, 155);
+      ctx.stroke();
+    }
+
+    // 4 Distinct Parallel linear stripes of bright yellow-orange rust pustules
+    const stripeX = [-45, -15, 15, 45];
+    stripeX.forEach((sx, sIdx) => {
+      for (let y = -140; y <= 140; y += 10) {
+        if ((sIdx * 3 + y) % 7 === 0) continue;
+        const pustuleWidth = 5;
+        const pustuleHeight = 7;
+        ctx.fillStyle = (y % 2 === 0) ? '#F59E0B' : '#E87D04';
+        ctx.beginPath();
+        ctx.ellipse(sx, y, pustuleWidth / 2, pustuleHeight / 2, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#FDE047';
+        ctx.beginPath();
+        ctx.arc(sx, y - 1, 1.2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    });
+
+    ctx.restore();
+  } else if (demo.key === 'onion_purple_blotch') {
+    // Hollow tubular onion scape with sunken elliptical purple-violet blotch
+    ctx.save();
+    ctx.translate(w / 2, h / 2 - 15);
+
+    // Tubular scape (cylindrical gradient)
+    const scapeGrad = ctx.createLinearGradient(0, -55, 0, 55);
+    scapeGrad.addColorStop(0, '#1E4A28');
+    scapeGrad.addColorStop(0.3, '#3B7A48');
+    scapeGrad.addColorStop(0.5, '#4E965D');
+    scapeGrad.addColorStop(0.8, '#32683E');
+    scapeGrad.addColorStop(1, '#1A3F22');
+
+    ctx.fillStyle = scapeGrad;
+    ctx.beginPath();
+    ctx.roundRect(-210, -50, 420, 100, 20);
+    ctx.fill();
+
+    // Large sunken elliptical purple blotch
+    ctx.fillStyle = 'rgba(217, 208, 67, 0.85)';
+    ctx.beginPath();
+    ctx.ellipse(20, 0, 75, 34, -0.05, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = '#783A1E';
+    ctx.beginPath();
+    ctx.ellipse(20, 0, 60, 26, -0.05, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = '#5B2C6F';
+    ctx.beginPath();
+    ctx.ellipse(20, 0, 46, 19, -0.05, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.strokeStyle = '#3E194D';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.ellipse(20, 0, 32, 13, -0.05, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.fillStyle = '#260B31';
+    ctx.beginPath();
+    ctx.ellipse(20, 0, 16, 7, -0.05, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+  } else if (demo.key === 'cotton_bacterial_blight') {
+    // 3-lobed broad palmate cotton leaf with vein-delimited angular polygonal lesions
+    ctx.save();
+    ctx.translate(w / 2, h / 2 - 15);
+
+    // Palmate 3-lobed cotton leaf outline
+    ctx.fillStyle = '#36612E';
+    ctx.beginPath();
+    ctx.moveTo(0, 140);
+    ctx.bezierCurveTo(-50, 120, -140, 90, -170, 30);
+    ctx.lineTo(-190, -30);
+    ctx.bezierCurveTo(-140, -40, -90, -20, -60, -50);
+    ctx.lineTo(0, -165);
+    ctx.lineTo(60, -50);
+    ctx.bezierCurveTo(90, -20, 140, -40, 190, -30);
+    ctx.bezierCurveTo(170, 30, 140, 90, 50, 120);
+    ctx.closePath();
+    ctx.fill();
+
+    // Palmate Main Ribs
+    ctx.strokeStyle = '#5B8C4C';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(0, 140);
+    ctx.lineTo(0, -155);
+    ctx.moveTo(0, 140);
+    ctx.lineTo(-180, -25);
+    ctx.moveTo(0, 140);
+    ctx.lineTo(180, -25);
+    ctx.stroke();
+
+    ctx.lineWidth = 1.2;
+    ctx.strokeStyle = '#4A753E';
+    for (let a = -100; a <= 100; a += 40) {
+      ctx.beginPath();
+      ctx.moveTo(0, a);
+      ctx.lineTo(-70, a - 25);
+      ctx.moveTo(0, a);
+      ctx.lineTo(70, a - 25);
+      ctx.stroke();
+    }
+
+    const drawAngularLesion = (coords: number[][]) => {
+      ctx.fillStyle = 'rgba(75, 105, 52, 0.8)';
+      ctx.beginPath();
+      ctx.moveTo(coords[0][0], coords[0][1]);
+      for (let i = 1; i < coords.length; i++) {
+        ctx.lineTo(coords[i][0], coords[i][1]);
+      }
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = '#261408';
+      ctx.beginPath();
+      ctx.moveTo(coords[0][0] * 0.9, coords[0][1] * 0.9);
+      for (let i = 1; i < coords.length; i++) {
+        ctx.lineTo(coords[i][0] * 0.9, coords[i][1] * 0.9);
+      }
+      ctx.closePath();
+      ctx.fill();
+    };
+
+    drawAngularLesion([[-25, -40], [-55, -55], [-45, -80], [-18, -65]]);
+    drawAngularLesion([[15, -20], [50, -35], [60, -60], [20, -50]]);
+    drawAngularLesion([[-30, 20], [-65, 10], [-55, 38], [-20, 45]]);
+    drawAngularLesion([[25, 30], [60, 20], [70, 50], [30, 55]]);
+
+    ctx.restore();
+  }
+
+  // Bottom Telemetry Metadata Bar
+  ctx.fillStyle = 'rgba(10, 20, 12, 0.92)';
+  ctx.fillRect(0, h - 52, w, 52);
+  ctx.strokeStyle = '#2E7D32';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(0, h - 52);
+  ctx.lineTo(w, h - 52);
+  ctx.stroke();
+
+  ctx.fillStyle = '#A5D6A7';
+  ctx.font = 'bold 11px sans-serif';
+  ctx.fillText(`SPECIMEN: ${demo.name.toUpperCase()} (${demo.latin})`, 16, h - 32);
+
+  ctx.fillStyle = '#E8A238';
+  ctx.font = 'bold 10px monospace';
+  ctx.fillText(`LOC: ${demo.location.toUpperCase()}`, 16, h - 16);
+
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = '9px monospace';
+  ctx.fillText(`FARMER: ${demo.farmer.toUpperCase()}`, w - 210, h - 32);
+  ctx.fillStyle = '#78909C';
+  ctx.fillText('AGRIMATE FIELD SENSOR v2.4 • VIS-NIR', w - 210, h - 16);
+}
 
 interface DiagnosePageProps {
   language: Language;
@@ -26,6 +521,7 @@ export const DiagnosePage: React.FC<DiagnosePageProps> = ({ language, onNavigate
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<DiagnosisResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [activeDemoCase, setActiveDemoCase] = useState<DemoCase | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Past Disease Scan Reports
@@ -56,6 +552,7 @@ export const DiagnosePage: React.FC<DiagnosePageProps> = ({ language, onNavigate
   const handleLoadReport = (rep: any) => {
     if (rep.diagnosis) {
       setResult(rep.diagnosis);
+      setActiveDemoCase(null);
     }
     setReportsOpen(false);
   };
@@ -67,6 +564,7 @@ export const DiagnosePage: React.FC<DiagnosePageProps> = ({ language, onNavigate
       setPreviewUrl(URL.createObjectURL(file));
       setResult(null);
       setError(null);
+      setActiveDemoCase(null);
     }
   };
 
@@ -78,94 +576,33 @@ export const DiagnosePage: React.FC<DiagnosePageProps> = ({ language, onNavigate
       setPreviewUrl(URL.createObjectURL(file));
       setResult(null);
       setError(null);
+      setActiveDemoCase(null);
     }
   };
 
   // One-click demo samples for hackathon presentation!
-  const loadDemoSample = async (sampleName: string) => {
+  const loadDemoSample = async (demo: DemoCase) => {
+    setActiveDemoCase(demo);
     setLoading(true);
     setError(null);
     try {
-      // Draw realistic botanical leaf with concentric pathogen lesions
       const canvas = document.createElement('canvas');
       canvas.width = 480;
       canvas.height = 360;
       const ctx = canvas.getContext('2d');
       if (ctx) {
-        // Natural garden green background
-        ctx.fillStyle = '#2D4428';
-        ctx.fillRect(0, 0, 480, 360);
-
-        // Leaf Body polygon
-        ctx.fillStyle = '#476930';
-        ctx.beginPath();
-        ctx.moveTo(80, 180);
-        ctx.bezierCurveTo(120, 60, 360, 60, 420, 180);
-        ctx.bezierCurveTo(360, 300, 120, 300, 80, 180);
-        ctx.fill();
-
-        // Main Leaf Vein
-        ctx.strokeStyle = '#5E8842';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(80, 180);
-        ctx.lineTo(410, 180);
-        ctx.stroke();
-
-        // Secondary Veins
-        ctx.lineWidth = 1.5;
-        for (let i = 120; i < 380; i += 40) {
-          ctx.beginPath();
-          ctx.moveTo(i, 180);
-          ctx.lineTo(i + 30, 110);
-          ctx.stroke();
-          ctx.beginPath();
-          ctx.moveTo(i, 180);
-          ctx.lineTo(i + 30, 250);
-          ctx.stroke();
-        }
-
-        // Chlorotic Halo (Yellowing margin around infection)
-        ctx.fillStyle = '#C8B238';
-        ctx.beginPath();
-        ctx.arc(260, 150, 48, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Concentric Necrotic Lesion (Target-board pattern)
-        ctx.fillStyle = '#8B4513';
-        ctx.beginPath();
-        ctx.arc(260, 150, 34, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.fillStyle = '#5C2E0B';
-        ctx.beginPath();
-        ctx.arc(260, 150, 20, 0, Math.PI * 2);
-        ctx.fill();
-
-        ctx.fillStyle = '#2B1405';
-        ctx.beginPath();
-        ctx.arc(260, 150, 9, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Botanical Telemetry Tag
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.65)';
-        ctx.fillRect(0, 320, 480, 40);
-        ctx.fillStyle = '#A5D6A7';
-        ctx.font = 'bold 12px sans-serif';
-        ctx.fillText(`SPECIMEN: ${sampleName.toUpperCase()}`, 16, 345);
-        ctx.fillStyle = '#FFFFFF';
-        ctx.font = '10px monospace';
-        ctx.fillText('AGRIMATE FIELD SENSOR v2.4', 310, 345);
+        drawSpecimenCanvas(ctx, demo);
       }
       canvas.toBlob(async (blob) => {
         if (!blob) return;
-        const file = new File([blob], `${sampleName.toLowerCase().replace(/\s+/g, '_')}.png`, { type: 'image/png' });
+        const file = new File([blob], `${demo.key}_specimen.png`, { type: 'image/png' });
         setSelectedFile(file);
         setPreviewUrl(URL.createObjectURL(file));
 
         const formData = new FormData();
         formData.append('image', file);
         formData.append('language', language);
+        formData.append('sampleName', demo.key);
 
         const res = await fetch('/api/disease/diagnose', {
           method: 'POST',
@@ -193,6 +630,9 @@ export const DiagnosePage: React.FC<DiagnosePageProps> = ({ language, onNavigate
       const formData = new FormData();
       formData.append('image', selectedFile);
       formData.append('language', language);
+      if (activeDemoCase) {
+        formData.append('sampleName', activeDemoCase.key);
+      }
 
       const res = await fetch('/api/disease/diagnose', {
         method: 'POST',
@@ -216,6 +656,7 @@ export const DiagnosePage: React.FC<DiagnosePageProps> = ({ language, onNavigate
     setPreviewUrl(null);
     setResult(null);
     setError(null);
+    setActiveDemoCase(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
@@ -353,50 +794,73 @@ export const DiagnosePage: React.FC<DiagnosePageProps> = ({ language, onNavigate
         {/* Quick Pitch Demo Samples */}
         <div className="lg:col-span-5 bg-white rounded-3xl border border-[#CCE0D0] p-6 shadow-xs flex flex-col justify-between space-y-4">
           <div>
-            <div className="flex items-center gap-2 mb-3 pb-2 border-b border-[#E2ECE3]">
-              <Sparkles className="w-4 h-4 text-[#E8A238]" />
-              <h3 className="text-xs uppercase tracking-wider font-extrabold text-[#123826]">
-                One-Click Hackathon Demo Cases
-              </h3>
+            <div className="flex items-center justify-between mb-3 pb-2 border-b border-[#E2ECE3]">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-[#E8A238]" />
+                <h3 className="text-xs uppercase tracking-wider font-extrabold text-[#123826]">
+                  One-Click Hackathon Demo Cases
+                </h3>
+              </div>
+              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-[#EBF5ED] text-[#2E7D32]">
+                6 Real-Life Cases
+              </span>
             </div>
-            <p className="text-xs text-stone-600 mb-4 leading-relaxed">
-              Test instant diagnostic evaluation on real crop diseases without having to take a field photograph:
+            <p className="text-xs text-stone-600 mb-3 leading-relaxed">
+              Test instant diagnostic evaluation on authentic Indian agricultural outbreak cases with ICAR & KVK verified ground truth:
             </p>
 
-            <div className="space-y-2.5">
-              {[
-                { name: 'Tomato Early Blight', crop: 'Tomato (Solanum lycopersicum)', tag: 'Fungal Pathogen', icon: '🍅' },
-                { name: 'Paddy Rice Blast', crop: 'Paddy (Oryza sativa)', tag: 'Magnaporthe oryzae', icon: '🍚' },
-                { name: 'Onion Purple Blotch', crop: 'Onion (Allium cepa)', tag: 'Alternaria porri', icon: '🧅' },
-                { name: 'Cotton Leaf Curl Virus', crop: 'Cotton (Gossypium)', tag: 'Whitefly Vector', icon: '☁️' }
-              ].map((sample, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => loadDemoSample(sample.name)}
-                  disabled={loading}
-                  className="w-full p-3 rounded-2xl bg-[#F7FBF8] hover:bg-[#EBF5ED] border border-[#E2ECE3] hover:border-[#2E7D32] text-left transition-all flex items-center justify-between cursor-pointer group disabled:opacity-50"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl">{sample.icon}</span>
-                    <div>
-                      <strong className="text-xs text-[#123826] block group-hover:text-[#2E7D32] transition-colors">
-                        {sample.name}
-                      </strong>
-                      <span className="text-[10px] text-stone-500">{sample.crop}</span>
+            <div className="space-y-2 max-h-[460px] overflow-y-auto pr-1">
+              {DEMO_CASES.map((sample) => {
+                const isSelected = activeDemoCase?.key === sample.key;
+                return (
+                  <button
+                    key={sample.key}
+                    onClick={() => loadDemoSample(sample)}
+                    disabled={loading}
+                    className={`w-full p-3 rounded-2xl border text-left transition-all flex items-center justify-between cursor-pointer group disabled:opacity-50 ${
+                      isSelected
+                        ? 'bg-[#EBF5ED] border-[#2E7D32] shadow-xs'
+                        : 'bg-[#F7FBF8] hover:bg-[#EBF5ED] border-[#E2ECE3] hover:border-[#2E7D32]'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3 min-w-0 pr-2">
+                      <span className="text-2xl shrink-0">{sample.icon}</span>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <strong className="text-xs text-[#123826] group-hover:text-[#2E7D32] transition-colors truncate">
+                            {sample.name}
+                          </strong>
+                          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${
+                            sample.severity === 'severe'
+                              ? 'bg-red-50 text-red-700 border-red-200'
+                              : 'bg-amber-50 text-amber-700 border-amber-200'
+                          }`}>
+                            {sample.tag}
+                          </span>
+                        </div>
+                        <span className="text-[10px] text-stone-500 flex items-center gap-1 truncate mt-0.5">
+                          <MapPin className="w-2.5 h-2.5 text-stone-400 shrink-0" />
+                          <span className="truncate">{sample.location} • {sample.farmer}</span>
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-white border border-[#CCE0D0] text-[#123826]">
-                    Simulate
-                  </span>
-                </button>
-              ))}
+                    <span className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border transition-all shrink-0 ${
+                      isSelected && loading
+                        ? 'bg-[#2E7D32] text-white border-[#2E7D32]'
+                        : 'bg-white border-[#CCE0D0] text-[#123826] group-hover:bg-[#2E7D32] group-hover:text-white'
+                    }`}>
+                      {isSelected && loading ? 'Scanning...' : 'Simulate'}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
           <div className="p-3.5 rounded-2xl bg-[#FFF8E7] border border-[#FFE0A3] text-[11px] text-amber-900 flex items-start gap-2">
             <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
             <span>
-              <strong>Kisan Safety Principle:</strong> All diagnostic chemical formulations specify statutory withholding periods prior to harvest.
+              <strong>Kisan Safety Principle:</strong> All diagnostic chemical formulations specify statutory Pre-Harvest Intervals (PHI) and CIBRC-approved dosages.
             </span>
           </div>
         </div>
@@ -412,6 +876,35 @@ export const DiagnosePage: React.FC<DiagnosePageProps> = ({ language, onNavigate
       {/* Diagnosis Report Results */}
       {result && (
         <div className="space-y-6 animate-in fade-in duration-300">
+          {/* Active Outbreak Case Context Banner */}
+          {activeDemoCase && (
+            <div className="p-4 rounded-3xl bg-gradient-to-r from-[#123826] to-[#1E4D34] text-white shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <span className="text-3xl p-2 rounded-2xl bg-white/10">{activeDemoCase.icon}</span>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-md bg-[#E8A238] text-[#123826]">
+                      Validated Field Outbreak Case
+                    </span>
+                    <span className="text-xs text-[#A5D6A7] font-mono">
+                      ICAR / KVK Ground Truth
+                    </span>
+                  </div>
+                  <h4 className="text-sm font-bold text-white mt-0.5 flex items-center gap-1.5">
+                    <MapPin className="w-3.5 h-3.5 text-[#E8A238] shrink-0" />
+                    <span>{activeDemoCase.location} • {activeDemoCase.farmer}</span>
+                  </h4>
+                  <p className="text-xs text-white/80 mt-0.5">
+                    {activeDemoCase.description}
+                  </p>
+                </div>
+              </div>
+              <div className="sm:text-right shrink-0">
+                <span className="text-[10px] uppercase font-bold text-white/60 block">Causal Pathogen</span>
+                <span className="text-xs font-mono font-bold text-[#E8A238]">{activeDemoCase.latin}</span>
+              </div>
+            </div>
+          )}
           {/* Top Banner Summary */}
           <div className="bg-white rounded-3xl border border-[#CCE0D0] p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
