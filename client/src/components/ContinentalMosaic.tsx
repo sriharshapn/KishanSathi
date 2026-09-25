@@ -19,7 +19,7 @@ export const ContinentalMosaic: React.FC<ContinentalMosaicProps> = ({
             <div className="flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-[#2E7D32]"></span>
               <span className="text-[11px] font-mono uppercase font-bold tracking-widest text-[#2E7D32]">
-                AgriMate Core Product Pillars
+                AgriMate Core Capabilities
               </span>
             </div>
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#153424] tracking-tight font-['Syne',sans-serif]">
@@ -28,9 +28,9 @@ export const ContinentalMosaic: React.FC<ContinentalMosaicProps> = ({
           </div>
         </div>
 
-        {/* Asymmetrical 4-Card Photographic Mosaic Grid — The 4 PRD Pillars */}
+        {/* Asymmetrical 4-Card Photographic Mosaic Grid — Core Modules */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-          {/* Pillar 1: Satellite Intelligence & Sentinel-2 NDVI (Span 7 cols) */}
+          {/* Card 1: Satellite Intelligence & Sentinel-2 NDVI (Span 7 cols) */}
           <div
             onClick={() => onNavigate('satellite')}
             className="lg:col-span-7 group relative rounded-3xl overflow-hidden min-h-[360px] sm:min-h-[400px] border border-[#CCE0D0] cursor-pointer shadow-md hover:shadow-2xl transition-all duration-500 bg-[#163D28] flex flex-col justify-between p-6 sm:p-8"
@@ -50,7 +50,7 @@ export const ContinentalMosaic: React.FC<ContinentalMosaicProps> = ({
             <div className="relative z-10 flex items-center justify-between">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-[10px] font-mono font-bold tracking-wider text-[#FCD34D] uppercase">
                 <Satellite className="w-3 h-3 text-[#FCD34D]" />
-                Pillar 1: Satellite Intelligence
+                Satellite Intelligence
               </span>
               <span className="text-[11px] font-mono text-emerald-200 bg-emerald-900/70 px-2.5 py-0.5 rounded-full border border-emerald-400/30">
                 Sentinel-2 ≤10m Multispectral
@@ -74,7 +74,7 @@ export const ContinentalMosaic: React.FC<ContinentalMosaicProps> = ({
             </div>
           </div>
 
-          {/* Pillar 2: AI Crop Advisory Engine (Span 5 cols) */}
+          {/* Card 2: AI Crop Advisory Engine (Span 5 cols) */}
           <div
             onClick={() => onNavigate('advisory')}
             className="lg:col-span-5 group relative rounded-3xl overflow-hidden min-h-[360px] sm:min-h-[400px] border border-[#CCE0D0] cursor-pointer shadow-md hover:shadow-2xl transition-all duration-500 bg-[#163D28] flex flex-col justify-between p-6 sm:p-8"
@@ -93,7 +93,7 @@ export const ContinentalMosaic: React.FC<ContinentalMosaicProps> = ({
             <div className="relative z-10 flex items-center justify-between">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-[10px] font-mono font-bold tracking-wider text-[#FCD34D] uppercase">
                 <Sparkles className="w-3 h-3 text-[#FCD34D]" />
-                Pillar 2: AI Advisory
+                AI Advisory Engine
               </span>
               <span className="text-[11px] font-mono text-amber-200 bg-amber-900/70 px-2.5 py-0.5 rounded-full border border-amber-400/30">
                 Gemini 2.0 Flash
@@ -116,7 +116,7 @@ export const ContinentalMosaic: React.FC<ContinentalMosaicProps> = ({
             </div>
           </div>
 
-          {/* Pillar 3: Crop Disease Diagnostics (Span 5 cols) */}
+          {/* Card 3: Crop Disease Diagnostics (Span 5 cols) */}
           <div
             onClick={() => onNavigate('diagnose')}
             className="lg:col-span-5 group relative rounded-3xl overflow-hidden min-h-[340px] sm:min-h-[380px] border border-[#CCE0D0] cursor-pointer shadow-md hover:shadow-2xl transition-all duration-500 bg-[#163D28] flex flex-col justify-between p-6 sm:p-8"
@@ -135,7 +135,7 @@ export const ContinentalMosaic: React.FC<ContinentalMosaicProps> = ({
             <div className="relative z-10 flex items-center justify-between">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-[10px] font-mono font-bold tracking-wider text-[#FCD34D] uppercase">
                 <Scan className="w-3 h-3 text-[#FCD34D]" />
-                Pillar 3: Plant Pathology
+                Crop Diagnostics
               </span>
               <span className="text-[11px] font-mono text-emerald-200 bg-emerald-900/70 px-2.5 py-0.5 rounded-full border border-emerald-400/30">
                 Vision AI Diagnostics
@@ -158,7 +158,7 @@ export const ContinentalMosaic: React.FC<ContinentalMosaicProps> = ({
             </div>
           </div>
 
-          {/* Pillar 4: Inter-State Gov Network & DPG (Span 7 cols) */}
+          {/* Card 4: Inter-State Gov Network & DPG (Span 7 cols) */}
           <div
             onClick={() => onNavigate('gov')}
             className="lg:col-span-7 group relative rounded-3xl overflow-hidden min-h-[340px] sm:min-h-[380px] border border-[#CCE0D0] cursor-pointer shadow-md hover:shadow-2xl transition-all duration-500 bg-[#163D28] flex flex-col justify-between p-6 sm:p-8"
@@ -177,7 +177,7 @@ export const ContinentalMosaic: React.FC<ContinentalMosaicProps> = ({
             <div className="relative z-10 flex items-center justify-between">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-[10px] font-mono font-bold tracking-wider text-[#FCD34D] uppercase">
                 <Share2 className="w-3 h-3 text-[#FCD34D]" />
-                Pillar 4: Interoperability Layer
+                Inter-State Gov Layer
               </span>
               <span className="text-[11px] font-mono text-emerald-200 bg-emerald-900/70 px-2.5 py-0.5 rounded-full border border-emerald-400/30">
                 FIWARE NGSI-LD & India Stack

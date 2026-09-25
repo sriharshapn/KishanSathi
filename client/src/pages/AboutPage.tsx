@@ -76,7 +76,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
         </div>
       </section>
 
-      {/* The 4 Core Integrated Product Pillars (PRD Section 5 & 6) */}
+      {/* Core Integrated Product Architecture (PRD Section 5 & 6) */}
       <section className="bg-[#ECE8DE]/40 py-12 sm:py-16 border-y border-[#E6E1D7]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="text-center max-w-xl mx-auto mb-10 space-y-1.5">
@@ -84,7 +84,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
               PRD Section 5 & 6
             </span>
             <h2 className="text-2xl sm:text-3xl font-black text-[#153424] font-['Syne',sans-serif]">
-              The Four Product Pillars
+              Core Technical Capabilities
             </h2>
             <p className="text-stone-600 text-xs sm:text-sm">
               Integrated technical modules specified in the official AgriMate PRD.
@@ -92,7 +92,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {/* Pillar 1 */}
+            {/* Capability 1 */}
             <div 
               onClick={() => onNavigate('satellite')}
               className="glass-card p-5 rounded-2xl border border-white/80 shadow-xs space-y-2.5 hover-slide-up cursor-pointer"
@@ -101,7 +101,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
                 <Compass className="w-5 h-5" />
               </div>
               <div>
-                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#2E7D32]">Pillar 1</span>
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#2E7D32]">Copernicus Sentinel-2</span>
                 <h3 className="text-base font-bold text-[#153424]">🛰️ Satellite Intelligence</h3>
               </div>
               <p className="text-stone-600 text-xs leading-relaxed">
@@ -109,7 +109,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
               </p>
             </div>
 
-            {/* Pillar 2 */}
+            {/* Capability 2 */}
             <div 
               onClick={() => onNavigate('advisory')}
               className="glass-card p-5 rounded-2xl border border-white/80 shadow-xs space-y-2.5 hover-slide-up cursor-pointer"
@@ -118,7 +118,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
                 <Sprout className="w-5 h-5" />
               </div>
               <div>
-                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#E8A238]">Pillar 2</span>
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#E8A238]">Gemini 2.0 Flash</span>
                 <h3 className="text-base font-bold text-[#153424]">🌱 AI Crop Advisory</h3>
               </div>
               <p className="text-stone-600 text-xs leading-relaxed">
@@ -126,7 +126,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
               </p>
             </div>
 
-            {/* Pillar 3 */}
+            {/* Capability 3 */}
             <div 
               onClick={() => onNavigate('diagnose')}
               className="glass-card p-5 rounded-2xl border border-white/80 shadow-xs space-y-2.5 hover-slide-up cursor-pointer"
@@ -135,7 +135,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
                 <ShieldCheck className="w-5 h-5" />
               </div>
               <div>
-                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#2E7D32]">Pillar 3</span>
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#2E7D32]">Computer Vision AI</span>
                 <h3 className="text-base font-bold text-[#153424]">🔬 Disease Diagnostics</h3>
               </div>
               <p className="text-stone-600 text-xs leading-relaxed">
@@ -143,7 +143,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
               </p>
             </div>
 
-            {/* Pillar 4 */}
+            {/* Capability 4 */}
             <div 
               onClick={() => onNavigate('gov')}
               className="glass-card p-5 rounded-2xl border border-white/80 shadow-xs space-y-2.5 hover-slide-up cursor-pointer"
@@ -152,7 +152,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
                 <Layers className="w-5 h-5" />
               </div>
               <div>
-                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#E8A238]">Pillar 4</span>
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#E8A238]">FIWARE NGSI-LD</span>
                 <h3 className="text-base font-bold text-[#153424]">🔗 Interop Network</h3>
               </div>
               <p className="text-stone-600 text-xs leading-relaxed">

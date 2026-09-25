@@ -88,10 +88,10 @@ export const Header: React.FC<HeaderProps> = ({
 
   const primaryNavItems: { id: NavigationPage; label: string; icon: React.ComponentType<{ className?: string }>; badge?: string }[] = [
     { id: 'home', label: t.navHome || 'Home', icon: Compass },
-    { id: 'satellite', label: 'Satellite NDVI', icon: Compass, badge: 'Pillar 1' },
-    { id: 'advisory', label: t.navAdvisory || 'AI Advisory', icon: Sprout, badge: 'Pillar 2' },
-    { id: 'diagnose', label: t.navDiagnose || 'Disease Scan', icon: Info, badge: 'Pillar 3' },
-    { id: 'gov', label: t.navGov || 'Gov Network', icon: LayoutDashboard, badge: 'Pillar 4' },
+    { id: 'satellite', label: 'Satellite NDVI', icon: Compass, badge: 'Sentinel-2' },
+    { id: 'advisory', label: t.navAdvisory || 'AI Advisory', icon: Sprout, badge: 'Gemini AI' },
+    { id: 'diagnose', label: t.navDiagnose || 'Disease Scan', icon: Info, badge: 'Vision AI' },
+    { id: 'gov', label: t.navGov || 'Gov Network', icon: LayoutDashboard, badge: 'Inter-State' },
   ];
 
   const secondaryNavItems: { id: NavigationPage; label: string; icon: React.ComponentType<{ className?: string }>; desc: string }[] = [

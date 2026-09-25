@@ -25,6 +25,8 @@ import {
   generateIVRAdvisoryText, 
   STATE_COORDINATES 
 } from '../services/geminiService.js';
+import { GOV_API_REGISTRY, searchGovPlotData } from '../services/govPlotService.js';
+import { processEarthEnginePass, getEarthEngineStatus } from '../services/earthEngineService.js';
 import db from '../database/db.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -394,6 +396,50 @@ router.delete('/fields/:id', async (req, res) => {
   try {
     await db.run("DELETE FROM farmer_fields WHERE field_id = ? AND farmer_id = 'default_farmer';", [id]);
     res.json({ success: true, message: `Field ${id} deleted successfully` });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ── Government Agricultural Plot & Cadastral Registry APIs ──
+// GET /api/cadastre/apis - List official govt cadastral & plot APIs
+router.get('/cadastre/apis', (req, res) => {
+  res.json({ success: true, count: GOV_API_REGISTRY.length, apis: GOV_API_REGISTRY });
+});
+
+// GET /api/cadastre/query?state=Karnataka&district=Ballari&survey_number=142/2A
+router.get('/cadastre/query', (req, res) => {
+  try {
+    const plotData = searchGovPlotData(req.query);
+    res.json(plotData);
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// POST /api/cadastre/query
+router.post('/cadastre/query', (req, res) => {
+  try {
+    const plotData = searchGovPlotData(req.body);
+    res.json(plotData);
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ── Google Earth Engine (GEE) API ─────────────────
+// Official repo: https://github.com/google/earthengine-api.git
+// Client Library: @google/earthengine
+// GET /api/earthengine/status
+router.get('/earthengine/status', (req, res) => {
+  res.json({ success: true, ...getEarthEngineStatus() });
+});
+
+// POST /api/earthengine/process
+router.post('/earthengine/process', async (req, res) => {
+  try {
+    const result = await processEarthEnginePass(req.body);
+    res.json({ success: true, ...result });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }

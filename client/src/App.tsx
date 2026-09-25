@@ -352,7 +352,7 @@ export const App: React.FC = () => {
         aria-hidden="true"
       />
 
-      {/* Editorial Header with 4 PRD Pillars, multi-page navigation, language switch & sync */}
+      {/* Editorial Header with Core Technical Modules, multi-page navigation, language switch & sync */}
       <Header
         language={language}
         onLanguageChange={handleLanguageChange}
@@ -526,9 +526,9 @@ export const App: React.FC = () => {
               </div>
             </div>
 
-            {/* Column 2: 4 Core PRD Pillars */}
+            {/* Column 2: Core Platform Modules */}
             <div className="space-y-2.5">
-              <h4 className="text-white font-bold text-xs uppercase tracking-wider">Product Pillars</h4>
+              <h4 className="text-white font-bold text-xs uppercase tracking-wider">Core Modules</h4>
               <ul className="space-y-1.5 text-xs text-emerald-100/70">
                 <li><button onClick={() => navigateTo('satellite')} className="hover:text-white transition-colors cursor-pointer text-[#A5D6A7]">🛰️ Satellite Intelligence</button></li>
                 <li><button onClick={() => navigateTo('advisory')} className="hover:text-white transition-colors cursor-pointer text-[#A5D6A7]">🌱 AI Crop Advisory</button></li>

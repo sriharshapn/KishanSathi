@@ -222,7 +222,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                 Democratising precision agriculture for 100M+ small & marginal farmers. Hyper-localised advisories fusing Sentinel-2 satellite imagery, soil health data, climate forecasting, and Gemini 2.0 Flash in 10+ Indian languages.
               </p>
 
-              {/* 4 Core Pillars Action Buttons */}
+              {/* Core Modules Action Buttons */}
               <div className="flex flex-wrap items-center gap-3 pt-1">
                 <button
                   onClick={() => onNavigate('advisory')}
@@ -402,14 +402,14 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
       </section>
 
-      {/* SECTION 5: THE FOUR INTEGRATED PRODUCT PILLARS (PRD Section 5 & 6) */}
+      {/* SECTION 5: CORE INTEGRATED MODULES (PRD Section 5 & 6) */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 space-y-8">
         <div className="text-center max-w-2xl mx-auto space-y-2">
           <span className="text-xs font-bold uppercase tracking-widest text-[#2E7D32] bg-[#EAEFE9] px-3 py-1 rounded-full border border-[#D6DFD4]">
             AgriMate Architecture
           </span>
           <h2 className="text-2xl sm:text-4xl font-black text-[#153424] font-['Syne',sans-serif]">
-            Four Core Pillars of AgriMate
+            Core Technical Modules
           </h2>
           <p className="text-stone-600 text-xs sm:text-sm">
             Integrated digital public good infrastructure defined in the AgriMate PRD.
@@ -417,7 +417,7 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-          {/* Pillar 1: Satellite Intelligence */}
+          {/* Module 1: Satellite Intelligence */}
           <div 
             onClick={() => onNavigate('satellite')}
             className="glass-card p-6 rounded-2xl border border-white/80 shadow-xs space-y-3 hover-slide-up cursor-pointer hover:border-[#2E7D32] transition-all"
@@ -426,7 +426,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               <Compass className="w-5 h-5" />
             </div>
             <div>
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#2E7D32]">Pillar 1</span>
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#2E7D32]">Sentinel-2 Telemetry</span>
               <h3 className="text-base font-bold text-[#153424]">🛰️ Satellite Intelligence</h3>
             </div>
             <p className="text-stone-600 text-xs leading-relaxed">
@@ -438,7 +438,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             </div>
           </div>
 
-          {/* Pillar 2: AI Crop Advisory */}
+          {/* Module 2: AI Crop Advisory */}
           <div 
             onClick={() => onNavigate('advisory')}
             className="glass-card p-6 rounded-2xl border border-white/80 shadow-xs space-y-3 hover-slide-up cursor-pointer hover:border-[#2E7D32] transition-all"
@@ -447,7 +447,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               <Sprout className="w-5 h-5" />
             </div>
             <div>
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#E8A238]">Pillar 2</span>
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#E8A238]">AI Advisory</span>
               <h3 className="text-base font-bold text-[#153424]">🌱 AI Crop Advisory</h3>
             </div>
             <p className="text-stone-600 text-xs leading-relaxed">
@@ -459,7 +459,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             </div>
           </div>
 
-          {/* Pillar 3: Disease Diagnostics */}
+          {/* Module 3: Disease Diagnostics */}
           <div 
             onClick={() => onNavigate('diagnose')}
             className="glass-card p-6 rounded-2xl border border-white/80 shadow-xs space-y-3 hover-slide-up cursor-pointer hover:border-[#2E7D32] transition-all"
@@ -468,7 +468,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#2E7D32]">Pillar 3</span>
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#2E7D32]">Vision Diagnostics</span>
               <h3 className="text-base font-bold text-[#153424]">🔬 Disease Diagnostics</h3>
             </div>
             <p className="text-stone-600 text-xs leading-relaxed">
@@ -480,7 +480,7 @@ export const HomePage: React.FC<HomePageProps> = ({
             </div>
           </div>
 
-          {/* Pillar 4: Interop Network */}
+          {/* Module 4: Interop Network */}
           <div 
             onClick={() => onNavigate('gov')}
             className="glass-card p-6 rounded-2xl border border-white/80 shadow-xs space-y-3 hover-slide-up cursor-pointer hover:border-[#2E7D32] transition-all"
@@ -489,7 +489,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               <Layers className="w-5 h-5" />
             </div>
             <div>
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#E8A238]">Pillar 4</span>
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#E8A238]">Gov Interoperability</span>
               <h3 className="text-base font-bold text-[#153424]">🔗 Interop Network</h3>
             </div>
             <p className="text-stone-600 text-xs leading-relaxed">

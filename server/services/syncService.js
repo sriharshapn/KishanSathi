@@ -272,18 +272,18 @@ export async function syncMarketData({ simulateLiveData = false } = {}) {
     let baselineCount = 0;
     const baseSourceAgency = "Agmarknet / Directorate of Marketing & Inspection, Ministry of Agriculture, Govt. of India";
     const allCommodities = await db.query("SELECT * FROM commodities WHERE commodity_id LIKE 'CROP-00%';");
-    const baselineMarkets = await db.query("SELECT * FROM markets WHERE market_id LIKE 'MKT-00%';");
+    const baselineMarkets = await db.query("SELECT * FROM markets WHERE market_id LIKE 'MKT-%' LIMIT 25;");
 
     for (const commodity of allCommodities) {
       const varieties = JSON.parse(commodity.varieties_json || '["Standard"]');
 
       for (const market of baselineMarkets) {
-        // Skip if already inserted via live feed today
-        const existing = await db.get(
-          "SELECT record_id FROM price_records WHERE commodity_id = ? AND market_id = ? AND is_today = 1;",
+        // Skip only if already inserted via live Data.gov.in feed today
+        const existingLive = await db.get(
+          "SELECT record_id FROM price_records WHERE commodity_id = ? AND market_id = ? AND is_today = 1 AND source LIKE '%Data.gov.in%';",
           [commodity.commodity_id, market.market_id]
         );
-        if (existing) continue;
+        if (existingLive) continue;
 
         const hash = (market.market_name.charCodeAt(0) * 19 + commodity.name.charCodeAt(0) * 37 + now.getDate() * 13) % 80;
         const drift = hash - 40;
