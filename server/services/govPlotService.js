@@ -163,15 +163,27 @@ export function searchGovPlotData(query = {}) {
   const distCode = district.slice(0, 3).toUpperCase();
   const agristackPlotId = `IN-${stateCode}-${distCode}-2026-${String(numSeed).padStart(5, '0')}`;
 
-  return {
-    success: true,
-    query: { state, district, taluk, village, survey_number: surveyClean },
-    agristack_plot_id: agristackPlotId,
+  const khataNum = `KHT-${Math.abs(numSeed * 3 + 120) % 999 + 100}`;
+  const ownerName = `Farmer Beneficiary (Patta #${surveyMain})`;
+
+  const recordPayload = {
+    official_plot_id: {
+      agristack_plot_id: agristackPlotId,
+      survey_number: surveyClean,
+      system_name: `${statePortal.name} & AgriStack`,
+      official_portal_url: statePortal.url
+    },
+    tenure: {
+      owner_name: ownerName,
+      khata_number: khataNum,
+      tenure_type: "Individual Agricultural Patta (RoR Certified)",
+      land_classification: "Dry Agricultural (Rayatwari)"
+    },
     survey_record: {
       survey_number: surveyMain,
       hissa_number: hissaPart || '1',
       full_survey_id: surveyClean,
-      khata_number: `KHT-${Math.abs(numSeed * 3 + 120) % 999 + 100}`,
+      khata_number: khataNum,
       tenure_type: "Individual Agricultural Patta (RoR Certified)",
       mutation_status: "Approved & Digitally Locked",
       extent_hectares: extentHectares,
@@ -182,6 +194,7 @@ export function searchGovPlotData(query = {}) {
       village
     },
     soil_health_card: {
+      sample_id: `SHC-${stateCode}-${numSeed}-2026`,
       card_id: `SHC-${stateCode}-${numSeed}-2026`,
       soil_type: soilType,
       nitrogen_kg_ha: nitrogen,
@@ -196,6 +209,8 @@ export function searchGovPlotData(query = {}) {
       source: "Soil Health Card Portal (soilhealth.dac.gov.in)"
     },
     digital_crop_survey: {
+      sown_crop: verifiedCrop,
+      crop_variety: "Certified State Agro Cultivar",
       survey_year: "2026-27",
       season: "Kharif 2026",
       verified_crop: verifiedCrop,
@@ -207,7 +222,9 @@ export function searchGovPlotData(query = {}) {
       verification_status: "Verified On-Field"
     },
     geospatial: {
-      centroid: { lat, lng: lon },
+      centroid: { latitude: lat, longitude: lon, lat, lng: lon },
+      area_hectares: extentHectares,
+      area_acres: extentAcres,
       boundary_polygon: polygonCoordinates,
       google_earth_url: `https://earth.google.com/web/@${lat.toFixed(6)},${lon.toFixed(6)},450a,1200d,35y,0h,45t,0r`,
       bhuvan_wms_layer: "ISRO:Cadastral_Plot_Boundaries",
@@ -243,5 +260,12 @@ export function searchGovPlotData(query = {}) {
       }
     ],
     timestamp: new Date().toISOString()
+  };
+
+  return {
+    success: true,
+    query: { state, district, taluk, village, survey_number: surveyClean },
+    record: recordPayload,
+    ...recordPayload
   };
 }
