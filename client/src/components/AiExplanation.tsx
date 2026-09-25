@@ -103,7 +103,7 @@ export const AiExplanation: React.FC<AiExplanationProps> = ({
 
   const handleCopy = () => {
     if (!explanation) return;
-    const text = `${explanation.title}\n\n${explanation.summary}\n\n${explanation.priceDetails}\n${explanation.trendExplanation}\n\nTip: ${explanation.advice}\n\nVerified by AgriMate`;
+    const text = `${explanation.title}\n\n${explanation.summary}\n\n${explanation.priceDetails}\n${explanation.trendExplanation}\n\nTip: ${explanation.advice}\n\nVerified by Kisan Setu`;
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -111,7 +111,7 @@ export const AiExplanation: React.FC<AiExplanationProps> = ({
 
   const handleShareWhatsApp = () => {
     if (!explanation) return;
-    const text = `*${explanation.title}*\n\n${explanation.summary}\n\n${explanation.priceDetails}\n${explanation.trendExplanation}\n\n*Farmer Tip:* ${explanation.advice}\n\n_Source: ${market.source}_\n_Verified by AgriMate Market Intelligence_`;
+    const text = `*${explanation.title}*\n\n${explanation.summary}\n\n${explanation.priceDetails}\n${explanation.trendExplanation}\n\n*Farmer Tip:* ${explanation.advice}\n\n_Source: ${market.source}_\n_Verified by Kisan Setu Market Intelligence_`;
     const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
     window.open(url, '_blank');
   };
@@ -133,7 +133,7 @@ export const AiExplanation: React.FC<AiExplanationProps> = ({
     en: "Listen Voice",
     hi: "आवाज़ में सुनें",
     kn: "ಧ್ವನಿ ಕೇಳಿ",
-    te: "వాయిస్ వినండి",
+    te: "ವాయిస్ వినండి",
     ta: "குரல் கேளுங்கள்",
     mr: "आवाज ऐका",
     bn: "ভয়েস শুনুন",
@@ -144,10 +144,10 @@ export const AiExplanation: React.FC<AiExplanationProps> = ({
 
   if (loading) {
     return (
-      <div className="verda-card rounded-3xl p-6 border border-[#CCE0D0] animate-pulse">
+      <div className="bg-white rounded-3xl p-6 border border-[#E5EAD7] shadow-[0_4px_24px_rgba(2,33,19,0.04)] animate-pulse">
         <div className="flex items-center gap-3">
-          <div className="w-5 h-5 border-2 border-[#2E7D32] border-t-transparent rounded-full animate-spin" />
-          <span className="text-sm font-medium text-[#123826]">
+          <div className="w-4 h-4 border-2 border-[#59701E] border-t-transparent rounded-full animate-spin" />
+          <span className="text-xs font-['Montserrat',sans-serif] font-semibold text-[#59701E]">
             Generating market analysis in {languageDisplayNames[language]}...
           </span>
         </div>
@@ -158,22 +158,18 @@ export const AiExplanation: React.FC<AiExplanationProps> = ({
   if (!explanation) return null;
 
   return (
-    <div className="relative overflow-hidden verda-card text-[#162E21] rounded-3xl p-6 sm:p-8 border border-[#CCE0D0] shadow-sm">
-      {/* Background subtle nature ambiance */}
-      <div className="absolute top-0 right-0 -mt-10 -mr-10 w-72 h-72 bg-[#EBF5ED] rounded-full blur-3xl pointer-events-none opacity-60" />
-
+    <div className="bg-white text-[#022113] rounded-3xl p-6 sm:p-8 border border-[#E5EAD7] shadow-[0_4px_24px_rgba(2,33,19,0.04)] font-['Open_Sans',sans-serif]">
       {/* Header with audio and action controls */}
-      <div className="relative z-10 flex flex-wrap items-center justify-between gap-4 border-b border-[#E2ECE3] pb-5 mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#E5EAD7] pb-5 mb-6">
         <div className="flex items-center gap-3.5">
-          <div className="p-3 bg-[#EBF5ED] border border-[#CCE0D0] text-[#2E7D32] rounded-2xl">
-            <Sparkles className="w-6 h-6" />
+          <div className="p-2.5 bg-[#F0F4EC] border border-[#E5EAD7] text-[#59701E] rounded-2xl">
+            <Sparkles className="w-5 h-5" strokeWidth={2} />
           </div>
           <div>
-            <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-[#123826] font-['Syne',sans-serif]">
+            <h3 className="text-lg sm:text-xl font-bold tracking-tight text-[#022113] font-['Montserrat',sans-serif]">
               {explanation.title}
             </h3>
-            <span className="text-xs font-mono text-[#2E7D32] flex items-center gap-1.5 mt-0.5 font-medium">
-              <Sparkles className="w-3.5 h-3.5" />
+            <span className="text-xs font-semibold text-[#59701E] flex items-center gap-1.5 mt-0.5 font-['Montserrat',sans-serif]">
               <span>{t.aiExplanationBadge}</span>
             </span>
           </div>
@@ -185,14 +181,14 @@ export const AiExplanation: React.FC<AiExplanationProps> = ({
           <button
             type="button"
             onClick={handleSpeak}
-            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-mono font-bold transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold font-['Montserrat',sans-serif] transition-all cursor-pointer shadow-xs ${
               isSpeaking 
-                ? 'bg-amber-500 text-white animate-bounce shadow-md' 
-                : 'bg-[#2E7D32] hover:bg-[#1B5E20] text-white shadow-sm hover:shadow-md'
+                ? 'bg-amber-500 text-white animate-pulse' 
+                : 'bg-[#DFEB38] hover:bg-[#d0dc32] text-[#022113]'
             }`}
             title={isSpeaking ? "Stop Voice Narration" : `Listen in ${languageDisplayNames[language]}`}
           >
-            {isSpeaking ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+            {isSpeaking ? <VolumeX className="w-4 h-4" strokeWidth={2} /> : <Volume2 className="w-4 h-4" strokeWidth={2} />}
             <span>{isSpeaking ? "Speaking..." : listenButtonLabels[language]}</span>
           </button>
 
@@ -200,76 +196,76 @@ export const AiExplanation: React.FC<AiExplanationProps> = ({
           <button
             type="button"
             onClick={handleCopy}
-            className="p-2 rounded-xl bg-[#F4F8F5] hover:bg-[#EBF5ED] text-stone-700 hover:text-[#123826] border border-[#CCE0D0] transition-colors cursor-pointer"
+            className="p-2 rounded-full bg-[#F0F4EC] hover:bg-[#E5EAD7] text-[#022113] border border-[#E5EAD7] transition-colors cursor-pointer"
             title="Copy Insights"
           >
-            {copied ? <Check className="w-4 h-4 text-[#2E7D32]" /> : <Copy className="w-4 h-4" />}
+            {copied ? <Check className="w-4 h-4 text-[#59701E]" strokeWidth={2} /> : <Copy className="w-4 h-4" strokeWidth={2} />}
           </button>
 
           {/* WhatsApp Share Button */}
           <button
             type="button"
             onClick={handleShareWhatsApp}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#25D366] hover:bg-[#1EBE5D] text-white text-xs font-mono font-bold transition-all cursor-pointer shadow-sm"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-[#F0F4EC] hover:bg-[#E5EAD7] border border-[#E5EAD7] text-[#022113] text-xs font-bold font-['Montserrat',sans-serif] transition-colors cursor-pointer"
             title="Share to WhatsApp"
           >
-            <Share2 className="w-3.5 h-3.5" />
+            <Share2 className="w-3.5 h-3.5" strokeWidth={2} />
             <span className="hidden sm:inline">WhatsApp</span>
           </button>
         </div>
       </div>
 
       {/* Narrative Cards */}
-      <div className="relative z-10 space-y-4 text-sm sm:text-base leading-relaxed">
-        <div className="bg-[#F4F8F5] p-5 rounded-2xl border border-[#CCE0D0] shadow-inner">
-          <p className="font-semibold text-[#123826] text-base sm:text-lg">
+      <div className="space-y-4 text-sm leading-relaxed">
+        <div className="bg-[#F8FAF6] p-5 rounded-2xl border border-[#E5EAD7]">
+          <p className="font-medium text-[#022113] text-base leading-relaxed">
             {explanation.summary}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-mono text-xs">
-          <div className="glass-card-subtle p-4.5 rounded-2xl border border-white/80">
-            <div className="text-[10px] uppercase tracking-wider text-amber-800 font-bold mb-1.5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+          <div className="bg-[#F8FAF6] p-4 rounded-2xl border border-[#E5EAD7]">
+            <div className="text-[10px] uppercase font-bold font-['Montserrat',sans-serif] tracking-wider text-[#59701E] mb-1.5">
               Price Range & Arrival Volume
             </div>
-            <p className="text-stone-700 leading-normal">{explanation.priceDetails}</p>
+            <p className="text-[#4A5568] leading-normal">{explanation.priceDetails}</p>
           </div>
 
-          <div className="glass-card-subtle p-4.5 rounded-2xl border border-white/80">
-            <div className="text-[10px] uppercase tracking-wider text-[#123826] font-bold mb-1.5">
+          <div className="bg-[#F8FAF6] p-4 rounded-2xl border border-[#E5EAD7]">
+            <div className="text-[10px] uppercase font-bold font-['Montserrat',sans-serif] tracking-wider text-[#59701E] mb-1.5">
               Historical Trend Insight
             </div>
-            <p className="text-stone-700 leading-normal">{explanation.trendExplanation}</p>
+            <p className="text-[#4A5568] leading-normal">{explanation.trendExplanation}</p>
           </div>
         </div>
 
         {explanation.estimatedValueNote && (
-          <div className="glass-card-subtle p-4 rounded-2xl border border-amber-200/80 bg-amber-50/40 text-xs font-mono text-amber-900">
-            <strong className="text-amber-800">Produce Estimate Note:</strong> {explanation.estimatedValueNote}
+          <div className="bg-[#F8FAF6] p-4 rounded-2xl border border-[#E5EAD7] text-xs text-[#59701E]">
+            <strong className="text-[#022113]">Produce Estimate Note:</strong> {explanation.estimatedValueNote}
           </div>
         )}
 
-        <div className="glass-card-subtle p-5 rounded-2xl border border-[#2E7D32]/25 flex items-start gap-3.5">
-          <div className="p-2 bg-[#2E7D32] text-white rounded-xl shrink-0 mt-0.5">
-            <Bot className="w-5 h-5" />
+        <div className="bg-[#F0F4EC] p-5 rounded-2xl border border-[#E5EAD7] flex items-start gap-3.5">
+          <div className="p-2.5 bg-white border border-[#E5EAD7] text-[#59701E] rounded-xl shrink-0 mt-0.5 shadow-2xs">
+            <Bot className="w-4 h-4" strokeWidth={2} />
           </div>
           <div>
-            <div className="text-xs font-mono uppercase tracking-wider text-[#123826] font-bold mb-1">
+            <div className="text-xs font-bold font-['Montserrat',sans-serif] uppercase tracking-wider text-[#59701E] mb-1">
               Field Action Advice
             </div>
-            <p className="text-stone-800 font-medium">{explanation.advice}</p>
+            <p className="text-[#022113] font-normal leading-relaxed">{explanation.advice}</p>
           </div>
         </div>
       </div>
 
       {/* Telemetry Footer */}
-      <div className="relative z-10 mt-6 pt-4 border-t border-[#E2ECE3] text-xs font-mono text-stone-500 flex flex-wrap items-center justify-between gap-2">
+      <div className="mt-6 pt-4 border-t border-[#E5EAD7] text-xs font-mono text-[#59701E] flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-1.5">
-          <ShieldCheck className="w-4 h-4 text-[#2E7D32] shrink-0" />
+          <ShieldCheck className="w-4 h-4 text-[#59701E] shrink-0" strokeWidth={2} />
           <span>{explanation.verifiedNotice}</span>
         </div>
-        <span className="text-[10px] bg-[#F4F8F5] px-2.5 py-1 rounded-md border border-[#E2ECE3] text-stone-600">
-          Official APMC Market Advisory • Ministry of Agriculture
+        <span className="text-[10px] bg-[#F0F4EC] px-3 py-1 rounded-full border border-[#E5EAD7] text-[#022113] font-bold font-['Montserrat',sans-serif] uppercase tracking-wider">
+          Official APMC Advisory • Ministry of Agriculture
         </span>
       </div>
     </div>

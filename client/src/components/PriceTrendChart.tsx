@@ -57,10 +57,9 @@ export const PriceTrendChart: React.FC<PriceTrendChartProps> = ({
 
   if (!trendData || !trendData.has_data) {
     return (
-      <div className="rounded-2xl border border-white/80 p-8 text-center glass-card"
-        style={{ boxShadow: '0 4px 20px rgba(21,52,36,0.04), inset 0 1px 1px rgba(255,255,255,0.95)' }}>
-        <BarChart2 className="w-8 h-8 mx-auto text-stone-300 mb-2" />
-        <p className="text-xs font-mono text-stone-400">No historical data for this market.</p>
+      <div className="rounded-2xl border border-white/[0.08] p-8 text-center bg-[#0F0F12]/90 backdrop-blur-xl">
+        <BarChart2 className="w-8 h-8 mx-auto text-zinc-600 mb-2" strokeWidth={1.5} />
+        <p className="text-xs font-mono text-zinc-500">No historical data available for this market.</p>
       </div>
     );
   }
@@ -84,38 +83,36 @@ export const PriceTrendChart: React.FC<PriceTrendChartProps> = ({
 
   const isUp = direction === 'increasing';
   const isDown = direction === 'decreasing';
-  const accentColor = isUp ? '#2E7D32' : isDown ? '#e11d48' : '#64748b';
   const hovered = hoveredIdx !== null ? pts[hoveredIdx] : null;
 
   // 3 evenly-spaced Y-axis labels
   const yLabels = [maxP, Math.round((maxP + minP) / 2), minP];
 
   return (
-    <div className="rounded-2xl border border-white/80 overflow-hidden glass-card"
-      style={{ boxShadow: '0 8px 32px 0 rgba(21, 52, 36, 0.05), inset 0 1px 1px rgba(255,255,255,0.95)' }}>
+    <div className="rounded-3xl border border-[#E5EAD7] overflow-hidden bg-white shadow-[0_4px_24px_rgba(2,33,19,0.04)] font-['Open_Sans',sans-serif]">
 
       {/* ── Header ── */}
-      <div className="px-5 pt-5 pb-4 flex flex-wrap items-start justify-between gap-3 border-b border-stone-200/50">
+      <div className="px-6 pt-6 pb-4 flex flex-wrap items-start justify-between gap-3 border-b border-[#E5EAD7]">
         <div>
-          <h3 className="text-[15px] font-bold text-[#153424] font-['Syne',sans-serif] leading-snug">
+          <h3 className="text-base font-bold text-[#022113] tracking-tight font-['Montserrat',sans-serif]">
             {t.trendsTitle}
           </h3>
-          <p className="text-[11px] font-mono text-stone-400 mt-0.5">
+          <p className="text-xs font-mono text-[#59701E] mt-0.5">
             {crop} · {marketName}
           </p>
         </div>
 
         {/* Period toggle */}
-        <div className="flex items-center gap-1 bg-white/60 backdrop-blur-xs border border-white/80 p-1 rounded-xl">
+        <div className="flex items-center gap-1 bg-[#F0F4EC] border border-[#E5EAD7] p-1 rounded-full">
           {[7, 15, 30].map(d => (
             <button
               key={d}
               type="button"
               onClick={() => setDays(d)}
-              className={`px-3 py-1 text-[11px] font-bold font-mono rounded-lg transition-all cursor-pointer ${
+              className={`px-3.5 py-1 text-xs font-['Montserrat',sans-serif] rounded-full transition-all cursor-pointer ${
                 days === d
-                  ? 'bg-white text-[#153424] shadow-sm'
-                  : 'text-stone-500 hover:text-stone-700'
+                  ? 'bg-[#546C18] text-[#DFEB38] font-bold shadow-xs'
+                  : 'text-[#59701E] hover:text-[#546C18]'
               }`}
             >
               {d === 7 ? t.period7Days : d === 15 ? t.period15Days : t.period30Days}
@@ -124,62 +121,62 @@ export const PriceTrendChart: React.FC<PriceTrendChartProps> = ({
         </div>
       </div>
 
-      <div className="p-5 space-y-5">
+      <div className="p-6 space-y-5">
 
         {/* ── Trend summary row ── */}
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
-              isUp ? 'bg-[#F0F7F1]' : isDown ? 'bg-rose-50' : 'bg-slate-100'
+            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 ${
+              isUp ? 'bg-emerald-50 border border-emerald-200' : isDown ? 'bg-rose-50 border border-rose-200' : 'bg-[#F0F4EC] border border-[#E5EAD7]'
             }`}>
               {isUp
-                ? <TrendingUp className="w-4.5 h-4.5 text-[#2E7D32]" />
+                ? <TrendingUp className="w-5 h-5 text-emerald-700" strokeWidth={2} />
                 : isDown
-                  ? <TrendingDown className="w-4.5 h-4.5 text-rose-600" />
-                  : <Minus className="w-4.5 h-4.5 text-slate-500" />}
+                  ? <TrendingDown className="w-5 h-5 text-rose-700" strokeWidth={2} />
+                  : <Minus className="w-5 h-5 text-[#59701E]" strokeWidth={2} />}
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-sm font-bold text-[#153424] font-['Syne',sans-serif]">
+                <span className="text-sm font-bold text-[#022113] font-['Montserrat',sans-serif]">
                   {symbol} {isUp ? 'Increasing' : isDown ? 'Decreasing' : 'Stable'}
                 </span>
-                <span className={`text-[11px] font-mono font-bold px-2 py-0.5 rounded-full ${
-                  isUp ? 'bg-[#F0F7F1] text-[#2E7D32]' : isDown ? 'bg-rose-50 text-rose-600' : 'bg-slate-100 text-slate-600'
+                <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full font-['Montserrat',sans-serif] ${
+                  isUp ? 'bg-[#DFEB38] text-[#022113]' : isDown ? 'bg-rose-100 text-rose-800 border border-rose-200' : 'bg-[#F0F4EC] text-[#59701E] border border-[#E5EAD7]'
                 }`}>
                   {percent_change > 0 ? `+${percent_change}%` : `${percent_change}%`}
                 </span>
               </div>
-              <p className="text-[11px] font-mono text-stone-400 mt-0.5 leading-snug">{descriptive_statement}</p>
+              <p className="text-xs text-[#59701E] mt-0.5 leading-snug">{descriptive_statement}</p>
             </div>
           </div>
 
           <div className="text-right shrink-0">
-            <div className={`text-base font-black font-mono ${price_change >= 0 ? 'text-[#2E7D32]' : 'text-rose-600'}`}>
+            <div className={`text-base font-bold font-['Montserrat',sans-serif] ${price_change >= 0 ? 'text-[#59701E]' : 'text-rose-700'}`}>
               {price_change > 0 ? `+₹${price_change}` : `-₹${Math.abs(price_change)}`}
             </div>
-            <div className="text-[10px] font-mono text-stone-400">{days}d net shift</div>
+            <div className="text-[10px] text-[#718096] font-medium">{days}d net shift</div>
           </div>
         </div>
 
         {/* ── 3 stat pills ── */}
         <div className="grid grid-cols-3 gap-2">
           {[
-            { label: t.periodAvg, value: average_price, color: 'text-stone-700' },
-            { label: t.periodHigh, value: highest_price, color: 'text-[#2E7D32]' },
-            { label: t.periodLow,  value: lowest_price,  color: 'text-rose-600'  },
+            { label: t.periodAvg, value: average_price, color: 'text-[#022113]' },
+            { label: t.periodHigh, value: highest_price, color: 'text-[#59701E]' },
+            { label: t.periodLow,  value: lowest_price,  color: 'text-rose-700'  },
           ].map(({ label, value, color }) => (
-            <div key={label} className="border border-white/70 rounded-xl px-3 py-2.5 glass-card-subtle text-center">
-              <div className="text-[9px] font-mono uppercase tracking-[0.1em] text-stone-400 mb-1">{label}</div>
-              <div className={`text-sm font-black font-mono ${color}`}>₹{value.toLocaleString('en-IN')}</div>
+            <div key={label} className="border border-[#E5EAD7] rounded-2xl px-3.5 py-3 bg-[#F8FAF6] text-center">
+              <div className="text-[10px] font-bold font-['Montserrat',sans-serif] uppercase tracking-wider text-[#59701E] mb-1">{label}</div>
+              <div className={`text-sm font-bold font-['Montserrat',sans-serif] ${color}`}>₹{value.toLocaleString('en-IN')}</div>
             </div>
           ))}
         </div>
 
         {/* ── SVG Chart ── */}
-        <div className="relative rounded-xl glass-card-subtle border border-white/70 overflow-hidden">
+        <div className="relative rounded-2xl bg-[#F8FAF6] border border-[#E5EAD7] overflow-hidden p-2">
           {isLoading ? (
-            <div className="h-[180px] flex items-center justify-center text-[11px] font-mono text-stone-400 animate-pulse">
-              Loading…
+            <div className="h-[180px] flex items-center justify-center text-xs font-mono text-[#59701E] animate-pulse">
+              Loading historical telemetry…
             </div>
           ) : (
             <svg
@@ -191,8 +188,8 @@ export const PriceTrendChart: React.FC<PriceTrendChartProps> = ({
             >
               <defs>
                 <linearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={accentColor} stopOpacity="0.12" />
-                  <stop offset="100%" stopColor={accentColor} stopOpacity="0" />
+                  <stop offset="0%" stopColor="#59701E" stopOpacity="0.25" />
+                  <stop offset="100%" stopColor="#DFEB38" stopOpacity="0.05" />
                 </linearGradient>
               </defs>
 
@@ -202,9 +199,9 @@ export const PriceTrendChart: React.FC<PriceTrendChartProps> = ({
                 return (
                   <g key={i}>
                     <line x1={PX} y1={gy} x2={W - PX} y2={gy}
-                      stroke="#E8E4DF" strokeWidth="1" strokeDasharray={i === 2 ? '0' : '3 4'} />
+                      stroke="#E5EAD7" strokeWidth="1" strokeDasharray={i === 2 ? '0' : '3 4'} />
                     <text x={PX - 6} y={gy + 4} textAnchor="end"
-                      style={{ fontSize: 9, fill: '#a8a29e', fontFamily: 'monospace' }}>
+                      style={{ fontSize: 9, fill: '#59701E', fontFamily: 'monospace' }}>
                       ₹{label.toLocaleString('en-IN')}
                     </text>
                   </g>
@@ -215,13 +212,13 @@ export const PriceTrendChart: React.FC<PriceTrendChartProps> = ({
               <path d={areaPath} fill="url(#areaFill)" />
 
               {/* Smooth line */}
-              <path d={linePath} fill="none" stroke={accentColor} strokeWidth="2.5"
+              <path d={linePath} fill="none" stroke="#59701E" strokeWidth="2.5"
                 strokeLinecap="round" strokeLinejoin="round" />
 
               {/* Hover line */}
               {hovered && (
                 <line x1={hovered.x} y1={PY} x2={hovered.x} y2={H - PY}
-                  stroke={accentColor} strokeWidth="1" strokeDasharray="3 3" opacity="0.5" />
+                  stroke="#59701E" strokeWidth="1" strokeDasharray="3 3" opacity="0.6" />
               )}
 
               {/* Data points — invisible wide hit areas + visible dots */}
@@ -230,18 +227,18 @@ export const PriceTrendChart: React.FC<PriceTrendChartProps> = ({
                   {/* Wide invisible hit area */}
                   <rect x={pt.x - 14} y={PY} width={28} height={H - PY * 2} fill="transparent" />
                   <circle cx={pt.x} cy={pt.y} r={hoveredIdx === i ? 5 : 3.5}
-                    fill={accentColor} stroke="white" strokeWidth="2"
+                    fill={hoveredIdx === i ? "#DFEB38" : "#59701E"} stroke="#022113" strokeWidth="1.5"
                     style={{ transition: 'r 0.1s' }} />
                 </g>
               ))}
 
               {/* X-axis date labels */}
               <text x={pts[0].x} y={H - 6} textAnchor="middle"
-                style={{ fontSize: 9, fill: '#a8a29e', fontFamily: 'monospace' }}>
+                style={{ fontSize: 9, fill: '#718096', fontFamily: 'monospace' }}>
                 {pts[0].item.date.slice(5)}
               </text>
               <text x={pts[pts.length - 1].x} y={H - 6} textAnchor="middle"
-                style={{ fontSize: 9, fill: accentColor, fontFamily: 'monospace', fontWeight: 700 }}>
+                style={{ fontSize: 9, fill: '#022113', fontFamily: 'monospace', fontWeight: 600 }}>
                 {pts[pts.length - 1].item.date.slice(5)}
               </text>
             </svg>
@@ -249,8 +246,8 @@ export const PriceTrendChart: React.FC<PriceTrendChartProps> = ({
 
           {/* Floating tooltip */}
           {hovered && !isLoading && (
-            <div className="absolute top-3 right-3 bg-[#153424] text-white text-[11px] font-mono px-3 py-1.5 rounded-lg shadow-lg pointer-events-none leading-snug">
-              <div className="text-[#4ADE80] font-bold">{hovered.item.date}</div>
+            <div className="absolute top-3 right-3 bg-[#546C18] border border-[#546C18] text-white text-[11px] font-mono px-3.5 py-2 rounded-xl shadow-xl pointer-events-none leading-snug">
+              <div className="text-[#DFEB38] font-bold">{hovered.item.date}</div>
               <div>₹{hovered.item.modal_price.toLocaleString('en-IN')}/q</div>
             </div>
           )}

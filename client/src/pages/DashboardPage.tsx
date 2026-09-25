@@ -17,7 +17,7 @@ import { AiExplanation } from '../components/AiExplanation';
 import { apiUrl } from '../utils/api';
 import { 
   ShieldCheck, 
-  Sparkles,
+  Sparkles, 
   AlertCircle, 
   Satellite,
   ThermometerSnowflake,
@@ -148,55 +148,51 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
 
     // 2. Direct client-side Open-Meteo fallback
     try {
+      const geoRes = await fetch(
+        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(clean)}&count=1&language=en&format=json`
+      );
+      const geoData = await geoRes.json();
       let lat = 12.9716;
       let lon = 77.5946;
-      let dispName = `${clean} APMC`;
+      let dispName = clean;
 
-      try {
-        const firstWord = clean.split(/[, -]/)[0];
-        const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(firstWord)}&count=1&language=en&format=json`);
-        const geoData = await geoRes.json();
-        if (geoData.results && geoData.results.length > 0) {
-          lat = geoData.results[0].latitude;
-          lon = geoData.results[0].longitude;
-          dispName = `${geoData.results[0].name} APMC, ${geoData.results[0].admin1 || 'India'}`;
-        }
-      } catch {
-        // use default coordinates
+      if (geoData.results && geoData.results.length > 0) {
+        lat = geoData.results[0].latitude;
+        lon = geoData.results[0].longitude;
+        dispName = `${geoData.results[0].name}, ${geoData.results[0].admin1 || geoData.results[0].country}`;
       }
 
-      const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,wind_direction_10m,surface_pressure&timezone=auto`);
-      const data = await res.json();
+      const weatherRes = await fetch(
+        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,surface_pressure,wind_speed_10m,wind_direction_10m&timezone=auto`
+      );
+      const wData = await weatherRes.json();
 
-      if (data && data.current) {
-        const c = data.current;
-        const code = c.weather_code;
-        let condText = 'Fair Weather';
-        if (code === 0) condText = 'Clear Sky';
-        else if (code <= 2) condText = 'Partly Cloudy';
-        else if (code === 3) condText = 'Overcast';
-        else if (code === 45 || code === 48) condText = 'Fog / Mist';
-        else if (code >= 51 && code <= 65) condText = 'Light Rain';
-        else if (code >= 80 && code <= 82) condText = 'Rain Showers';
+      if (wData.current) {
+        const c = wData.current;
+        const code = c.weather_code || 0;
+        let condText = 'Clear Sky';
+        if (code >= 1 && code <= 3) condText = 'Partly Cloudy';
+        else if (code >= 45 && code <= 48) condText = 'Foggy Mist';
+        else if (code >= 51 && code <= 67) condText = 'Light Showers';
+        else if (code >= 71 && code <= 77) condText = 'Cool Flurries';
+        else if (code >= 80 && code <= 82) condText = 'Heavy Rain';
         else if (code >= 95) condText = 'Thunderstorm';
 
-        let vibe = 'Optimal Conditions for Transit';
-        if (c.precipitation > 0 || c.relative_humidity_2m > 80 || code >= 51) {
-          vibe = 'Precipitation / High Moisture: Tarpaulin Covered Transit Required';
-        } else if (c.temperature_2m > 36 || (c.apparent_temperature && c.apparent_temperature > 39)) {
-          vibe = 'High Ambient Heat: Ventilate Produce Crates';
-        }
+        let vibe = 'Optimal Field Conditions';
+        if (c.precipitation > 2) vibe = 'Active Rain • Protect Harvest';
+        else if (c.temperature_2m > 36) vibe = 'High Heat • Hydrate Transport';
+        else if (c.wind_speed_10m > 30) vibe = 'Gusty Winds • Secure Produce';
 
-        const directions = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
-        const windDirText = directions[Math.round((c.wind_direction_10m || 0) / 22.5) % 16] || 'N';
+        const dirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+        const dirText = dirs[Math.round((c.wind_direction_10m || 0) / 45) % 8];
 
         setLiveWeather({
           temp: c.temperature_2m,
-          feelsLike: c.apparent_temperature || c.temperature_2m,
+          feelsLike: c.apparent_temperature,
           humidity: c.relative_humidity_2m,
           windSpeed: c.wind_speed_10m,
           windDirectionDeg: c.wind_direction_10m || 0,
-          windDirectionText: windDirText,
+          windDirectionText: dirText,
           precipitationMm: c.precipitation || 0,
           pressureHpa: c.surface_pressure || 1013,
           conditionText: condText,
@@ -231,145 +227,149 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
     (unit === 'kg' ? quantity / 100 : (unit === 'tonne' ? quantity * 10 : quantity));
 
   return (
-    <div className="space-y-8 pb-16">
-      {/* Terminal Title & Overview Hero */}
-      <div className="rounded-3xl p-6 sm:p-10 border border-white/85 relative overflow-hidden glass-card print-hide-on-checklist shadow-xs">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-          {/* Left Content Column */}
-          <div className="lg:col-span-7 space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#EAEFE9] border border-[#D6DFD4] text-xs font-semibold text-[#153424]">
-              <ShieldCheck className="w-4 h-4 text-[#2E7D32]" />
+    <div className="space-y-8 pb-16 text-[#022113] max-w-[1440px] mx-auto px-3 sm:px-6 font-['Open_Sans',sans-serif]">
+      
+      {/* ── Terminal Title & Overview Hero (Pic 1 & 2 Aesthetic) ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+        
+        {/* Left Card: Crisp White Elevation (Pic 2 style) */}
+        <div className="lg:col-span-7 bg-white rounded-[2.5rem] p-8 sm:p-10 shadow-xl border border-[#022113]/8 flex flex-col justify-between space-y-6 hover:shadow-2xl transition-all">
+          <div className="space-y-4">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#F0F2EB] border border-[#022113]/8 text-xs font-['Montserrat',sans-serif] font-bold uppercase tracking-wider text-[#546C18]">
+              <ShieldCheck className="w-3.5 h-3.5 text-[#546C18]" strokeWidth={2} />
               <span>100% Official APMC Rates • Zero Speculation</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#153424] font-['Syne',sans-serif] tracking-tight leading-[1.15]">
-              AgriMate Terminal Workstation
-            </h2>
-            <p className="text-sm sm:text-base text-stone-600 font-normal leading-relaxed max-w-xl">
-              Compare verified wholesale mandi prices across 85+ APMC hubs in all 36 Indian States & UTs, calculate realistic transport logistics, and receive clear selling advisory in your regional language.
+
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#022113] tracking-tight leading-[1.08] font-['Montserrat',sans-serif]">
+              KisanSathi <span className="text-[#546C18]">Mandi Terminal</span>
+            </h1>
+
+            <p className="text-sm sm:text-base text-[#4A5568] font-normal leading-relaxed max-w-xl">
+              Compare verified wholesale mandi prices across 218+ APMC hubs in all 36 Indian States & UTs, calculate realistic transport logistics, and receive clear selling advisory in your regional language.
             </p>
 
             {/* Quick Action Navigation Strip */}
             <div className="flex flex-wrap items-center gap-3 pt-1">
               <button
                 onClick={() => onNavigate('advisory')}
-                className="px-4 py-2 rounded-xl glass-card-subtle hover:bg-white text-[#153424] text-xs font-bold border border-white/80 flex items-center gap-2 shadow-xs transition-colors cursor-pointer"
+                className="px-5 py-2.5 rounded-full bg-[#DFEB38] hover:bg-[#d0df2a] text-[#022113] text-xs font-bold uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer font-['Montserrat',sans-serif] shadow-xs"
               >
-                <Sparkles className="w-3.5 h-3.5 text-[#2E7D32]" />
+                <Sparkles className="w-3.5 h-3.5 text-[#022113]" strokeWidth={2} />
                 <span>AI Crop Advisory</span>
               </button>
               <button
                 onClick={() => onNavigate('satellite')}
-                className="px-4 py-2 rounded-xl glass-card-subtle hover:bg-white text-[#153424] text-xs font-bold border border-white/80 flex items-center gap-2 shadow-xs transition-colors cursor-pointer"
+                className="px-5 py-2.5 rounded-full bg-[#F0F2EB] hover:bg-[#E5EAD7] text-[#022113] text-xs font-bold uppercase tracking-wider border border-[#022113]/8 flex items-center gap-2 transition-all cursor-pointer font-['Montserrat',sans-serif]"
               >
-                <Satellite className="w-3.5 h-3.5 text-[#2E7D32]" />
+                <Satellite className="w-3.5 h-3.5 text-[#546C18]" strokeWidth={2} />
                 <span>Satellite Field NDVI</span>
               </button>
             </div>
+          </div>
 
-            {/* Agricultural Key Stat Tiles */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
-              <div className="glass-card-subtle p-3.5 rounded-2xl border border-white/80 shadow-xs hover-slide-up animate-slide-up stagger-1">
-                <span className="text-[11px] text-stone-600 font-medium block">Active Markets</span>
-                <span className="text-[#153424] font-black text-lg sm:text-xl">85+ Mandis</span>
+          {/* Agricultural Key Stat Tiles */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-[#022113]/8">
+            <div className="bg-[#F0F2EB] p-4 rounded-2xl border border-[#022113]/8">
+              <span className="text-[11px] font-bold font-['Montserrat',sans-serif] text-[#546C18] uppercase tracking-wider block">Active Markets</span>
+              <span className="text-[#022113] font-['Montserrat',sans-serif] font-black text-lg sm:text-xl mt-1 block">85+ Mandis</span>
+            </div>
+            <div className="bg-[#F0F2EB] p-4 rounded-2xl border border-[#022113]/8">
+              <span className="text-[11px] font-bold font-['Montserrat',sans-serif] text-[#546C18] uppercase tracking-wider block">All Crops In DB</span>
+              <span className="text-[#022113] font-['Montserrat',sans-serif] font-black text-lg sm:text-xl mt-1 block">100+ Crops</span>
+            </div>
+            <div className="bg-[#F0F2EB] p-4 rounded-2xl border border-[#022113]/8">
+              <span className="text-[11px] font-bold font-['Montserrat',sans-serif] text-[#546C18] uppercase tracking-wider block">Top Spread</span>
+              <span className="text-[#546C18] font-['Montserrat',sans-serif] font-black text-lg sm:text-xl mt-1 block">₹1,400/q</span>
+            </div>
+            <div className="bg-[#F0F2EB] p-4 rounded-2xl border border-[#022113]/8">
+              <span className="text-[11px] font-bold font-['Montserrat',sans-serif] text-[#546C18] uppercase tracking-wider block">Sync Status</span>
+              <span className="text-[#546C18] font-['Montserrat',sans-serif] font-black text-lg sm:text-xl mt-1 block">Daily Live</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Card: Rich Olive Elevation (Pic 2 style) */}
+        <div className="lg:col-span-5 bg-[#546C18] text-white rounded-[2.5rem] p-8 sm:p-10 shadow-xl flex flex-col justify-between space-y-5 hover:shadow-2xl transition-all">
+          <div>
+            <div className="flex items-center justify-between border-b border-white/20 pb-4 mb-4">
+              <div className="flex items-center gap-2">
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#DFEB38] opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#DFEB38]" />
+                </span>
+                <span className="text-xs font-['Montserrat',sans-serif] font-bold uppercase tracking-wider text-white">
+                  Live Mandi Price Pulse
+                </span>
               </div>
-              <div className="glass-card-subtle p-3.5 rounded-2xl border border-white/80 shadow-xs hover-slide-up animate-slide-up stagger-2">
-                <span className="text-[11px] text-stone-600 font-medium block">All Crops In DB</span>
-                <span className="text-[#153424] font-black text-lg sm:text-xl">100+ Crops</span>
-              </div>
-              <div className="glass-card-subtle p-3.5 rounded-2xl border border-white/80 shadow-xs hover-slide-up animate-slide-up stagger-3">
-                <span className="text-[11px] text-stone-600 font-medium block">Top Spread</span>
-                <span className="text-[#D97706] font-black text-lg sm:text-xl">₹1,400/q</span>
-              </div>
-              <div className="glass-card-subtle p-3.5 rounded-2xl border border-white/80 shadow-xs hover-slide-up animate-slide-up stagger-4">
-                <span className="text-[11px] text-stone-600 font-medium block">Sync Status</span>
-                <span className="text-[#2E7D32] font-black text-lg sm:text-xl">Daily Live</span>
-              </div>
+              <span className="text-[10px] font-bold font-['Montserrat',sans-serif] uppercase tracking-wider px-3 py-1 rounded-full bg-[#DFEB38] text-[#022113]">
+                Agmarknet Verified
+              </span>
+            </div>
+
+            {/* 3 Live Top Crops from DB */}
+            <div className="space-y-2.5">
+              {[
+                { name: 'Tomato', apmc: 'Kolar & Ballari APMC', price: '₹1,850 - ₹2,100', trend: '+4.2%' },
+                { name: 'Onion', apmc: 'Lasalgaon & Nashik', price: '₹1,920 - ₹2,250', trend: '+2.8%' },
+                { name: 'Maize', apmc: 'Davanagere & Khanna', price: '₹1,950 - ₹2,080', trend: '+1.5%' },
+              ].map((item) => (
+                <button
+                  key={item.name}
+                  type="button"
+                  onClick={() => setCrop(item.name)}
+                  className={`w-full p-4 rounded-2xl text-left transition-all cursor-pointer flex items-center justify-between ${
+                    crop.toLowerCase() === item.name.toLowerCase()
+                      ? 'bg-white text-[#022113] shadow-md ring-2 ring-[#DFEB38]'
+                      : 'bg-white/10 hover:bg-white/20 text-white border border-white/10'
+                  }`}
+                >
+                  <div className="min-w-0">
+                    <span className={`text-xs font-bold block truncate font-['Montserrat',sans-serif] ${crop.toLowerCase() === item.name.toLowerCase() ? 'text-[#022113]' : 'text-white'}`}>{item.name}</span>
+                    <span className={`text-[10px] truncate block mt-0.5 font-mono ${crop.toLowerCase() === item.name.toLowerCase() ? 'text-[#546C18]' : 'text-white/70'}`}>{item.apmc}</span>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <span className={`text-xs font-mono font-bold block ${crop.toLowerCase() === item.name.toLowerCase() ? 'text-[#022113]' : 'text-white'}`}>{item.price}</span>
+                    <span className={`text-[10px] font-mono font-bold ${crop.toLowerCase() === item.name.toLowerCase() ? 'text-[#546C18]' : 'text-[#DFEB38]'}`}>{item.trend} Modal</span>
+                  </div>
+                </button>
+              ))}
             </div>
           </div>
 
-          {/* Right Useful Panel: Real-Time APMC Market Pulse & Spreads */}
-          <div className="lg:col-span-5 relative">
-            <div className="glass-card rounded-2xl border border-white/85 p-4 sm:p-5 shadow-sm space-y-3.5">
-              <div className="flex items-center justify-between border-b border-[#E6E1D7]/70 pb-2.5">
-                <div className="flex items-center gap-2">
-                  <span className="relative flex h-2.5 w-2.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#2E7D32] opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#2E7D32]"></span>
-                  </span>
-                  <span className="text-xs font-black uppercase tracking-wider text-[#153424] font-['Syne',sans-serif]">
-                    Live Mandi Price Pulse
-                  </span>
-                </div>
-                <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-[#EAEFE9] text-[#2E7D32] border border-[#CCE0D0]">
-                  Agmarknet Verified
-                </span>
-              </div>
-
-              {/* 3 Live Top Crops from DB */}
-              <div className="space-y-2">
-                {[
-                  { name: 'Tomato', apmc: 'Kolar & Ballari APMC', price: '₹1,850 - ₹2,100', trend: '+4.2%' },
-                  { name: 'Onion', apmc: 'Lasalgaon & Nashik', price: '₹1,920 - ₹2,250', trend: '+2.8%' },
-                  { name: 'Maize', apmc: 'Davanagere & Khanna', price: '₹1,950 - ₹2,080', trend: '+1.5%' },
-                ].map((item) => (
-                  <button
-                    key={item.name}
-                    type="button"
-                    onClick={() => setCrop(item.name)}
-                    className={`w-full p-2.5 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between ${
-                      crop.toLowerCase() === item.name.toLowerCase()
-                        ? 'bg-emerald-50/90 border-[#2E7D32] shadow-xs ring-1 ring-[#2E7D32]'
-                        : 'glass-card-subtle border-white/70 hover:border-[#2E7D32]/50 hover:bg-white/90'
-                    }`}
-                  >
-                    <div className="min-w-0">
-                      <span className="text-xs font-bold text-[#153424] block truncate">{item.name}</span>
-                      <span className="text-[10px] text-stone-500 truncate block">{item.apmc}</span>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <span className="text-xs font-mono font-black text-[#153424] block">{item.price}</span>
-                      <span className="text-[10px] font-mono font-bold text-[#2E7D32]">{item.trend} Modal</span>
-                    </div>
-                  </button>
-                ))}
-              </div>
-
-              {/* Arbitrage Opportunity Snapshot */}
-              <div className="p-2.5 rounded-xl bg-gradient-to-r from-[#FFF8E7]/90 to-[#FAF8F5]/80 border border-[#E8A238]/40 backdrop-blur-xs flex items-center justify-between text-xs">
-                <div className="flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4 text-[#E8A238] shrink-0" />
-                  <div>
-                    <span className="text-[11px] font-bold text-[#153424] block">Arbitrage Opportunity Detected</span>
-                    <span className="text-[10px] text-stone-500">Up to ₹350/q price spread across regional yards</span>
-                  </div>
-                </div>
-                <span className="px-2 py-0.5 rounded bg-[#E8A238]/20 text-[#B45309] text-[10px] font-mono font-bold shrink-0">
-                  Active
-                </span>
+          {/* Arbitrage Opportunity Snapshot */}
+          <div className="p-4 rounded-2xl bg-white/10 border border-white/15 flex items-center justify-between text-xs">
+            <div className="flex items-center gap-3">
+              <TrendingUp className="w-5 h-5 text-[#DFEB38] shrink-0" strokeWidth={2} />
+              <div>
+                <span className="text-xs font-bold text-white block font-['Montserrat',sans-serif]">Arbitrage Opportunity Detected</span>
+                <span className="text-[10px] text-white/80 font-mono">Up to ₹350/q price spread across regional yards</span>
               </div>
             </div>
+            <span className="px-3 py-1 rounded-full bg-[#DFEB38] text-[#022113] text-[10px] font-bold uppercase tracking-wider shrink-0 font-['Montserrat',sans-serif]">
+              Active
+            </span>
           </div>
         </div>
       </div>
 
-      {/* REAL-TIME OPEN-METEO SATELLITE & MICROCLIMATE TELEMETRY BAR */}
-      <div className="glass-card rounded-2xl border border-white/85 p-4 sm:p-5 shadow-xs space-y-4 print-hide-on-checklist">
+      {/* ── Real-Time Open-Meteo Satellite & Microclimate Bar ── */}
+      <div className="bg-white rounded-[2.5rem] border border-[#022113]/8 p-7 sm:p-8 space-y-5 shadow-xl hover:shadow-2xl transition-all">
         {/* Top Header Row with Live Pulsing Beacon & Title + Transit Advisory */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E6E1D7]/60 pb-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#022113]/8 pb-4">
           <div className="flex items-center gap-2.5">
             <span className="relative flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#2E7D32]"></span>
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#546C18] opacity-75" />
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#546C18]" />
             </span>
-            <h3 className="text-xs sm:text-sm font-black text-[#153424] font-['Syne',sans-serif] tracking-tight">
+            <h3 className="text-base sm:text-lg font-black text-[#022113] tracking-tight font-['Montserrat',sans-serif]">
               Real-Time Mandi Microclimate & Satellite Telemetry
             </h3>
           </div>
 
           {/* Transit Advisory Badge */}
           {liveWeather && (
-            <div className="flex items-center gap-1.5 text-xs font-bold font-['Outfit',sans-serif] text-[#2E7D32] bg-[#EAEFE9] px-2.5 py-1 rounded-full border border-[#D6DFD4]">
-              <Sprout className="w-3.5 h-3.5" />
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-[#022113] bg-[#DFEB38] px-3 py-1 rounded-full shadow-xs">
+              <Sprout className="w-3.5 h-3.5 text-[#022113]" strokeWidth={2} />
               <span>{liveWeather.harvestVibe}</span>
             </div>
           )}
@@ -377,132 +377,120 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
 
         {/* 6 Real-Time Telemetry Metrics Cards */}
         {weatherLoading && !liveWeather ? (
-          <div className="py-8 flex flex-col items-center justify-center space-y-2 text-stone-500 font-['Outfit',sans-serif]">
-            <RefreshCw className="w-6 h-6 animate-spin text-[#2E7D32]" />
-            <p className="text-xs font-medium">Connecting to Open-Meteo satellite weather sensors for {location || 'APMC Mandi'}...</p>
+          <div className="py-8 flex flex-col items-center justify-center space-y-2 text-[#59701E] font-mono text-xs">
+            <RefreshCw className="w-5 h-5 animate-spin text-[#59701E]" strokeWidth={1.5} />
+            <p>Connecting to Open-Meteo satellite sensors for {location || 'APMC Mandi'}...</p>
           </div>
         ) : liveWeather ? (
           <>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
               {/* 1. Ambient Temp */}
-              <div className="glass-card-subtle p-3 rounded-xl border border-white/80 space-y-1 hover:border-[#2E7D32]/40 transition-colors shadow-2xs">
+              <div className="bg-[#F8FAF6] p-3.5 rounded-2xl border border-[#E5EAD7] space-y-1 hover:border-[#59701E] transition-colors">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-stone-500">Ambient Temp</span>
-                  <div className="w-6 h-6 rounded-md bg-emerald-100/60 text-[#2E7D32] flex items-center justify-center shrink-0">
-                    <ThermometerSnowflake className="w-3.5 h-3.5" />
-                  </div>
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-[#59701E]">Ambient Temp</span>
+                  <ThermometerSnowflake className="w-3.5 h-3.5 text-[#59701E]" strokeWidth={1.5} />
                 </div>
-                <strong className="text-base sm:text-lg font-black text-[#153424] font-['Syne',sans-serif] tracking-tight block">
+                <strong className="text-base sm:text-lg font-bold text-[#022113] font-['Montserrat',sans-serif] block">
                   {liveWeather.temp.toFixed(1)}°C
                 </strong>
-                <span className="text-[10px] text-stone-500 block font-['Outfit',sans-serif] font-medium truncate">
+                <span className="text-[10px] text-[#4A5568] block font-mono truncate">
                   Feels like {liveWeather.feelsLike.toFixed(1)}°C
                 </span>
               </div>
 
               {/* 2. Relative Humidity */}
-              <div className="glass-card-subtle p-3 rounded-xl border border-white/80 space-y-1 hover:border-[#2E7D32]/40 transition-colors shadow-2xs">
+              <div className="bg-[#F8FAF6] p-3.5 rounded-2xl border border-[#E5EAD7] space-y-1 hover:border-[#59701E] transition-colors">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-stone-500">Humidity</span>
-                  <div className="w-6 h-6 rounded-md bg-blue-100/60 text-blue-700 flex items-center justify-center shrink-0">
-                    <Droplets className="w-3.5 h-3.5" />
-                  </div>
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-[#59701E]">Humidity</span>
+                  <Droplets className="w-3.5 h-3.5 text-sky-600" strokeWidth={1.5} />
                 </div>
-                <strong className="text-base sm:text-lg font-black text-[#153424] font-['Syne',sans-serif] tracking-tight block">
+                <strong className="text-base sm:text-lg font-bold text-[#022113] font-['Montserrat',sans-serif] block">
                   {liveWeather.humidity}% RH
                 </strong>
-                <span className="text-[10px] text-stone-500 block font-['Outfit',sans-serif] font-medium truncate">
-                  {liveWeather.humidity > 70 ? 'High Moisture' : 'Optimal Moisture'}
+                <span className="text-[10px] text-[#4A5568] block font-mono truncate">
+                  {liveWeather.humidity > 70 ? 'High Moisture' : 'Optimal'}
                 </span>
               </div>
 
               {/* 3. Field Wind */}
-              <div className="glass-card-subtle p-3 rounded-xl border border-white/80 space-y-1 hover:border-[#2E7D32]/40 transition-colors shadow-2xs">
+              <div className="bg-[#F8FAF6] p-3.5 rounded-2xl border border-[#E5EAD7] space-y-1 hover:border-[#59701E] transition-colors">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-stone-500">Field Wind</span>
-                  <div className="w-6 h-6 rounded-md bg-teal-100/60 text-teal-700 flex items-center justify-center shrink-0">
-                    <Wind className="w-3.5 h-3.5" />
-                  </div>
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-[#59701E]">Field Wind</span>
+                  <Wind className="w-3.5 h-3.5 text-[#59701E]" strokeWidth={1.5} />
                 </div>
-                <strong className="text-base sm:text-lg font-black text-[#153424] font-['Syne',sans-serif] tracking-tight block">
+                <strong className="text-base sm:text-lg font-bold text-[#022113] font-['Montserrat',sans-serif] block">
                   {liveWeather.windSpeed.toFixed(1)} km/h
                 </strong>
-                <span className="text-[10px] text-stone-500 block font-['Outfit',sans-serif] font-medium truncate">
+                <span className="text-[10px] text-[#4A5568] block font-mono truncate">
                   {liveWeather.windDirectionText} ({liveWeather.windDirectionDeg}°)
                 </span>
               </div>
 
               {/* 4. Precipitation */}
-              <div className="glass-card-subtle p-3 rounded-xl border border-white/80 space-y-1 hover:border-[#2E7D32]/40 transition-colors shadow-2xs">
+              <div className="bg-[#F8FAF6] p-3.5 rounded-2xl border border-[#E5EAD7] space-y-1 hover:border-[#59701E] transition-colors">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-stone-500">Precipitation</span>
-                  <div className="w-6 h-6 rounded-md bg-sky-100/60 text-sky-700 flex items-center justify-center shrink-0">
-                    <CloudRain className="w-3.5 h-3.5" />
-                  </div>
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-[#59701E]">Precipitation</span>
+                  <CloudRain className="w-3.5 h-3.5 text-sky-600" strokeWidth={1.5} />
                 </div>
-                <strong className="text-base sm:text-lg font-black text-[#153424] font-['Syne',sans-serif] tracking-tight block">
+                <strong className="text-base sm:text-lg font-bold text-[#022113] font-['Montserrat',sans-serif] block">
                   {liveWeather.precipitationMm.toFixed(1)} mm
                 </strong>
-                <span className="text-[10px] text-stone-500 block font-['Outfit',sans-serif] font-medium truncate">
-                  {liveWeather.precipitationMm > 0 ? 'Active Rain' : 'Dry Gate Weather'}
+                <span className="text-[10px] text-[#4A5568] block font-mono truncate">
+                  {liveWeather.precipitationMm > 0 ? 'Active Rain' : 'Dry Gate'}
                 </span>
               </div>
 
               {/* 5. Sky & Barometric */}
-              <div className="glass-card-subtle p-3 rounded-xl border border-white/80 space-y-1 hover:border-[#2E7D32]/40 transition-colors shadow-2xs">
+              <div className="bg-[#F8FAF6] p-3.5 rounded-2xl border border-[#E5EAD7] space-y-1 hover:border-[#59701E] transition-colors">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-stone-500">Sky Condition</span>
-                  <div className="w-6 h-6 rounded-md bg-amber-100/60 text-amber-800 flex items-center justify-center shrink-0">
-                    <CloudSun className="w-3.5 h-3.5" />
-                  </div>
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-[#59701E]">Sky</span>
+                  <CloudSun className="w-3.5 h-3.5 text-amber-600" strokeWidth={1.5} />
                 </div>
-                <strong className="text-base sm:text-lg font-black text-[#153424] font-['Syne',sans-serif] tracking-tight truncate block">
+                <strong className="text-base sm:text-lg font-bold text-[#022113] font-['Montserrat',sans-serif] truncate block">
                   {liveWeather.conditionText}
                 </strong>
-                <span className="text-[10px] text-stone-500 block font-['Outfit',sans-serif] font-medium truncate">
-                  {liveWeather.pressureHpa.toFixed(0)} hPa pressure
+                <span className="text-[10px] text-[#4A5568] block font-mono truncate">
+                  {liveWeather.pressureHpa.toFixed(0)} hPa
                 </span>
               </div>
 
               {/* 6. Telemetry Satellite Status */}
-              <div className="glass-card-subtle p-3 rounded-xl border border-white/80 space-y-1 hover:border-[#2E7D32]/40 transition-colors shadow-2xs">
+              <div className="bg-[#F8FAF6] p-3.5 rounded-2xl border border-[#E5EAD7] space-y-1 hover:border-[#59701E] transition-colors">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-stone-500">Satellite Link</span>
-                  <div className="w-6 h-6 rounded-md bg-lime-100/60 text-lime-800 flex items-center justify-center shrink-0">
-                    <Activity className="w-3.5 h-3.5" />
-                  </div>
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-[#59701E]">Telemetry</span>
+                  <Activity className="w-3.5 h-3.5 text-[#59701E]" strokeWidth={1.5} />
                 </div>
-                <strong className="text-base sm:text-lg font-black text-[#2E7D32] font-['Syne',sans-serif] tracking-tight flex items-center gap-1.5 block">
-                  <span className="w-2 h-2 rounded-full bg-[#2E7D32] inline-block animate-pulse"></span>
-                  {weatherLoading ? 'Syncing...' : 'Live Connected'}
+                <strong className="text-base sm:text-lg font-bold text-[#59701E] font-['Montserrat',sans-serif] flex items-center gap-1.5 block">
+                  <span className="w-2 h-2 rounded-full bg-[#59701E] inline-block animate-pulse" />
+                  {weatherLoading ? 'Syncing...' : 'Connected'}
                 </strong>
-                <span className="text-[10px] text-stone-500 block font-mono truncate">
-                  Sync: {lastSyncTime || 'Now'}
+                <span className="text-[10px] text-[#4A5568] block font-mono truncate">
+                  {lastSyncTime || 'Active'}
                 </span>
               </div>
             </div>
 
             {/* Satellite Timestamp & Verification Footer */}
-            <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] text-stone-500 font-mono pt-1">
-              <span className="flex items-center gap-1.5">
-                <span>Station Observation: {liveWeather.stationObservationTime ? liveWeather.stationObservationTime.replace('T', ' ') : 'Live'}</span>
+            <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] text-[#59701E] font-mono pt-1">
+              <span className="flex items-center gap-2">
+                <span>Obs: {liveWeather.stationObservationTime ? liveWeather.stationObservationTime.replace('T', ' ') : 'Live'}</span>
                 <span>•</span>
-                <span>Source: {liveWeather.source}</span>
+                <span>Feed: {liveWeather.source}</span>
                 <span>•</span>
-                <span>Last Verified: {lastSyncTime || 'Just now'}</span>
+                <span>Synced: {lastSyncTime || 'Now'}</span>
               </span>
-              <span className="text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 font-mono font-bold uppercase tracking-wider text-[10px]">
-                Verified Live Internet Telemetry
+              <span className="text-[#022113] bg-[#DFEB38] px-2.5 py-0.5 rounded-full font-bold font-['Montserrat',sans-serif] text-[10px] uppercase tracking-wider">
+                Verified Live Telemetry
               </span>
             </div>
           </>
         ) : null}
 
         {/* Quick-Preset Chips for Mandis & Commodities */}
-        <div className="pt-1 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs border-t border-[#E6E1D7]/60">
+        <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs border-t border-[#E5EAD7]">
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-stone-500 flex items-center gap-1 mr-1">
-              <MapPin className="w-3 h-3 text-[#2E7D32]" />
+            <span className="text-[10px] font-['Montserrat',sans-serif] font-bold uppercase tracking-wider text-[#59701E] flex items-center gap-1 mr-1">
+              <MapPin className="w-3 h-3 text-[#59701E]" strokeWidth={1.5} />
               Quick Mandis:
             </span>
             {[
@@ -521,10 +509,10 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                 key={m.name}
                 type="button"
                 onClick={() => setLocation(m.name)}
-                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold font-['Outfit',sans-serif] transition-all cursor-pointer border ${
+                className={`px-3 py-1 rounded-full text-xs font-['Montserrat',sans-serif] font-medium transition-all cursor-pointer border ${
                   location.toLowerCase().includes(m.name.toLowerCase())
-                    ? 'bg-[#153424] text-white border-[#153424] shadow-xs'
-                    : 'bg-[#F6F4EE] hover:bg-[#ECE8DE] text-stone-700 border-[#E6E1D7]'
+                    ? 'bg-[#546C18] text-[#DFEB38] font-bold border-[#546C18]'
+                    : 'bg-[#F0F4EC] hover:bg-[#DFEB38] hover:text-[#022113] text-[#022113] border-[#E5EAD7]'
                 }`}
               >
                 {m.label}
@@ -533,16 +521,16 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           </div>
 
           <div className="flex flex-wrap items-center gap-1.5">
-            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-stone-500 mr-1">Crops:</span>
+            <span className="text-[10px] font-['Montserrat',sans-serif] font-bold uppercase tracking-wider text-[#59701E] mr-1">Crops:</span>
             {['Tomato', 'Onion', 'Maize', 'Paddy', 'Chilli'].map((c) => (
               <button
                 key={c}
                 type="button"
                 onClick={() => setCrop(c)}
-                className={`px-2 py-0.5 rounded-lg text-[11px] font-bold font-['Outfit',sans-serif] transition-all cursor-pointer border ${
+                className={`px-3 py-0.5 rounded-full text-xs font-['Montserrat',sans-serif] font-medium transition-all cursor-pointer border ${
                   crop.toLowerCase() === c.toLowerCase()
-                    ? 'bg-[#E8A238] text-[#153424] border-[#E8A238] shadow-xs'
-                    : 'bg-[#F6F4EE] hover:bg-[#ECE8DE] text-stone-700 border-[#E6E1D7]'
+                    ? 'bg-[#546C18] text-[#DFEB38] font-bold border-[#546C18]'
+                    : 'bg-[#F0F4EC] hover:bg-[#DFEB38] hover:text-[#022113] text-[#022113] border-[#E5EAD7]'
                 }`}
               >
                 {c}
@@ -552,17 +540,17 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
         </div>
       </div>
 
-      {/* Search & Query Section */}
-      <section className="space-y-3 print-hide-on-checklist">
+      {/* ── Search & Query Section ───────────────────────────── */}
+      <section className="space-y-4">
         {/* Query Mode Toggle Tabs */}
         <div className="flex gap-2">
           <button
             type="button"
             onClick={() => setActiveTab('form')}
-            className={`px-5 py-2.5 text-xs font-bold rounded-2xl border transition-all cursor-pointer ${
+            className={`px-6 py-2.5 text-xs font-bold rounded-full border transition-all cursor-pointer uppercase tracking-wider font-['Montserrat',sans-serif] ${
               activeTab === 'form'
-                ? 'bg-[#153424] text-white border-[#153424] shadow-xs'
-                : 'bg-white text-stone-600 border-[#E6E1D7] hover:border-stone-400 hover:text-[#153424]'
+                ? 'bg-[#546C18] text-[#DFEB38] border-[#546C18] shadow-sm'
+                : 'bg-white text-[#59701E] border-[#E5EAD7] hover:bg-[#F8FAF6]'
             }`}
           >
             {t.searchTabForm}
@@ -570,13 +558,13 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           <button
             type="button"
             onClick={() => setActiveTab('nlp')}
-            className={`px-5 py-2.5 text-xs font-bold rounded-2xl border transition-all cursor-pointer flex items-center gap-1.5 ${
+            className={`px-6 py-2.5 text-xs font-bold rounded-full border transition-all cursor-pointer uppercase tracking-wider font-['Montserrat',sans-serif] flex items-center gap-1.5 ${
               activeTab === 'nlp'
-                ? 'bg-[#153424] text-white border-[#153424] shadow-xs'
-                : 'bg-white text-stone-600 border-[#E6E1D7] hover:border-stone-400 hover:text-[#153424]'
+                ? 'bg-[#546C18] text-[#DFEB38] border-[#546C18] shadow-sm'
+                : 'bg-white text-[#59701E] border-[#E5EAD7] hover:bg-[#F8FAF6]'
             }`}
           >
-            <Sparkles className="w-3.5 h-3.5 text-[#2E7D32]" />
+            <Sparkles className="w-3.5 h-3.5 text-[#DFEB38]" strokeWidth={2} />
             <span>{t.searchTabNlp}</span>
           </button>
         </div>
@@ -608,18 +596,18 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
 
       {/* No-data notice if unverified or missing */}
       {searchResult && !searchResult.verified && (
-        <div className="verda-card rounded-3xl border border-amber-200 bg-[#FEF8ED] p-8 text-center max-w-2xl mx-auto shadow-sm print-hide-on-checklist">
+        <div className="rounded-3xl border border-amber-200 bg-amber-50/50 p-8 text-center max-w-2xl mx-auto shadow-sm">
           <div className="w-12 h-12 bg-amber-100 text-amber-700 rounded-full flex items-center justify-center mx-auto mb-3 border border-amber-200">
-            <AlertCircle className="w-6 h-6" />
+            <AlertCircle className="w-6 h-6" strokeWidth={1.5} />
           </div>
-          <h3 className="text-lg font-bold text-[#123826] mb-2 font-['Syne',sans-serif]">
-            {t.noDataTitle}
+          <h3 className="text-lg font-bold text-[#022113] mb-2 font-['Montserrat',sans-serif]">
+            {searchResult.message ? 'Data Update In Progress' : t.noDataTitle}
           </h3>
-          <p className="text-stone-700 text-xs sm:text-sm mb-4 leading-relaxed">
+          <p className="text-[#4A5568] text-xs sm:text-sm mb-4 leading-relaxed font-normal">
             {searchResult.message || t.noDataMsg}
           </p>
-          <p className="text-[11px] text-stone-600 font-medium">
-            Notice: AgriMate only displays official government APMC market prices. When market committees have not filed today's rates, we do not estimate or substitute unverified prices.
+          <p className="text-xs font-mono text-[#546C18]">
+            Notice: KisanSathi displays official government APMC market rates only. Zero price hallucination or unverified estimations.
           </p>
         </div>
       )}
@@ -628,7 +616,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
       {searchResult && searchResult.verified && searchResult.markets.length > 0 && (
         <div className="space-y-8">
           {/* Market Comparison Cards */}
-          <div className="print-hide-on-checklist">
+          <div>
             <MarketComparison
               markets={searchResult.markets}
               language={language}
@@ -640,19 +628,19 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
 
           {/* Selected Market Deep-Dive Section */}
           {selectedMarket && (
-            <div className="space-y-8 pt-4 border-t border-[#E6E1D7]">
-              <div className="space-y-8 print-hide-on-checklist">
-                <div className="bg-white p-5 rounded-3xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-[#E6E1D7] shadow-xs">
+            <div className="space-y-8 pt-4 border-t border-[#E5EAD7]">
+              <div className="space-y-8">
+                <div className="bg-white p-6 rounded-3xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-[#E5EAD7] shadow-[0_4px_24px_rgba(2,33,19,0.04)]">
                   <div>
-                    <span className="text-[11px] uppercase tracking-wider text-[#2E7D32] font-bold">
+                    <span className="text-xs font-bold font-['Montserrat',sans-serif] uppercase tracking-wider text-[#59701E]">
                       Selected Mandi Overview
                     </span>
-                    <h3 className="text-xl sm:text-2xl font-bold text-[#153424] font-['Syne',sans-serif]">
+                    <h3 className="text-xl sm:text-2xl font-bold text-[#022113] tracking-tight mt-0.5 font-['Montserrat',sans-serif]">
                       {selectedMarket.market_name} ({selectedMarket.district})
                     </h3>
                   </div>
-                  <div className="text-xs bg-[#FAF8F5] px-4 py-2.5 rounded-2xl border border-[#E6E1D7] self-start sm:self-auto font-mono">
-                    Modal Rate: <strong className="text-[#153424] text-base tnum font-black">₹{selectedMarket.modal_price}/quintal</strong>
+                  <div className="text-xs bg-[#F0F4EC] px-4 py-2.5 rounded-full border border-[#E5EAD7] self-start sm:self-auto font-mono text-[#022113]">
+                    Modal Rate: <strong className="text-[#022113] text-base font-bold font-['Montserrat',sans-serif]">₹{selectedMarket.modal_price}/quintal</strong>
                   </div>
                 </div>
 

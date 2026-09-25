@@ -7,7 +7,8 @@ import {
   Check, 
   ExternalLink,
   Satellite,
-  AlertTriangle
+  AlertTriangle,
+  X
 } from 'lucide-react';
 
 interface GoogleMapsNdviProps {
@@ -338,12 +339,12 @@ export const GoogleMapsNdvi: React.FC<GoogleMapsNdviProps> = ({
 
         polygon.addListener('click', (e: any) => {
           const content = `
-            <div style="font-family: sans-serif; padding: 6px; max-width: 220px; color: #123826;">
-              <div style="font-weight: 800; font-size: 13px; margin-bottom: 4px;">${parcel.name}</div>
-              <div style="font-size: 11px; color: #555; margin-bottom: 2px;">🌾 Crop: <b>${parcel.crop}</b> (${parcel.area} ha)</div>
-              <div style="font-size: 11px; color: #555; margin-bottom: 2px;">🛰️ Sentinel-2 NDVI: <b style="color: ${parcel.ndvi >= 0.6 ? '#2E7D32' : parcel.ndvi >= 0.4 ? '#D97706' : '#DC2626'};">${parcel.ndvi.toFixed(3)}</b></div>
-              <div style="font-size: 10px; font-weight: bold; margin-top: 4px; padding: 2px 6px; border-radius: 4px; display: inline-block; background: ${parcel.ndvi >= 0.6 ? '#E8F5E9' : '#FFF3E0'}; color: ${parcel.ndvi >= 0.6 ? '#1B5E20' : '#E65100'};">
-                ${parcel.ndvi >= 0.6 ? 'Optimal Canopy Vigor' : parcel.ndvi >= 0.4 ? 'Moderate Canopy Vigor' : 'Moisture Deficit / Stressed'}
+            <div style="font-family: monospace, sans-serif; padding: 8px; max-width: 240px; background: #0F0F12; color: #F4F4F5; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+              <div style="font-weight: 700; font-size: 13px; margin-bottom: 6px; color: #FFFFFF; letter-spacing: -0.01em;">${parcel.name}</div>
+              <div style="font-size: 11px; color: #A1A1AA; margin-bottom: 3px;">Crop: <span style="color: #FFFFFF; font-weight: 600;">${parcel.crop}</span> (${parcel.area} ha)</div>
+              <div style="font-size: 11px; color: #A1A1AA; margin-bottom: 4px;">Sentinel-2 NDVI: <span style="font-weight: 700; color: ${parcel.ndvi >= 0.6 ? '#34D399' : parcel.ndvi >= 0.4 ? '#FBBF24' : '#F87171'};">${parcel.ndvi.toFixed(3)}</span></div>
+              <div style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; padding: 2px 6px; border-radius: 4px; display: inline-block; background: ${parcel.ndvi >= 0.6 ? 'rgba(16,185,129,0.15)' : 'rgba(245,158,11,0.15)'}; color: ${parcel.ndvi >= 0.6 ? '#34D399' : '#FBBF24'}; border: 1px solid ${parcel.ndvi >= 0.6 ? 'rgba(16,185,129,0.3)' : 'rgba(245,158,11,0.3)'};">
+                ${parcel.ndvi >= 0.6 ? 'Optimal Canopy Vigor' : parcel.ndvi >= 0.4 ? 'Moderate Canopy Vigor' : 'Moisture Deficit'}
               </div>
             </div>
           `;
@@ -370,13 +371,13 @@ export const GoogleMapsNdvi: React.FC<GoogleMapsNdviProps> = ({
 
         govPolygon.addListener('click', (e: any) => {
           const content = `
-            <div style="font-family: sans-serif; padding: 6px; max-width: 240px; color: #123826;">
-              <div style="font-weight: 800; font-size: 13px; margin-bottom: 4px; color: #1B5E20;">🏛️ Official Govt Cadastre Plot</div>
-              <div style="font-size: 11px; margin-bottom: 2px;">AgriStack ID: <b>${govPlotRecord?.agristack_plot_id || 'IN-AGRI-PLOT'}</b></div>
-              <div style="font-size: 11px; margin-bottom: 2px;">Survey No: <b>${govPlotRecord?.survey_number || '142/2A'}</b></div>
-              <div style="font-size: 11px; margin-bottom: 2px;">Tenure: <b>${govPlotRecord?.tenure_type || 'Certified Patta'}</b></div>
-              <div style="font-size: 11px; margin-bottom: 2px;">DCS Crop: <b>${govPlotRecord?.verified_crop || 'Verified Crop'}</b></div>
-              <div style="font-size: 10px; font-weight: bold; margin-top: 4px; padding: 2px 6px; border-radius: 4px; display: inline-block; background: #E8F5E9; color: #1B5E20;">
+            <div style="font-family: monospace, sans-serif; padding: 8px; max-width: 250px; background: #0F0F12; color: #F4F4F5; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+              <div style="font-weight: 700; font-size: 13px; margin-bottom: 6px; color: #34D399; letter-spacing: -0.01em;">Official Cadastre Plot</div>
+              <div style="font-size: 11px; color: #A1A1AA; margin-bottom: 3px;">AgriStack ID: <span style="color: #FFFFFF; font-weight: 600;">${govPlotRecord?.agristack_plot_id || 'IN-AGRI-PLOT'}</span></div>
+              <div style="font-size: 11px; color: #A1A1AA; margin-bottom: 3px;">Survey No: <span style="color: #FFFFFF; font-weight: 600;">${govPlotRecord?.survey_number || '142/2A'}</span></div>
+              <div style="font-size: 11px; color: #A1A1AA; margin-bottom: 3px;">Tenure: <span style="color: #FFFFFF; font-weight: 600;">${govPlotRecord?.tenure_type || 'Certified Patta'}</span></div>
+              <div style="font-size: 11px; color: #A1A1AA; margin-bottom: 4px;">DCS Crop: <span style="color: #FFFFFF; font-weight: 600;">${govPlotRecord?.verified_crop || 'Verified Crop'}</span></div>
+              <div style="font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; padding: 2px 6px; border-radius: 4px; display: inline-block; background: rgba(16,185,129,0.15); color: #34D399; border: 1px solid rgba(16,185,129,0.3);">
                 ISRO Bhuvan & State RoR Validated
               </div>
             </div>
@@ -434,19 +435,19 @@ export const GoogleMapsNdvi: React.FC<GoogleMapsNdviProps> = ({
   const embedUrl = `https://maps.google.com/maps?q=${lat.toFixed(6)},${lon.toFixed(6)}+(${encodeURIComponent(district + ', ' + state)})&t=${viewMode === 'hybrid' ? 'h' : 'k'}&z=15&ie=UTF8&iwloc=&output=embed`;
 
   return (
-    <div className="relative w-full rounded-2xl overflow-hidden border border-[#CCE0D0] bg-[#10241A] shadow-inner">
+    <div className="relative w-full rounded-2xl overflow-hidden border border-white/[0.08] bg-[#08080A] shadow-inner">
       {/* Top Map HUD Bar */}
       <div className="absolute top-3 left-3 right-3 z-30 flex flex-wrap items-center justify-between gap-2 pointer-events-none">
         {/* Left Badge: Location & Sentinel-2 Telemetry */}
-        <div className="bg-black/80 backdrop-blur-md text-white text-[11px] p-2.5 sm:p-3 rounded-xl border border-white/20 shadow-lg pointer-events-auto space-y-1">
-          <div className="font-extrabold text-[#A5D6A7] flex items-center gap-1.5">
-            <MapPin className="w-3.5 h-3.5 text-[#E8A238]" />
+        <div className="bg-[#0F0F12]/90 backdrop-blur-md text-white text-[11px] p-2.5 sm:p-3 rounded-xl border border-white/[0.08] shadow-lg pointer-events-auto space-y-1">
+          <div className="font-semibold text-white flex items-center gap-1.5">
+            <MapPin className="w-3.5 h-3.5 text-emerald-400" strokeWidth={1.5} />
             <span>{focusedField ? focusedField.field_name : `${district}, ${state}`}</span>
           </div>
-          <div className="text-[10px] text-stone-300 font-mono">
+          <div className="text-[10px] text-zinc-400 font-mono">
             GPS: {lat.toFixed(4)}°N, {lon.toFixed(4)}°E • Area: {areaHectares} ha
           </div>
-          <div className="text-[10px] text-emerald-300 font-semibold flex items-center gap-2">
+          <div className="text-[10px] text-emerald-400 font-mono flex items-center gap-2">
             <span>Sentinel-2 Pass: Active</span>
             <span>• Cloud: {cloudCoverage}%</span>
             <span>• GSD: 10m/px</span>
@@ -458,21 +459,21 @@ export const GoogleMapsNdvi: React.FC<GoogleMapsNdviProps> = ({
           {apiLoaded ? (
             <button
               onClick={recenterMap}
-              className="px-2.5 py-1.5 bg-black/80 hover:bg-black backdrop-blur-md border border-white/20 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-md transition-all cursor-pointer"
+              className="px-2.5 py-1.5 bg-[#0F0F12]/90 hover:bg-[#18181D] backdrop-blur-md border border-white/[0.08] text-zinc-200 hover:text-white rounded-lg text-xs font-medium flex items-center gap-1.5 shadow-md transition-all cursor-pointer"
               title="Recenter Map to Farmer Field"
             >
-              <Crosshair className="w-3.5 h-3.5 text-[#FDE047]" />
+              <Crosshair className="w-3.5 h-3.5 text-emerald-400" strokeWidth={1.5} />
               <span className="hidden sm:inline">Recenter Field</span>
             </button>
           ) : null}
 
           <button
             onClick={() => setShowKeyModal(true)}
-            className="px-2.5 py-1.5 bg-black/80 hover:bg-black backdrop-blur-md border border-white/20 text-emerald-300 rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-md transition-all cursor-pointer"
+            className="px-2.5 py-1.5 bg-[#0F0F12]/90 hover:bg-[#18181D] backdrop-blur-md border border-white/[0.08] text-zinc-300 hover:text-white rounded-lg text-xs font-medium flex items-center gap-1.5 shadow-md transition-all cursor-pointer"
             title="Configure Google Maps API Key"
           >
-            <Key className="w-3.5 h-3.5 text-[#E8A238]" />
-            <span className="text-[11px] font-mono">Google Maps API</span>
+            <Key className="w-3.5 h-3.5 text-zinc-400" strokeWidth={1.5} />
+            <span className="text-[11px] font-mono">Maps API</span>
             {apiLoaded && <span className="w-2 h-2 rounded-full bg-emerald-400"></span>}
           </button>
 
@@ -480,10 +481,10 @@ export const GoogleMapsNdvi: React.FC<GoogleMapsNdviProps> = ({
             href={`https://www.google.com/maps/@${lat},${lon},16z/data=!3m1!1e3`}
             target="_blank"
             rel="noopener noreferrer"
-            className="p-2 bg-black/80 hover:bg-black backdrop-blur-md border border-white/20 text-stone-300 hover:text-white rounded-lg transition-all shadow-md"
+            className="p-2 bg-[#0F0F12]/90 hover:bg-[#18181D] backdrop-blur-md border border-white/[0.08] text-zinc-400 hover:text-white rounded-lg transition-all shadow-md"
             title="Open in Google Earth / Full Google Maps"
           >
-            <ExternalLink className="w-3.5 h-3.5" />
+            <ExternalLink className="w-3.5 h-3.5" strokeWidth={1.5} />
           </a>
         </div>
       </div>
@@ -492,7 +493,7 @@ export const GoogleMapsNdvi: React.FC<GoogleMapsNdviProps> = ({
       <div className="relative w-full h-[400px] sm:h-[480px]">
         {viewMode === 'earth3d' ? (
           // Google Earth 3D Web Perspective
-          <div className="relative w-full h-full bg-[#0d1f16] overflow-hidden">
+          <div className="relative w-full h-full bg-[#08080A] overflow-hidden">
             <iframe
               key={`earth3d_${lat.toFixed(4)}_${lon.toFixed(4)}_${district}_${state}`}
               title={`Google Earth 3D - ${district}, ${state}`}
@@ -501,35 +502,35 @@ export const GoogleMapsNdvi: React.FC<GoogleMapsNdviProps> = ({
               loading="lazy"
             />
             {/* Google Earth 3D HUD Inset */}
-            <div className="absolute top-16 right-3 bg-black/85 backdrop-blur-md text-white text-[11px] p-3 rounded-xl border border-white/20 shadow-xl space-y-1.5 pointer-events-auto max-w-xs">
-              <div className="font-extrabold text-[#A5D6A7] flex items-center gap-1.5">
-                <Globe2 className="w-3.5 h-3.5 text-[#60A5FA]" />
+            <div className="absolute top-16 right-3 bg-[#0F0F12]/90 backdrop-blur-md text-white text-[11px] p-3 rounded-xl border border-white/[0.08] shadow-xl space-y-1.5 pointer-events-auto max-w-xs">
+              <div className="font-semibold text-white flex items-center gap-1.5">
+                <Globe2 className="w-3.5 h-3.5 text-blue-400" strokeWidth={1.5} />
                 <span>Google Earth 3D Topography</span>
               </div>
-              <div className="text-[10px] text-stone-300">
+              <div className="text-[10px] text-zinc-400 font-mono">
                 Camera: 450m AMSL • 60° Oblique Perspective
               </div>
-              <div className="text-[10px] text-emerald-300 font-mono">
-                GEE Dataset: COPERNICUS/S2_SR_HARMONIZED
+              <div className="text-[10px] text-emerald-400 font-mono">
+                Dataset: COPERNICUS/S2_SR_HARMONIZED
               </div>
               <div className="pt-1 flex gap-2">
                 <a
                   href={`https://earth.google.com/web/@${lat.toFixed(6)},${lon.toFixed(6)},500a,800d,35y,0h,45t,0r`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-2.5 py-1 bg-[#123826] hover:bg-[#1b5037] text-white rounded text-[10px] font-bold flex items-center gap-1 transition-colors"
+                  className="px-2.5 py-1 bg-white/10 hover:bg-white/15 text-white rounded text-[10px] font-medium flex items-center gap-1 transition-colors border border-white/[0.08]"
                 >
                   <span>Open Full 3D</span>
-                  <ExternalLink className="w-3 h-3" />
+                  <ExternalLink className="w-3 h-3" strokeWidth={1.5} />
                 </a>
                 <a
                   href={`https://code.earthengine.google.com/?scriptPath=users/google/earthengine-api:templates/landsat`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-2.5 py-1 bg-stone-800 hover:bg-stone-700 text-stone-200 rounded text-[10px] font-bold flex items-center gap-1 transition-colors"
+                  className="px-2.5 py-1 bg-white/[0.04] hover:bg-white/[0.08] text-zinc-300 rounded text-[10px] font-medium flex items-center gap-1 transition-colors border border-white/[0.08]"
                 >
                   <span>GEE Catalog</span>
-                  <ExternalLink className="w-3 h-3" />
+                  <ExternalLink className="w-3 h-3" strokeWidth={1.5} />
                 </a>
               </div>
             </div>
@@ -566,20 +567,20 @@ export const GoogleMapsNdvi: React.FC<GoogleMapsNdviProps> = ({
                     points="160,110 340,90 355,240 145,230" 
                     fill="url(#gmapNdviGrad)" 
                     stroke="#FDE047" 
-                    strokeWidth="2.5" 
+                    strokeWidth="2" 
                     strokeDasharray="6 3" 
                   />
 
                   {/* Adjacent farm parcels */}
-                  <polygon points="50,60 150,50 155,160 45,150" fill={viewMode === 'stress' ? '#10B981' : '#2E7D32'} fillOpacity="0.3" stroke="#A5D6A7" strokeWidth="1.5" />
-                  <polygon points="350,55 460,70 445,170 345,155" fill={viewMode === 'stress' ? '#F59E0B' : '#4CAF50'} fillOpacity="0.3" stroke="#A5D6A7" strokeWidth="1.5" />
-                  <polygon points="140,240 330,250 315,330 130,320" fill={viewMode === 'stress' ? '#EF4444' : '#8BC34A'} fillOpacity="0.3" stroke="#A5D6A7" strokeWidth="1.5" />
+                  <polygon points="50,60 150,50 155,160 45,150" fill={viewMode === 'stress' ? '#10B981' : '#2E7D32'} fillOpacity="0.3" stroke="#A5D6A7" strokeWidth="1.2" />
+                  <polygon points="350,55 460,70 445,170 345,155" fill={viewMode === 'stress' ? '#F59E0B' : '#4CAF50'} fillOpacity="0.3" stroke="#A5D6A7" strokeWidth="1.2" />
+                  <polygon points="140,240 330,250 315,330 130,320" fill={viewMode === 'stress' ? '#EF4444' : '#8BC34A'} fillOpacity="0.3" stroke="#A5D6A7" strokeWidth="1.2" />
 
                   {/* Centroid Reticle */}
-                  <circle cx="250" cy="170" r="30" fill="none" stroke="rgba(253, 224, 71, 0.4)" strokeWidth="1.5" strokeDasharray="3 3" />
-                  <circle cx="250" cy="170" r="4" fill="#FDE047" stroke="#123826" strokeWidth="2" />
-                  <line x1="230" y1="170" x2="270" y2="170" stroke="#FDE047" strokeWidth="2" />
-                  <line x1="250" y1="150" x2="250" y2="190" stroke="#FDE047" strokeWidth="2" />
+                  <circle cx="250" cy="170" r="30" fill="none" stroke="rgba(253, 224, 71, 0.4)" strokeWidth="1.2" strokeDasharray="3 3" />
+                  <circle cx="250" cy="170" r="4" fill="#FDE047" stroke="#08080A" strokeWidth="2" />
+                  <line x1="230" y1="170" x2="270" y2="170" stroke="#FDE047" strokeWidth="1.5" />
+                  <line x1="250" y1="150" x2="250" y2="190" stroke="#FDE047" strokeWidth="1.5" />
                 </svg>
               </div>
             )}
@@ -589,8 +590,8 @@ export const GoogleMapsNdvi: React.FC<GoogleMapsNdviProps> = ({
 
       {/* Optional API Error Notification Banner */}
       {apiError && (
-        <div className="absolute top-16 left-3 right-3 z-30 bg-amber-900/90 backdrop-blur-md text-amber-200 text-xs px-3 py-1.5 rounded-lg border border-amber-500/30 flex items-center gap-1.5">
-          <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+        <div className="absolute top-16 left-3 right-3 z-30 bg-amber-950/80 backdrop-blur-md text-amber-200 text-xs px-3 py-1.5 rounded-lg border border-amber-500/20 flex items-center gap-1.5">
+          <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0" strokeWidth={1.5} />
           <span>{apiError}</span>
         </div>
       )}
@@ -598,77 +599,77 @@ export const GoogleMapsNdvi: React.FC<GoogleMapsNdviProps> = ({
       {/* Bottom Floating Legend & Vigor Metrics */}
       <div className="absolute bottom-3 left-3 right-3 z-30 flex flex-wrap items-end justify-between gap-3 pointer-events-none">
         {/* Layer Selector & Engine Badge */}
-        <div className="bg-white/95 backdrop-blur-md p-1.5 sm:p-2 rounded-xl border border-[#CCE0D0] text-[11px] text-[#123826] font-bold shadow-lg pointer-events-auto flex items-center gap-1.5 flex-wrap">
-          <div className="flex items-center gap-1.5 pr-2 border-r border-stone-200">
-            <Satellite className="w-3.5 h-3.5 text-[#2E7D32]" />
-            <span className="hidden sm:inline font-extrabold">Google Satellite</span>
+        <div className="bg-[#0F0F12]/90 backdrop-blur-md p-1.5 sm:p-2 rounded-xl border border-white/[0.08] text-[11px] text-zinc-300 font-medium shadow-lg pointer-events-auto flex items-center gap-1.5 flex-wrap">
+          <div className="flex items-center gap-1.5 pr-2 border-r border-white/[0.08]">
+            <Satellite className="w-3.5 h-3.5 text-emerald-400" strokeWidth={1.5} />
+            <span className="hidden sm:inline font-mono uppercase text-xs tracking-wider text-zinc-400">Satellite</span>
           </div>
 
-          <div className="flex items-center gap-1 flex-wrap">
+          <div className="flex items-center gap-1 flex-wrap font-mono text-xs">
             <button
               onClick={() => onViewModeChange('ndvi')}
-              className={`px-2 py-0.5 rounded text-[10px] font-bold cursor-pointer transition-colors ${
-                viewMode === 'ndvi' ? 'bg-[#123826] text-white' : 'text-stone-600 hover:bg-stone-100'
+              className={`px-2 py-0.5 rounded text-[10px] uppercase tracking-wider transition-colors ${
+                viewMode === 'ndvi' ? 'bg-white/10 text-white border border-white/[0.15]' : 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'
               }`}
             >
               NDVI
             </button>
             <button
               onClick={() => onViewModeChange('rgb')}
-              className={`px-2 py-0.5 rounded text-[10px] font-bold cursor-pointer transition-colors ${
-                viewMode === 'rgb' ? 'bg-[#123826] text-white' : 'text-stone-600 hover:bg-stone-100'
+              className={`px-2 py-0.5 rounded text-[10px] uppercase tracking-wider transition-colors ${
+                viewMode === 'rgb' ? 'bg-white/10 text-white border border-white/[0.15]' : 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'
               }`}
             >
               RGB Earth
             </button>
             <button
               onClick={() => onViewModeChange('stress')}
-              className={`px-2 py-0.5 rounded text-[10px] font-bold cursor-pointer transition-colors ${
-                viewMode === 'stress' ? 'bg-[#123826] text-white' : 'text-stone-600 hover:bg-stone-100'
+              className={`px-2 py-0.5 rounded text-[10px] uppercase tracking-wider transition-colors ${
+                viewMode === 'stress' ? 'bg-white/10 text-white border border-white/[0.15]' : 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'
               }`}
             >
               Stress
             </button>
             <button
               onClick={() => onViewModeChange('hybrid')}
-              className={`px-2 py-0.5 rounded text-[10px] font-bold cursor-pointer transition-colors ${
-                viewMode === 'hybrid' ? 'bg-[#123826] text-white' : 'text-stone-600 hover:bg-stone-100'
+              className={`px-2 py-0.5 rounded text-[10px] uppercase tracking-wider transition-colors ${
+                viewMode === 'hybrid' ? 'bg-white/10 text-white border border-white/[0.15]' : 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'
               }`}
             >
               Hybrid
             </button>
             <button
               onClick={() => onViewModeChange('earth3d')}
-              className={`px-2 py-0.5 rounded text-[10px] font-bold cursor-pointer transition-colors flex items-center gap-1 ${
-                viewMode === 'earth3d' ? 'bg-[#123826] text-white' : 'text-stone-600 hover:bg-stone-100'
+              className={`px-2 py-0.5 rounded text-[10px] uppercase tracking-wider transition-colors flex items-center gap-1 ${
+                viewMode === 'earth3d' ? 'bg-white/10 text-white border border-white/[0.15]' : 'text-zinc-400 hover:text-white hover:bg-white/[0.04]'
               }`}
             >
-              <Globe2 className="w-3 h-3 text-[#60A5FA]" />
+              <Globe2 className="w-3 h-3 text-blue-400" strokeWidth={1.5} />
               <span>Earth 3D</span>
             </button>
           </div>
         </div>
 
         {/* NDVI Color Scale Legend */}
-        <div className="bg-white/95 backdrop-blur-md p-2.5 rounded-xl border border-[#CCE0D0] text-xs shadow-lg pointer-events-auto space-y-1">
-          <div className="flex items-center justify-between text-[10px] font-bold text-stone-500 uppercase tracking-wider">
+        <div className="bg-[#0F0F12]/90 backdrop-blur-md p-2.5 rounded-xl border border-white/[0.08] text-xs shadow-lg pointer-events-auto space-y-1">
+          <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-zinc-500">
             <span>NDVI Scale</span>
-            <span className="text-[#2E7D32] font-mono font-bold">Field: {ndviScore.toFixed(2)}</span>
+            <span className="text-emerald-400 font-mono font-bold">Field: {ndviScore.toFixed(2)}</span>
           </div>
-          <div className="flex items-center gap-1">
-            <div className="flex items-center gap-1 text-[10px] text-stone-700">
+          <div className="flex items-center gap-1 font-mono text-[10px]">
+            <div className="flex items-center gap-1 text-zinc-400">
               <span className="w-2.5 h-2.5 rounded-full bg-[#DC2626]"></span>
               <span>&lt;0.3</span>
             </div>
-            <div className="flex items-center gap-1 text-[10px] text-stone-700 ml-1.5">
+            <div className="flex items-center gap-1 text-zinc-400 ml-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-[#E8A238]"></span>
               <span>0.3-0.5</span>
             </div>
-            <div className="flex items-center gap-1 text-[10px] text-stone-700 ml-1.5">
+            <div className="flex items-center gap-1 text-zinc-400 ml-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-[#4CAF50]"></span>
               <span>0.5-0.6</span>
             </div>
-            <div className="flex items-center gap-1 text-[10px] text-stone-700 ml-1.5">
+            <div className="flex items-center gap-1 text-zinc-400 ml-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-[#1B5E20]"></span>
               <span>0.6-1.0</span>
             </div>
@@ -678,30 +679,30 @@ export const GoogleMapsNdvi: React.FC<GoogleMapsNdviProps> = ({
 
       {/* Google Maps API Key Modal */}
       {showKeyModal && (
-        <div className="absolute inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl p-6 max-w-md w-full border border-[#CCE0D0] shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-[#E2ECE3] pb-3">
+        <div className="absolute inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#0F0F12] rounded-2xl p-6 max-w-md w-full border border-white/[0.08] shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
               <div className="flex items-center gap-2">
-                <Globe2 className="w-5 h-5 text-[#2E7D32]" />
-                <h3 className="text-base font-black text-[#123826] font-['Syne',sans-serif]">
-                  Google Maps API Configuration
+                <Globe2 className="w-5 h-5 text-emerald-400" strokeWidth={1.5} />
+                <h3 className="text-base font-semibold text-white tracking-[-0.03em]">
+                  Maps API Configuration
                 </h3>
               </div>
               <button 
                 onClick={() => setShowKeyModal(false)}
-                className="text-stone-400 hover:text-stone-700 text-sm font-bold cursor-pointer"
+                className="text-zinc-500 hover:text-white p-1 rounded-lg cursor-pointer transition-colors"
               >
-                ✕
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            <p className="text-xs text-stone-600 leading-relaxed">
-              AgriMate connects to the <b>Google Maps JavaScript API & Google Earth Satellite Constellation</b> to render true high-resolution satellite imagery with NDVI vector overlays.
+            <p className="text-xs text-zinc-400 leading-relaxed font-normal">
+              KisanSathi connects to the Google Maps JavaScript API & Google Earth Constellation to render high-resolution satellite imagery with NDVI vector overlays.
             </p>
 
             <form onSubmit={handleSaveApiKey} className="space-y-3">
               <div>
-                <label className="text-xs font-bold text-stone-700 block mb-1">
+                <label className="text-xs font-mono uppercase tracking-wider text-zinc-400 block mb-1">
                   Google Maps JavaScript API Key:
                 </label>
                 <input
@@ -709,17 +710,17 @@ export const GoogleMapsNdvi: React.FC<GoogleMapsNdviProps> = ({
                   value={keyInput}
                   onChange={(e) => setKeyInput(e.target.value)}
                   placeholder="AIzaSy..."
-                  className="w-full px-3 py-2 text-xs font-mono border border-stone-300 rounded-xl focus:outline-none focus:border-[#2E7D32] bg-stone-50"
+                  className="w-full px-3 py-2 text-xs font-mono border border-white/[0.08] rounded-xl focus:outline-none focus:border-emerald-500/50 bg-[#08080A] text-white placeholder-zinc-600"
                 />
               </div>
 
-              <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3 text-[11px] text-emerald-800 space-y-1">
-                <div className="font-bold flex items-center gap-1">
-                  <Check className="w-3.5 h-3.5 text-emerald-600" />
+              <div className="bg-emerald-500/[0.08] border border-emerald-500/20 rounded-xl p-3 text-[11px] text-emerald-300 space-y-1">
+                <div className="font-medium flex items-center gap-1.5">
+                  <Check className="w-3.5 h-3.5 text-emerald-400" strokeWidth={1.5} />
                   <span>Built-in Fallback Active</span>
                 </div>
-                <p className="text-emerald-700">
-                  Even without a custom key, AgriMate's Google Satellite Earth engine is fully operational for all 36 Indian States & UTs.
+                <p className="text-emerald-300/80">
+                  Even without a custom key, the Google Satellite Earth engine is fully operational for all 36 Indian States & UTs.
                 </p>
               </div>
 
@@ -727,13 +728,13 @@ export const GoogleMapsNdvi: React.FC<GoogleMapsNdviProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowKeyModal(false)}
-                  className="px-3 py-1.5 text-xs font-bold text-stone-600 hover:text-stone-800 cursor-pointer"
+                  className="px-3 py-1.5 text-xs font-mono text-zinc-400 hover:text-white cursor-pointer transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-[#123826] hover:bg-[#1A4D35] text-white text-xs font-bold rounded-xl shadow-md transition-all cursor-pointer"
+                  className="px-4 py-2 bg-white text-black hover:bg-zinc-200 text-xs font-semibold rounded-xl shadow-md transition-all cursor-pointer"
                 >
                   Apply & Reload Map
                 </button>

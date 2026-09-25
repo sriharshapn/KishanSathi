@@ -144,116 +144,51 @@ const CROP_DATABASE: CropDetail[] = [
     hindiName: 'ड्रैगन फ्रूट / कमलम',
     kannadaName: 'ಡ್ರ್ಯಾಗನ್ ಹಣ್ಣು',
     category: 'Fruits & Exotic',
-    varieties: ['Red Flesh (C规范)', 'White Flesh', 'Royal Red'],
+    varieties: ['Red Flesh', 'White Flesh', 'Royal Red'],
     modalRange: '₹12,000 - ₹22,000 / q',
     peakSeason: 'Jun - Nov',
     majorMandis: ['Kolar (KA)', 'Surat (GJ)', 'Vashi APMC (MH)', 'Azadpur (DL)'],
-    storageAdvice: 'Pre-cool to 10°C immediately after harvest. Shelf life 14 days at 7-10°C.',
-    moistureThreshold: 'Glossy bracts, harvested at 80% color break for long transit'
-  },
-  {
-    id: 'saffron',
-    name: 'Saffron (Kesar)',
-    hindiName: 'केसर',
-    kannadaName: 'ಕೇಸರಿ',
-    category: 'Spices & Plantation',
-    varieties: ['Mongra', 'Lacha', 'Guchhi'],
-    modalRange: '₹1,80,000 - ₹2,60,000 / kg',
-    peakSeason: 'Oct - Nov',
-    majorMandis: ['Pampore IIKSTC (JK)', 'Srinagar (JK)', 'Khari Baoli (DL)'],
-    storageAdvice: 'Pack in hermetically sealed glass jars away from direct UV light.',
-    moistureThreshold: 'Crocin color value > 220, moisture below 8%'
-  },
-  {
-    id: 'chilli',
-    name: 'Green Chilli',
-    hindiName: 'हरी मिर्च',
-    kannadaName: 'ಹಸಿ ಮೆಣಸಿನಕಾಯಿ',
-    category: 'Solanaceous',
-    varieties: ['G-4', 'Sitara', 'Teja', 'Byadagi Green'],
-    modalRange: '₹2,800 - ₹4,200 / q',
-    peakSeason: 'Aug - Jan',
-    majorMandis: ['Guntur (AP)', 'Ballari (KA)', 'Belagavi (KA)', 'Byadgi (KA)'],
-    storageAdvice: 'Pack in aerated CFB corrugated boxes. Avoid direct sunlight during transit.',
-    moistureThreshold: 'Deep green firm pod, stalk intact'
-  },
-  {
-    id: 'cotton',
-    name: 'Cotton',
-    hindiName: 'कपास',
-    kannadaName: 'ಹತ್ತಿ',
-    category: 'Cash Crops',
-    varieties: ['DCH-32 Extra Long Staple', 'Bunny BT', 'RCH-2'],
-    modalRange: '₹6,400 - ₹7,800 / q',
-    peakSeason: 'Oct - Feb',
-    majorMandis: ['Adoni (AP)', 'Raichur (KA)', 'Davanagere (KA)', 'Jalgaon (MH)'],
-    storageAdvice: 'Store in dry covered godowns on wooden pallets. Keep away from fuel fumes.',
-    moistureThreshold: 'Moisture must remain strictly below 8-9% for top MSP bonus'
-  },
-  {
-    id: 'soybean',
-    name: 'Soybean',
-    hindiName: 'सोयाबीन',
-    kannadaName: 'ಸೋಯಾಬೀನ್',
-    category: 'Oilseeds',
-    varieties: ['JS-335', 'JS-9560', 'NRC-37'],
-    modalRange: '₹4,100 - ₹4,850 / q',
-    peakSeason: 'Sep - Nov',
-    majorMandis: ['Indore (MP)', 'Latur (MH)', 'Akola (MH)', 'Belagavi (KA)'],
-    storageAdvice: 'Avoid mechanical seed cracking during thrashing. Store below 10% moisture.',
-    moistureThreshold: 'Foreign matter < 2%, oil content > 18%'
+    storageAdvice: 'Stage at 10°C with 85-90% relative humidity. Shelf life 14-21 days.',
+    moistureThreshold: 'Uniform coloration, firm bracts, zero mechanical bruising'
   },
   {
     id: 'maize',
-    name: 'Maize',
+    name: 'Maize (Corn)',
     hindiName: 'मक्का',
     kannadaName: 'ಮೆಕ್ಕೆಜೋಳ',
     category: 'Grains & Pulses',
-    varieties: ['Kargil 900M', 'Pioneer 30V92', 'DeKalb 9108'],
-    modalRange: '₹1,950 - ₹2,350 / q',
-    peakSeason: 'Oct - Jan (Kharif) & May - Jul (Rabi)',
-    majorMandis: ['Davanagere (KA)', 'Ranebennur (KA)', 'Nizamabad (TS)', 'Chhindwara (MP)'],
-    storageAdvice: 'Aflatoxin test required by poultry feed mills. Aerated grain bin storage.',
-    moistureThreshold: 'Moisture < 14% to prevent Aspergillus fungus formation'
-  },
-  {
-    id: 'wheat',
-    name: 'Wheat',
-    hindiName: 'गेहूं',
-    kannadaName: 'ಗೋಧಿ',
-    category: 'Grains & Pulses',
-    varieties: ['Sharbati', 'Lokwan', 'HD-2967', 'PBW-343'],
-    modalRange: '₹2,200 - ₹2,750 / q',
-    peakSeason: 'Mar - May',
-    majorMandis: ['Khanna (PB)', 'Sehore (MP)', 'Kotkapura (PB)', 'Belagavi (KA)'],
-    storageAdvice: 'Fumigate against weevils using phosphine tables under certified guidance.',
-    moistureThreshold: 'Grain moisture strictly below 12%, bold amber lustre'
+    varieties: ['Pioneer 3396', 'DeKalb 9108', 'NK-6240', 'CP-818'],
+    modalRange: '₹1,950 - ₹2,280 / q',
+    peakSeason: 'Oct - Jan (Kharif) & Apr - Jun (Rabi)',
+    majorMandis: ['Davanagere (KA)', 'Khanna (PB)', 'Gulabbagh (BR)', 'Chhindwara (MP)'],
+    storageAdvice: 'Dry grains to moisture < 12% before bagging. Treat against Sitophilus zeamais.',
+    moistureThreshold: 'Grain moisture strictly below 12%, inorganic matter < 1%'
   },
   {
     id: 'paddy',
-    name: 'Paddy / Rice',
+    name: 'Paddy (Rice / Dhan)',
     hindiName: 'धान / चावल',
-    kannadaName: 'ಭತ್ತ / ಅಕ್ಕಿ',
+    kannadaName: 'ಭತ್ತ',
     category: 'Grains & Pulses',
-    varieties: ['Sona Masoori (BPT-5204)', 'IR-64', 'Basmati 1121', 'JGL-1798'],
-    modalRange: '₹2,100 - ₹2,850 / q',
-    peakSeason: 'Nov - Jan (Kharif) & Apr - May (Rabi)',
-    majorMandis: ['Sindhanur (KA)', 'Raichur (KA)', 'Karnal (HR)', 'Miryalaguda (TS)'],
-    storageAdvice: 'Sun-dry on threshing floors before bagging. Keep in moisture-proof gunny sacks.',
-    moistureThreshold: 'Head rice recovery > 58%, moisture 13-14%'
+    varieties: ['Sona Masoori', 'Basmati 1121', 'IR-64', 'BPT-5204'],
+    modalRange: '₹2,180 - ₹3,600 / q',
+    peakSeason: 'Nov - Jan (Kharif) & May - Jul (Rabi)',
+    majorMandis: ['Karnal (HR)', 'Sindhanur (KA)', 'Gondia (MH)', 'Nalgonda (TS)'],
+    storageAdvice: 'Parboil or mill promptly. Store dried paddy at 13-14% moisture in well-dunnaged godowns.',
+    moistureThreshold: 'Moisture cutoff < 14%, head rice recovery > 62%'
   },
   {
-    id: 'groundnut',
-    name: 'Groundnut',
-    hindiName: 'मूंगफली',
-    kannadaName: 'ಕಡಲೆಕಾಯಿ',
-    category: 'Oilseeds',
-    varieties: ['TMV-2', 'Kadiri-6', 'JL-24', 'TAG-24'],
-    modalRange: '₹5,800 - ₹7,100 / q',
-    peakSeason: 'Oct - Dec',
-    majorMandis: ['Challakere (KA)', 'Bikaner (RJ)', 'Gondal (GJ)', 'Anantapur (AP)'],
-    storageAdvice: 'Decorticate only prior to sale. Store pods in clean, dry jute sacks.',
-    moistureThreshold: 'Pod moisture < 8%, shelling outturn > 70%'
+    id: 'cotton',
+    name: 'Cotton (Kapas)',
+    hindiName: 'कपास',
+    kannadaName: 'ಹತ್ತಿ',
+    category: 'Cash Crops',
+    varieties: ['Bt Cotton RCH-2', 'Brahma', 'DCH-32', 'Bunny'],
+    modalRange: '₹6,800 - ₹7,650 / q',
+    peakSeason: 'Oct - Feb',
+    majorMandis: ['Adilabad (TS)', 'Rajkot (GJ)', 'Raichur (KA)', 'Abohar (PB)'],
+    storageAdvice: 'Store seed-cotton in moisture-proof ventilated dry bays. Gin promptly to maintain lint whiteness.',
+    moistureThreshold: 'Moisture < 8.5%, trash content < 3%, staple length > 29mm'
   },
   {
     id: 'sugarcane',
@@ -309,105 +244,120 @@ export const CropsPage: React.FC<CropsPageProps> = ({
   });
 
   return (
-    <div className="space-y-12 sm:space-y-16 pb-16">
-      {/* Crops Page Header */}
-      <section className="relative overflow-hidden bg-[#ECE8DE]/70 border-b border-[#E6E1D7] py-10 sm:py-14">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-            {/* Left Column: Heading & Scope */}
-            <div className="lg:col-span-7 space-y-4">
+    <div className="space-y-12 sm:space-y-16 pb-20 font-['Open_Sans',sans-serif] text-[#022113]">
+      {/* Crops Page Header - Two Card Bento Layout */}
+      <section className="max-w-[1440px] mx-auto px-3 sm:px-6 mt-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+          {/* Left Card: Crisp Pure White Banner */}
+          <div className="lg:col-span-8 bg-white rounded-[2.5rem] p-8 sm:p-10 border border-[#022113]/8 shadow-xl flex flex-col justify-between">
+            <div className="space-y-4">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs font-bold uppercase tracking-widest text-[#2E7D32] bg-white px-3 py-1 rounded-full border border-[#E6E1D7] shadow-xs">
-                  Agricultural Produce Directory
+                <span className="text-xs font-bold font-['Montserrat',sans-serif] uppercase tracking-wider text-[#546C18] bg-[#F0F2EB] px-3.5 py-1.5 rounded-full border border-[#022113]/8">
+                  Produce Directory
                 </span>
-                <span className="text-[11px] font-mono text-stone-600 bg-white/80 px-2.5 py-0.5 rounded-full border border-[#E6E1D7]">
+                <span className="text-xs font-bold font-['Montserrat',sans-serif] uppercase tracking-wider text-[#022113]/70 bg-[#F0F2EB] px-3.5 py-1.5 rounded-full border border-[#022113]/8">
                   Agmarknet Grade-A Standards
                 </span>
               </div>
 
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#153424] font-['Syne',sans-serif] tracking-tight leading-[1.15]">
-                Commodity Portfolio & Agronomic Standards
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#022113] tracking-tight leading-[1.08] font-['Montserrat',sans-serif]">
+                Commodity Portfolio & <span className="text-[#546C18]">Agronomic Standards</span>
               </h1>
 
-              <p className="text-stone-600 text-sm sm:text-base leading-relaxed font-['Outfit',sans-serif] max-w-2xl">
+              <p className="text-[#022113]/70 text-sm sm:text-base leading-relaxed max-w-2xl font-['Open_Sans',sans-serif]">
                 Explore official APMC grading metrics, moisture benchmarks, storage conditions, and prevailing auction price bands across Indian agricultural commodities.
               </p>
 
               {/* Quick Feature Badges */}
-              <div className="flex flex-wrap items-center gap-2.5 pt-1 text-xs text-stone-600">
-                <div className="flex items-center gap-1.5 bg-white/90 px-3 py-1.5 rounded-xl border border-[#E6E1D7] shadow-2xs">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[#2E7D32]" />
-                  <span className="font-semibold text-[#153424]">Zero Price Hallucination</span>
+              <div className="flex flex-wrap items-center gap-2.5 pt-2 text-xs font-['Montserrat',sans-serif]">
+                <div className="flex items-center gap-1.5 bg-[#F0F2EB] px-3.5 py-1.5 rounded-full border border-[#022113]/8">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-[#546C18]" />
+                  <span className="text-[#022113] font-bold">Zero Price Hallucination</span>
                 </div>
-                <div className="flex items-center gap-1.5 bg-white/90 px-3 py-1.5 rounded-xl border border-[#E6E1D7] shadow-2xs">
-                  <ShieldCheck className="w-3.5 h-3.5 text-[#2E7D32]" />
-                  <span className="font-semibold text-[#153424]">APMC Act Compliant</span>
+                <div className="flex items-center gap-1.5 bg-[#F0F2EB] px-3.5 py-1.5 rounded-full border border-[#022113]/8">
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#546C18]" />
+                  <span className="text-[#022113] font-bold">APMC Act Compliant</span>
                 </div>
-                <div className="flex items-center gap-1.5 bg-white/90 px-3 py-1.5 rounded-xl border border-[#E6E1D7] shadow-2xs">
-                  <Boxes className="w-3.5 h-3.5 text-[#E8A238]" />
-                  <span className="font-semibold text-[#153424]">7 Produce Classes</span>
+                <div className="flex items-center gap-1.5 bg-[#F0F2EB] px-3.5 py-1.5 rounded-full border border-[#022113]/8">
+                  <Boxes className="w-3.5 h-3.5 text-[#546C18]" />
+                  <span className="text-[#022113] font-bold">7 Produce Classes</span>
                 </div>
               </div>
             </div>
 
-            {/* Right Column: Agronomic Parameters Bento Grid */}
-            <div className="lg:col-span-5">
-              <div className="grid grid-cols-2 gap-3">
-                {/* Tile 1: Grading Metrics */}
-                <div className="glass-card p-4 rounded-2xl border border-white/80 shadow-xs hover:border-[#2E7D32]/50 transition-all">
-                  <div className="flex items-center gap-2 text-[#2E7D32] mb-1.5">
-                    <div className="w-7 h-7 rounded-lg bg-[#EAEFE9] flex items-center justify-center">
-                      <ShieldCheck className="w-4 h-4 text-[#2E7D32]" />
-                    </div>
-                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-stone-500">Grading</span>
-                  </div>
-                  <p className="text-base font-black text-[#153424] font-['Syne',sans-serif]">Grade-A FAQ</p>
-                  <p className="text-[11px] text-stone-600 mt-0.5 leading-snug">
-                    Standard fair average quality specs for top mandi premiums
-                  </p>
+            {/* 4 Agronomic Benchmark Tiles in Sub-containers */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-6 mt-6 border-t border-[#022113]/8">
+              <div className="bg-[#F0F2EB] p-4 rounded-2xl border border-[#022113]/5">
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <ShieldCheck className="w-4 h-4 text-[#546C18]" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider font-['Montserrat',sans-serif] text-[#022113]/60">Grading</span>
                 </div>
+                <p className="text-sm font-bold text-[#022113] font-['Montserrat',sans-serif]">Grade-A FAQ</p>
+                <p className="text-[11px] text-[#022113]/70 mt-0.5 leading-snug">Fair average specs</p>
+              </div>
 
-                {/* Tile 2: Moisture Bounds */}
-                <div className="glass-card p-4 rounded-2xl border border-white/80 shadow-xs hover:border-[#2E7D32]/50 transition-all">
-                  <div className="flex items-center gap-2 text-[#E8A238] mb-1.5">
-                    <div className="w-7 h-7 rounded-lg bg-[#FEF3C7] flex items-center justify-center">
-                      <Droplets className="w-4 h-4 text-[#D97706]" />
-                    </div>
-                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-stone-500">Moisture</span>
-                  </div>
-                  <p className="text-base font-black text-[#153424] font-['Syne',sans-serif]">&lt; 10% – 14%</p>
-                  <p className="text-[11px] text-stone-600 mt-0.5 leading-snug">
-                    Permissible cutoff to prevent dockage & weight cut
-                  </p>
+              <div className="bg-[#F0F2EB] p-4 rounded-2xl border border-[#022113]/5">
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <Droplets className="w-4 h-4 text-[#546C18]" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider font-['Montserrat',sans-serif] text-[#022113]/60">Moisture</span>
                 </div>
+                <p className="text-sm font-bold text-[#022113] font-['Montserrat',sans-serif]">&lt; 10% – 14%</p>
+                <p className="text-[11px] text-[#022113]/70 mt-0.5 leading-snug">Permissible cutoff</p>
+              </div>
 
-                {/* Tile 3: Storage & Cold Chain */}
-                <div className="glass-card p-4 rounded-2xl border border-white/80 shadow-xs hover:border-[#2E7D32]/50 transition-all">
-                  <div className="flex items-center gap-2 text-[#2E7D32] mb-1.5">
-                    <div className="w-7 h-7 rounded-lg bg-[#EAEFE9] flex items-center justify-center">
-                      <Warehouse className="w-4 h-4 text-[#2E7D32]" />
-                    </div>
-                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-stone-500">Storage</span>
-                  </div>
-                  <p className="text-base font-black text-[#153424] font-['Syne',sans-serif]">3°C – 12°C RH</p>
-                  <p className="text-[11px] text-stone-600 mt-0.5 leading-snug">
-                    Scientific ventilation, humidity & sprout suppression
-                  </p>
+              <div className="bg-[#F0F2EB] p-4 rounded-2xl border border-[#022113]/5">
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <Warehouse className="w-4 h-4 text-[#546C18]" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider font-['Montserrat',sans-serif] text-[#022113]/60">Storage</span>
                 </div>
+                <p className="text-sm font-bold text-[#022113] font-['Montserrat',sans-serif]">3°C – 12°C RH</p>
+                <p className="text-[11px] text-[#022113]/70 mt-0.5 leading-snug">Sprout control</p>
+              </div>
 
-                {/* Tile 4: Market Realization */}
-                <div className="glass-card p-4 rounded-2xl border border-white/80 shadow-xs hover:border-[#2E7D32]/50 transition-all">
-                  <div className="flex items-center gap-2 text-emerald-700 mb-1.5">
-                    <div className="w-7 h-7 rounded-lg bg-[#DCFCE7] flex items-center justify-center">
-                      <TrendingUp className="w-4 h-4 text-emerald-700" />
-                    </div>
-                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-stone-500">Linkage</span>
-                  </div>
-                  <p className="text-base font-black text-[#153424] font-['Syne',sans-serif]">Daily Rates</p>
-                  <p className="text-[11px] text-stone-600 mt-0.5 leading-snug">
-                    Direct terminal linkage with live arrivals across 85 mandis
-                  </p>
+              <div className="bg-[#F0F2EB] p-4 rounded-2xl border border-[#022113]/5">
+                <div className="flex items-center gap-1.5 mb-1.5">
+                  <TrendingUp className="w-4 h-4 text-[#546C18]" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider font-['Montserrat',sans-serif] text-[#022113]/60">Linkage</span>
                 </div>
+                <p className="text-sm font-bold text-[#022113] font-['Montserrat',sans-serif]">Daily Rates</p>
+                <p className="text-[11px] text-[#022113]/70 mt-0.5 leading-snug">85 APMC mandis</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Card: Rich Olive Green Highlight Card */}
+          <div className="lg:col-span-4 bg-[#546C18] text-white rounded-[2.5rem] p-8 sm:p-10 shadow-xl border border-[#546C18]/20 flex flex-col justify-between">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="px-3.5 py-1.5 rounded-full bg-[#DFEB38] text-[#022113] text-xs font-black font-['Montserrat',sans-serif] uppercase tracking-wider shadow-sm">
+                  Agmarknet FAQ
+                </span>
+                <div className="w-10 h-10 rounded-full bg-white text-[#022113] flex items-center justify-center font-bold shadow-md">
+                  ↗
+                </div>
+              </div>
+
+              <h3 className="text-2xl sm:text-3xl font-black text-white font-['Montserrat',sans-serif] tracking-tight leading-snug pt-2">
+                Audited APMC <br />Grading Catalog
+              </h3>
+
+              <p className="text-white/80 text-xs sm:text-sm leading-relaxed font-['Open_Sans',sans-serif]">
+                Direct terminal linkage with live arrivals, modal rates, and moisture-controlled warehouse limits across Indian trade corridors.
+              </p>
+            </div>
+
+            <div className="pt-6 border-t border-white/20 space-y-3">
+              <div className="flex items-center justify-between text-xs text-white/90 font-['Montserrat',sans-serif]">
+                <span>Verified Varieties</span>
+                <span className="font-bold text-[#DFEB38]">100% Traceable</span>
+              </div>
+              <div className="flex items-center justify-between text-xs text-white/90 font-['Montserrat',sans-serif]">
+                <span>Price Transparency</span>
+                <span className="font-bold text-[#DFEB38]">Govt Agmarknet</span>
+              </div>
+              <div className="flex items-center justify-between text-xs text-white/90 font-['Montserrat',sans-serif]">
+                <span>Coverage</span>
+                <span className="font-bold text-[#DFEB38]">Pan-India</span>
               </div>
             </div>
           </div>
@@ -415,18 +365,18 @@ export const CropsPage: React.FC<CropsPageProps> = ({
       </section>
 
       {/* Filter and Search Bar */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="glass-card p-4 sm:p-6 rounded-2xl border border-white/80 shadow-xs flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+      <section className="max-w-[1440px] mx-auto px-3 sm:px-6">
+        <div className="bg-white p-4 sm:p-5 rounded-[2rem] border border-[#022113]/8 shadow-xl flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
           {/* Category Tabs */}
           <div className="flex flex-wrap items-center gap-2">
             {categories.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                className={`px-4 py-2 rounded-full text-xs font-bold font-['Montserrat',sans-serif] uppercase tracking-wider transition-all cursor-pointer ${
                   selectedCategory === cat
-                    ? 'bg-[#153424] text-white shadow-xs'
-                    : 'bg-[#F6F4EE] text-stone-700 hover:bg-[#ECE8DE]'
+                    ? 'bg-[#546C18] text-[#DFEB38] shadow-md'
+                    : 'bg-[#F0F2EB] text-[#022113] hover:bg-[#E2ECE3] border border-[#022113]/8'
                 }`}
               >
                 {cat}
@@ -435,61 +385,61 @@ export const CropsPage: React.FC<CropsPageProps> = ({
           </div>
 
           {/* Search Input */}
-          <div className="relative min-w-[240px]">
-            <Search className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <div className="relative min-w-[260px]">
+            <Search className="w-4 h-4 text-[#546C18] absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Search crop, variety or language..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 rounded-xl text-xs border border-[#E6E1D7] focus:border-[#2E7D32] focus:ring-1 focus:ring-[#2E7D32] outline-none bg-white text-[#153424]"
+              className="w-full pl-10 pr-4 py-2.5 rounded-full text-xs font-semibold border border-[#022113]/10 focus:border-[#546C18] outline-none bg-[#F0F2EB]/50 text-[#022113] placeholder-[#022113]/40"
             />
           </div>
         </div>
       </section>
 
       {/* Crops Cards Grid */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6">
+      <section className="max-w-[1440px] mx-auto px-3 sm:px-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredCrops.map((crop, idx) => (
+          {filteredCrops.map((crop) => (
             <div 
               key={crop.id}
-              className={`glass-card rounded-2xl border border-white/80 hover:border-[#2E7D32] hover:shadow-lg transition-all p-6 space-y-4 flex flex-col justify-between animate-slide-up stagger-${Math.min(idx + 1, 8)} hover-slide-up`}
+              className="bg-white rounded-[2.5rem] border border-[#022113]/8 hover:border-[#546C18]/40 transition-all p-6 sm:p-8 space-y-5 flex flex-col justify-between shadow-xl hover:shadow-2xl"
             >
               <div className="space-y-4">
                 {/* Header */}
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <h3 className="text-xl font-black text-[#153424] font-['Syne',sans-serif]">
+                    <h3 className="text-xl font-black text-[#022113] tracking-tight font-['Montserrat',sans-serif]">
                       {crop.name}
                     </h3>
-                    <p className="text-xs text-stone-600 font-medium mt-0.5">
+                    <p className="text-xs text-[#546C18] font-bold mt-1 font-['Montserrat',sans-serif]">
                       {crop.hindiName} • {crop.kannadaName}
                     </p>
                   </div>
-                  <span className="text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded-full bg-[#EAEFE9] text-[#2E7D32] border border-[#D6DFD4] shrink-0">
+                  <span className="text-[10px] font-bold uppercase tracking-wider font-['Montserrat',sans-serif] px-3 py-1 rounded-full bg-[#DFEB38]/40 text-[#022113] border border-[#DFEB38] shrink-0">
                     {crop.category}
                   </span>
                 </div>
 
                 {/* Modal Rate & Season */}
-                <div className="grid grid-cols-2 gap-2 pt-2 border-t border-[#E6E1D7] text-xs">
+                <div className="grid grid-cols-2 gap-3 pt-3 border-t border-[#022113]/8 text-xs">
                   <div>
-                    <span className="text-stone-600 text-[11px] block font-medium">Prevailing Band</span>
-                    <span className="font-bold text-[#153424] font-mono">{crop.modalRange}</span>
+                    <span className="text-[#022113]/50 text-[10px] uppercase font-bold tracking-wider font-['Montserrat',sans-serif] block">Prevailing Band</span>
+                    <span className="font-extrabold text-[#022113] mt-0.5 block font-['Montserrat',sans-serif]">{crop.modalRange}</span>
                   </div>
                   <div>
-                    <span className="text-stone-600 text-[11px] block font-medium">Harvest Window</span>
-                    <span className="font-semibold text-stone-700">{crop.peakSeason}</span>
+                    <span className="text-[#022113]/50 text-[10px] uppercase font-bold tracking-wider font-['Montserrat',sans-serif] block">Harvest Window</span>
+                    <span className="text-[#022113]/80 mt-0.5 block font-medium">{crop.peakSeason}</span>
                   </div>
                 </div>
 
                 {/* Varieties */}
                 <div>
-                  <span className="text-stone-600 text-[11px] block font-bold uppercase tracking-wider mb-1">Key Varieties</span>
+                  <span className="text-[#022113]/50 text-[10px] font-bold uppercase tracking-wider font-['Montserrat',sans-serif] block mb-1.5">Key Varieties</span>
                   <div className="flex flex-wrap gap-1.5">
                     {crop.varieties.map((v, i) => (
-                      <span key={i} className="text-[11px] px-2 py-0.5 rounded-md bg-[#FAF8F5] border border-[#E6E1D7] text-stone-700">
+                      <span key={i} className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-[#F0F2EB] border border-[#022113]/8 text-[#022113]">
                         {v}
                       </span>
                     ))}
@@ -498,10 +448,10 @@ export const CropsPage: React.FC<CropsPageProps> = ({
 
                 {/* Major Mandis */}
                 <div>
-                  <span className="text-stone-600 text-[11px] block font-bold uppercase tracking-wider mb-1">Major APMC Hubs</span>
+                  <span className="text-[#022113]/50 text-[10px] font-bold uppercase tracking-wider font-['Montserrat',sans-serif] block mb-1.5">Major APMC Hubs</span>
                   <div className="flex flex-wrap gap-1.5">
                     {crop.majorMandis.map((m, i) => (
-                      <span key={i} className="text-[11px] px-2 py-0.5 rounded-md bg-[#FAF8F5] text-[#153424] border border-[#E6E1D7]/60 font-medium">
+                      <span key={i} className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-[#F0F2EB] text-[#022113] border border-[#022113]/8">
                         {m}
                       </span>
                     ))}
@@ -509,19 +459,19 @@ export const CropsPage: React.FC<CropsPageProps> = ({
                 </div>
 
                 {/* Storage & Moisture */}
-                <div className="bg-[#FAF8F5] p-3 rounded-xl border border-[#E6E1D7] text-[11px] space-y-1 text-stone-600">
-                  <p><strong className="text-stone-700">Quality:</strong> {crop.moistureThreshold}</p>
-                  <p><strong className="text-stone-700">Storage:</strong> {crop.storageAdvice}</p>
+                <div className="bg-[#F0F2EB] p-4 rounded-2xl border border-[#022113]/8 text-xs space-y-1.5 text-[#022113]/70">
+                  <p><strong className="text-[#022113] font-bold font-['Montserrat',sans-serif]">Quality:</strong> {crop.moistureThreshold}</p>
+                  <p><strong className="text-[#022113] font-bold font-['Montserrat',sans-serif]">Storage:</strong> {crop.storageAdvice}</p>
                 </div>
               </div>
 
               {/* Action Button */}
               <button
                 onClick={() => onSelectCropAndNavigate(crop.name)}
-                className="w-full mt-4 py-2.5 rounded-xl bg-[#153424] hover:bg-[#2E7D32] text-white font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs"
+                className="w-full mt-4 py-3 rounded-full bg-[#DFEB38] hover:bg-[#d0df2a] text-[#022113] font-black text-xs font-['Montserrat',sans-serif] uppercase tracking-wider flex items-center justify-center gap-2 transition-all cursor-pointer shadow-[0_4px_16px_rgba(223,235,56,0.4)] hover:scale-[1.02]"
               >
                 <span>Analyze {crop.name} in Terminal</span>
-                <ChevronRight className="w-4 h-4 text-[#E8A238]" />
+                <ChevronRight className="w-4 h-4 text-[#022113]" />
               </button>
             </div>
           ))}

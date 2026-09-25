@@ -61,27 +61,27 @@ export const ExplainModal: React.FC<ExplainModalProps> = ({
 
   return (
     <div 
-      className="fixed inset-0 z-50 bg-stone-900/50 backdrop-blur-xs flex items-center justify-center p-4 cursor-pointer"
+      className="fixed inset-0 z-50 bg-[#022113]/60 backdrop-blur-sm flex items-center justify-center p-4 cursor-pointer"
       role="dialog"
       aria-modal="true"
       onClick={onClose}
     >
       <div 
-        className="glass-card rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-white/90 animate-in fade-in zoom-in-95 duration-200 cursor-default"
+        className="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-[#E5EAD7] animate-in fade-in zoom-in-95 duration-200 cursor-default"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="bg-white/40 border-b border-white/60 px-6 py-4 flex items-center justify-between backdrop-blur-xs">
+        <div className="bg-[#546C18] text-white px-6 py-4 flex items-center justify-between border-b border-[#546C18]">
           <div className="flex items-center gap-2.5">
-            <BookOpen className="w-5 h-5 text-[#2E7D32]" />
-            <h2 className="text-lg font-bold tracking-tight text-[#123826] font-['Syne',sans-serif]">
+            <BookOpen className="w-5 h-5 text-[#DFEB38]" />
+            <h2 className="text-lg font-bold tracking-tight text-white font-['Montserrat',sans-serif]">
               {t.educationalModalTitle}
             </h2>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg hover:bg-[#EBF5ED] text-stone-500 hover:text-[#123826] transition-colors cursor-pointer"
+            className="p-1.5 rounded-full hover:bg-white/10 text-stone-300 hover:text-white transition-colors cursor-pointer"
             aria-label="Close"
           >
             <X className="w-5 h-5" />
@@ -89,16 +89,16 @@ export const ExplainModal: React.FC<ExplainModalProps> = ({
         </div>
 
         {/* Term Tabs */}
-        <div className="flex border-b border-[#E2ECE3] bg-[#F7FAF8] p-2 gap-1.5 overflow-x-auto font-mono text-xs">
+        <div className="flex border-b border-[#E5EAD7] bg-[#F8FAF6] p-2.5 gap-2 overflow-x-auto font-mono text-xs">
           {termsList.map((item) => (
             <button
               key={item.key}
               type="button"
               onClick={() => setActiveTab(item.key)}
-              className={`px-3 py-1.5 rounded-xl whitespace-nowrap transition-all cursor-pointer ${
+              className={`px-3 py-1.5 rounded-full whitespace-nowrap transition-all cursor-pointer font-['Montserrat',sans-serif] ${
                 activeTab === item.key 
-                  ? 'bg-[#2E7D32] text-white shadow-sm font-bold' 
-                  : 'text-stone-600 hover:text-[#123826] hover:bg-[#EBF5ED]'
+                  ? 'bg-[#546C18] text-[#DFEB38] shadow-sm font-bold' 
+                  : 'text-stone-600 hover:text-[#022113] hover:bg-[#F0F4EC]'
               }`}
             >
               {item.label}
@@ -107,11 +107,11 @@ export const ExplainModal: React.FC<ExplainModalProps> = ({
         </div>
 
         {/* Content Body */}
-        <div className="p-6 space-y-4">
+        <div className="p-6 space-y-4 font-['Open_Sans',sans-serif]">
           {termData ? (
             <>
               <div>
-                <h3 className="text-xl font-bold text-[#123826] mb-1.5 font-['Syne',sans-serif]">
+                <h3 className="text-xl font-bold text-[#022113] mb-1.5 font-['Montserrat',sans-serif]">
                   {termData.title}
                 </h3>
                 <p className="text-sm text-stone-700 leading-relaxed">
@@ -120,23 +120,23 @@ export const ExplainModal: React.FC<ExplainModalProps> = ({
               </div>
 
               {/* Real life analogy */}
-              <div className="bg-amber-50 rounded-2xl p-4 border border-amber-200">
-                <div className="flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider text-amber-800 font-bold mb-1.5">
-                  <Compass className="w-4 h-4 text-amber-700" />
+              <div className="bg-[#F8FAF6] rounded-2xl p-4 border border-[#E5EAD7]">
+                <div className="flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider text-[#59701E] font-bold mb-1.5">
+                  <Compass className="w-4 h-4 text-[#59701E]" />
                   <span>Farmer Analogy (सरल उदाहरण)</span>
                 </div>
-                <p className="text-xs sm:text-sm text-amber-950 leading-relaxed font-mono">
+                <p className="text-xs sm:text-sm text-[#022113] leading-relaxed font-mono">
                   {termData.analogy}
                 </p>
               </div>
 
               {/* Actionable Tip */}
-              <div className="bg-[#EBF5ED] rounded-2xl p-4 border border-[#A5D6A7]">
-                <div className="flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider text-[#123826] font-bold mb-1.5">
-                  <Lightbulb className="w-4 h-4 text-[#2E7D32]" />
+              <div className="bg-[#F0F4EC] rounded-2xl p-4 border border-[#CCE0D0]">
+                <div className="flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider text-[#022113] font-bold mb-1.5">
+                  <Lightbulb className="w-4 h-4 text-[#59701E]" />
                   <span>Field Action Tip</span>
                 </div>
-                <p className="text-xs sm:text-sm text-stone-800 leading-relaxed">
+                <p className="text-xs sm:text-sm text-[#022113] leading-relaxed">
                   {termData.farmerTip}
                 </p>
               </div>
@@ -149,11 +149,11 @@ export const ExplainModal: React.FC<ExplainModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="bg-[#F4F8F5] px-6 py-3.5 border-t border-[#E2ECE3] flex justify-end">
+        <div className="bg-[#F8FAF6] px-6 py-3.5 border-t border-[#E5EAD7] flex justify-end">
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2 bg-[#2E7D32] hover:bg-[#1B5E20] text-white text-xs font-mono font-bold rounded-xl transition-all cursor-pointer shadow-sm"
+            className="px-5 py-2 bg-[#DFEB38] hover:bg-[#cbe025] text-[#022113] text-xs font-bold font-['Montserrat',sans-serif] rounded-full transition-all cursor-pointer shadow-sm"
           >
             {t.close}
           </button>

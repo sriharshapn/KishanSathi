@@ -16,6 +16,7 @@ import { getStorageConfig } from '../services/storageService.js';
 import { runIngestionPipeline } from '../handlers/syncPipeline.js';
 import { getSellingChecklist } from '../services/checklistService.js';
 import { parseNaturalLanguageQuery } from '../services/nlpService.js';
+import { generateMarketExplanation, TERMINOLOGY_EXPLANATIONS } from '../services/aiService.js';
 import { syncMarketData, getSyncStatus } from '../services/syncService.js';
 import { 
   generateCropAdvisory, 

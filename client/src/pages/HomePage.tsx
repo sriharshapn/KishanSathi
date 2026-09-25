@@ -1,22 +1,15 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import type { Language, NavigationPage, Commodity } from '../types';
 import { 
-  ArrowRight, 
-  ShieldCheck, 
-  Award, 
+  ArrowUpRight, 
+  ArrowDown, 
+  ChevronLeft, 
   ChevronRight, 
-  ChevronLeft,
-  Database, 
-  Search, 
-  X, 
-  Sprout, 
-  Layers, 
-  PhoneCall,
-  Compass
+  Play, 
+  CheckCircle2, 
+  ArrowRight,
+  MapPin
 } from 'lucide-react';
-import { ContinentalMosaic } from '../components/ContinentalMosaic';
-import { IndiaMarketsMap } from '../components/IndiaMarketsMap';
-import { COMPREHENSIVE_CROPS, resolveCropFromQuery } from '../data/cropDictionary';
 
 interface HomePageProps {
   language: Language;
@@ -26,260 +19,550 @@ interface HomePageProps {
   commodities?: Commodity[];
 }
 
+/**
+ * KisanSathi Authentic Behance Design Implementation
+ * Recreating the exact UI from Anastasia Chugueva's AgroInvest:
+ * - Color Palette: Deep Forest Green (#022113), Dark Olive (#59701E / #4A6016), 
+ *   Electric Lime (#DFEB38), Card White (#FFFFFF), Inset Pale Gray (#F0F2EB / #F8FAF6).
+ * - Typography: Montserrat (Headings, Buttons, Numbers), Open Sans (Body, Descriptions).
+ */
+const QUICK_PRODUCE_OPTIONS = [
+  { name: 'Tomato', label: 'Tomato', sub: 'टमाटर', modalRate: 2450, mandi: 'Ballari, KA', msp: 2100 },
+  { name: 'Onion', label: 'Onion', sub: 'प्याज़', modalRate: 1850, mandi: 'Nashik, MH', msp: 1650 },
+  { name: 'Potato', label: 'Potato', sub: 'आलू', modalRate: 1620, mandi: 'Agra, UP', msp: 1500 },
+  { name: 'Maize', label: 'Maize', sub: 'मक्का', modalRate: 2150, mandi: 'Davanagere, KA', msp: 2090 },
+  { name: 'Paddy', label: 'Paddy', sub: 'धान', modalRate: 2320, mandi: 'Raichur, KA', msp: 2300 },
+  { name: 'Cotton', label: 'Cotton', sub: 'कपास', modalRate: 7120, mandi: 'Guntur, AP', msp: 6620 },
+];
+
 export const HomePage: React.FC<HomePageProps> = ({
   onNavigate,
-  onSelectCropAndNavigate,
   onSearchAndNavigate
 }) => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [activeFaq, setActiveFaq] = useState<number | null>(null);
+  const [activeSatelliteHotspot, setActiveSatelliteHotspot] = useState<number | null>(null);
+  const [demoQuickCrop, setDemoQuickCrop] = useState('Tomato');
+  const [demoQuickLocation, setDemoQuickLocation] = useState('Ballari');
+  const [demoQuickQty, setDemoQuickQty] = useState(1000);
 
-  // Live mandi ticker data (Agmarknet / e-NAM feeds feeding the advisory model)
-  const liveTickers = [
-    { crop: 'Maize', mandi: 'Davanagere APMC', state: 'Karnataka', modal: '₹2,150', unit: 'q', change: '+4.2%', trend: 'up' },
-    { crop: 'Tomato', mandi: 'Ballari APMC', state: 'Karnataka', modal: '₹1,850', unit: 'q', change: '+2.6%', trend: 'up' },
-    { crop: 'Onion', mandi: 'Lasalgaon APMC', state: 'Maharashtra', modal: '₹2,100', unit: 'q', change: '+1.9%', trend: 'up' },
-    { crop: 'Cumin', mandi: 'Unjha APMC', state: 'Gujarat', modal: '₹28,500', unit: 'q', change: '+4.8%', trend: 'up' },
-    { crop: 'Mustard', mandi: 'Kota APMC', state: 'Rajasthan', modal: '₹5,450', unit: 'q', change: '+2.1%', trend: 'up' },
-    { crop: 'Wheat', mandi: 'Khanna APMC', state: 'Punjab', modal: '₹2,275', unit: 'q', change: '+1.1%', trend: 'up' },
-    { crop: 'Potato', mandi: 'Agra APMC', state: 'Uttar Pradesh', modal: '₹1,480', unit: 'q', change: '-0.5%', trend: 'stable' },
-    { crop: 'Green Chilli', mandi: 'Guntur APMC', state: 'Andhra Pradesh', modal: '₹3,400', unit: 'q', change: '+5.2%', trend: 'up' },
-    { crop: 'Soybean', mandi: 'Indore APMC', state: 'Madhya Pradesh', modal: '₹4,600', unit: 'q', change: '+1.8%', trend: 'up' },
-    { crop: 'Paddy / Rice', mandi: 'Burdwan APMC', state: 'West Bengal', modal: '₹2,550', unit: 'q', change: '+1.8%', trend: 'up' },
-    { crop: 'Apple', mandi: 'Sopore Mandi', state: 'Jammu and Kashmir', modal: '₹5,200', unit: 'q', change: '+3.6%', trend: 'up' },
-    { crop: 'Turmeric', mandi: 'Nizamabad APMC', state: 'Telangana', modal: '₹12,400', unit: 'q', change: '+4.1%', trend: 'up' },
+  const currentBenchmark = QUICK_PRODUCE_OPTIONS.find(
+    p => p.name.toLowerCase() === demoQuickCrop.toLowerCase()
+  ) || QUICK_PRODUCE_OPTIONS[0];
+
+  const qtlCount = demoQuickQty / 100;
+  const estimatedGross = Math.round(qtlCount * currentBenchmark.modalRate);
+  const estimatedFreight = Math.round(350 + qtlCount * 65);
+  const estimatedNet = Math.max(0, estimatedGross - estimatedFreight);
+  const mspBenchmarkTotal = Math.round(qtlCount * currentBenchmark.msp);
+  const gainPct = Number((((estimatedNet - mspBenchmarkTotal) / mspBenchmarkTotal) * 100).toFixed(1));
+
+  const satelliteSpecs = [
+    {
+      id: 1,
+      pct: '85%',
+      label: 'Canopy NDVI & vegetative vigor index.',
+      thumb: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=150&q=80',
+      pos: 'top-[8%] left-[2%] sm:left-[8%]'
+    },
+    {
+      id: 2,
+      pct: '85%',
+      label: 'Soil moisture & surface hydration.',
+      thumb: 'https://images.unsplash.com/photo-1592982537447-7440770cbfc9?auto=format&fit=crop&w=150&q=80',
+      pos: 'top-[8%] right-[2%] sm:right-[8%]'
+    },
+    {
+      id: 3,
+      pct: '70%',
+      label: 'Multi-band nitrogen & thermal stress.',
+      thumb: 'https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?auto=format&fit=crop&w=150&q=80',
+      pos: 'bottom-[8%] left-[4%] sm:left-[12%]'
+    },
+    {
+      id: 4,
+      pct: '90%',
+      label: '10m spatial ground resolution.',
+      thumb: 'https://images.unsplash.com/photo-1595974482597-4b8da8879bc5?auto=format&fit=crop&w=150&q=80',
+      pos: 'bottom-[8%] right-[4%] sm:right-[12%]'
+    }
   ];
 
-  const filteredCrops = searchQuery.trim() === ''
-    ? COMPREHENSIVE_CROPS.slice(0, 5)
-    : COMPREHENSIVE_CROPS.filter(c => 
-        c.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-        c.primaryAlias.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        c.hindi.includes(searchQuery) || 
-        c.kannada.includes(searchQuery) ||
-        c.aliases.some(a => a.toLowerCase().includes(searchQuery.toLowerCase()) || searchQuery.toLowerCase().includes(a.toLowerCase()))
-      );
+  const faqs = [
+    {
+      id: 1,
+      q: 'How does KisanSathi compute real-time Mandi price discovery?',
+      a: 'We ingest live official arrival and modal rate feeds from 2,400+ APMC mandis across India, calculating transportation fuel costs, local market demand, and historical variance to compute your true net farm-gate realization with zero price hallucination.',
+      image: 'https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?auto=format&fit=crop&w=800&q=80'
+    },
+    {
+      id: 2,
+      q: 'How does Sentinel-2 satellite NDVI crop health monitoring work?',
+      a: 'KisanSathi pulls 10-meter multispectral optical and infrared satellite bands from European Space Agency Sentinel-2 satellites to measure chlorophyll absorption and compute Normalized Difference Vegetation Index (NDVI) for any parcel in India.'
+    },
+    {
+      id: 3,
+      q: 'Can I receive agronomy advice in Hindi, Kannada, Telugu, or Marathi?',
+      a: 'Yes. KisanSathi is natively tuned for 10 regional Indian languages with localized vernacular crop dictionaries and regional agronomic practices.'
+    },
+    {
+      id: 4,
+      q: 'Is KisanSathi free for individual farmers and FPOs?',
+      a: 'Yes. Core mandi price terminals, weather alerts, and AI advisory are 100% free and open as a Digital Public Good. Advanced enterprise spatial analytics are available for cooperatives and agribusinesses.'
+    }
+  ];
 
-  const handleExecuteSearch = (targetCrop?: string, targetLocation?: string) => {
-    setShowSuggestions(false);
+  const handleQuickLaunch = (e: React.FormEvent) => {
+    e.preventDefault();
     if (onSearchAndNavigate) {
-      onSearchAndNavigate(targetCrop, targetLocation);
-    } else if (targetCrop && onSelectCropAndNavigate) {
-      onSelectCropAndNavigate(targetCrop);
+      onSearchAndNavigate(demoQuickCrop, demoQuickLocation);
     } else {
       onNavigate('dashboard');
     }
   };
 
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const query = searchQuery.trim();
-    if (!query) {
-      onNavigate('advisory');
-      return;
-    }
-    const resolved = resolveCropFromQuery(query);
-    handleExecuteSearch(resolved ? resolved.name : query);
-  };
-
-  const cropSliderRef = useRef<HTMLDivElement>(null);
-
-  const slideLeft = () => {
-    cropSliderRef.current?.scrollBy({ left: -320, behavior: 'smooth' });
-  };
-
-  const slideRight = () => {
-    cropSliderRef.current?.scrollBy({ left: 320, behavior: 'smooth' });
-  };
-
-  const featuredCrops = [
-    { name: 'Tomato', mandi: 'Ballari APMC', modal: '₹1,850', unit: 'q', change: '+2.6%', note: 'Solanaceous • High Yield' },
-    { name: 'Onion', mandi: 'Lasalgaon APMC', modal: '₹2,100', unit: 'q', change: '+1.9%', note: 'Allium • Low Water Need' },
-    { name: 'Maize', mandi: 'Davanagere APMC', modal: '₹2,150', unit: 'q', change: '+4.2%', note: 'Regenerative • Grade A' },
-    { name: 'Green Chilli', mandi: 'Guntur APMC', modal: '₹3,400', unit: 'q', change: '+5.2%', note: 'High Soil Nitrogen Retainer' },
-    { name: 'Potato', mandi: 'Hassan APMC', modal: '₹1,600', unit: 'q', change: '+0.8%', note: 'Tuber • Steady Returns' },
-    { name: 'Paddy / Rice', mandi: 'Sindhanur APMC', modal: '₹2,450', unit: 'q', change: '+3.1%', note: 'Staple • MSP Grounded' },
-    { name: 'Cotton', mandi: 'Hubballi APMC', modal: '₹7,200', unit: 'q', change: '+1.4%', note: 'Commercial • High Suitability' },
-  ];
-
   return (
-    <div className="space-y-12 sm:space-y-16 pb-16">
-      {/* SECTION 1: HERO — Grounded in PRD Executive Summary */}
-      <section className="relative overflow-hidden -mt-[88px] sm:-mt-[98px] pt-[124px] sm:pt-[138px] pb-10 sm:pb-14 bg-[#0F2316]">
-        {/* Full-bleed background photo extending well past top */}
-        <div
-          className="absolute -top-20 inset-x-0 bottom-0 bg-cover bg-center bg-no-repeat"
+    <div className="min-h-screen bg-[#F8FAF6] text-[#022113] font-['Open_Sans',sans-serif] selection:bg-[#DFEB38] selection:text-[#022113]">
+      
+      {/* ── 1. EXACT BEHANCE HERO SECTION (Image 1) ───────────────────────── */}
+      <section className="mx-auto max-w-[1440px] px-3 sm:px-6 pt-4 pb-10">
+        
+        {/* Main Hero Outer Canvas Box */}
+        <div className="relative rounded-[2.5rem] overflow-hidden bg-cover bg-center border border-[#022113]/10 shadow-xl"
           style={{
-            backgroundImage: `url('https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=1800&q=80&auto=format&fit=crop')`,
+            backgroundImage: `url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=2200&q=85')`
           }}
-          aria-hidden="true"
-        />
-        {/* Dark green scrim */}
-        <div
-          className="absolute -top-20 inset-x-0 bottom-0"
-          style={{
-            background: 'linear-gradient(to bottom, rgba(15,35,22,0.88) 0%, rgba(15,35,22,0.65) 35%, rgba(15,35,22,0.85) 100%)',
-          }}
-          aria-hidden="true"
-        />
+        >
+          {/* Subtle soft gradient over field */}
+          <div className="absolute inset-0 bg-gradient-to-b from-[#F8FAF6]/40 via-transparent to-[#022113]/50 pointer-events-none" />
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 space-y-8">
-          
-          {/* Universal Search Bar with Live Autocomplete */}
-          <div className="max-w-3xl mx-auto relative z-30">
-            <form onSubmit={handleSearchSubmit} className="relative">
-              <div className="bg-white/95 backdrop-blur-sm p-2 sm:p-2.5 pl-4 rounded-full border border-white/20 focus-within:border-[#2E7D32] shadow-lg hover:shadow-xl transition-all flex items-center gap-2 sm:gap-3">
-                <div className="w-10 h-10 rounded-full bg-[#EAEFE9] flex items-center justify-center text-[#2E7D32] shrink-0">
-                  <Search className="w-5 h-5" />
-                </div>
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    setShowSuggestions(true);
-                  }}
-                  onFocus={() => setShowSuggestions(true)}
-                  placeholder="Search crop for AI advisory in English, ಕನ್ನಡ (Kadlekayi), or हिन्दी (टमाटर)..."
-                  className="text-xs sm:text-sm text-[#153424] font-semibold flex-1 bg-transparent outline-none placeholder:text-stone-400 placeholder:font-normal"
-                />
-                {searchQuery && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSearchQuery('');
-                      setShowSuggestions(false);
-                    }}
-                    className="p-1.5 rounded-full text-stone-400 hover:text-stone-700 transition-colors cursor-pointer"
-                    title="Clear search"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                )}
-                <button
-                  type="submit"
-                  className="px-5 sm:px-6 py-2.5 rounded-full bg-[#153424] hover:bg-[#2E7D32] text-white text-xs sm:text-sm font-bold transition-all cursor-pointer shrink-0 shadow-xs flex items-center gap-1.5"
-                >
-                  <span>Query Advisory</span>
-                  <ArrowRight className="w-4 h-4 text-[#E8A238]" />
-                </button>
-              </div>
-
-              {/* Autocomplete Suggestions Dropdown */}
-              {showSuggestions && (
-                <div className="absolute left-0 right-0 top-full mt-2 bg-white rounded-3xl shadow-2xl border border-[#E6E1D7] p-4 z-50 animate-in fade-in zoom-in-95 duration-150">
-                  <div className="flex items-center justify-between pb-2.5 border-b border-[#ECE8DE] text-xs">
-                    <span className="font-bold text-[#153424] uppercase tracking-wider text-[11px]">
-                      {searchQuery.trim() ? 'Matching Crops' : 'Popular Crops for Advisory'}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setShowSuggestions(false)}
-                      className="text-stone-400 hover:text-stone-600 cursor-pointer p-1"
+          {/* Hero Top Content Grid */}
+          <div className="relative z-10 p-6 sm:p-10 lg:p-12">
+            
+            {/* Top Row: Floating Video Badge (Left) + Center Headline + Collaboration Button */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start pb-16 pt-4">
+              
+              {/* Left Floating Badge: Video Materials */}
+              <div className="lg:col-span-3">
+                <div className="inline-block bg-white/95 backdrop-blur-md rounded-3xl p-3.5 shadow-xl border border-white/60 max-w-[260px]">
+                  <div className="flex items-center gap-3">
+                    <div className="relative w-14 h-14 rounded-2xl overflow-hidden shrink-0 group cursor-pointer"
+                      onClick={() => onNavigate('satellite')}
                     >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3">
-                    <div className="space-y-1.5">
-                      {filteredCrops.map((c) => (
-                        <div
-                          key={c.name}
-                          onClick={() => handleExecuteSearch(c.name, undefined)}
-                          className="p-2 rounded-xl hover:bg-[#EBF5ED] transition-colors cursor-pointer flex items-center justify-between text-xs"
-                        >
-                          <div>
-                            <span className="font-bold text-[#123826] block">
-                              {c.name} {c.primaryAlias && c.primaryAlias.toLowerCase() !== c.name.toLowerCase() ? `(${c.primaryAlias})` : ''}
-                            </span>
-                            <span className="text-[10px] text-stone-500">{c.kannada} • {c.hindi}</span>
-                          </div>
-                          <span className="font-mono font-bold text-xs text-[#2E7D32]">{c.modal}</span>
+                      <img 
+                        src="https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?auto=format&fit=crop&w=200&q=80" 
+                        alt="Greenhouse" 
+                        className="w-full h-full object-cover group-hover:scale-105 transition"
+                      />
+                      <div className="absolute inset-0 bg-black/25 flex items-center justify-center">
+                        <div className="w-6 h-6 rounded-full bg-white/90 flex items-center justify-center shadow">
+                          <Play className="w-3 h-3 text-[#022113] fill-[#022113] ml-0.5" />
                         </div>
-                      ))}
+                      </div>
+                    </div>
+                    <div className="text-left">
+                      <p className="text-[11px] leading-tight text-stone-600 font-medium">
+                        Live satellite telemetry & daily mandi arrivals across India.
+                      </p>
                     </div>
                   </div>
+                  <button 
+                    onClick={() => onNavigate('satellite')}
+                    className="mt-2.5 w-full py-1.5 px-3 rounded-full bg-[#DFEB38] hover:bg-[#cde025] text-[#022113] font-bold text-[11px] font-['Montserrat',sans-serif] flex items-center justify-center gap-1 transition shadow-xs cursor-pointer"
+                  >
+                    <span>Satellite Feed</span>
+                    <ArrowUpRight className="w-3.5 h-3.5" />
+                  </button>
                 </div>
-              )}
-            </form>
+              </div>
+
+              {/* Center Main Headline & Collaboration CTA */}
+              <div className="lg:col-span-6 text-center space-y-4">
+                <h1 className="text-4xl sm:text-6xl lg:text-[68px] font-extrabold tracking-tight text-[#022113] font-['Montserrat',sans-serif] leading-[1.05]">
+                  Investments in <br />
+                  <span className="font-light text-[#022113]">Agri-Tech & Mandis</span>
+                </h1>
+
+                <p className="text-xs sm:text-sm text-[#022113]/80 max-w-md mx-auto leading-relaxed font-medium">
+                  Real-time APMC Mandi rates, Sentinel-2 satellite crop health monitoring, and AI agronomy advisory for farmers and agri-enterprises across India.
+                </p>
+
+                {/* Big Lime Collaboration Pill with Attached Down-Arrow Circle */}
+                <div className="pt-2 flex justify-center">
+                  <button
+                    onClick={() => {
+                      const el = document.getElementById('analytics-mission-section');
+                      el?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                    className="group inline-flex items-center gap-3 bg-[#DFEB38] hover:bg-[#d0df2a] text-[#022113] pl-7 pr-3 py-2.5 rounded-full font-bold text-xs sm:text-sm font-['Montserrat',sans-serif] shadow-lg transition-all transform hover:scale-[1.02] cursor-pointer"
+                  >
+                    <span>Explore Mandis</span>
+                    <span className="w-8 h-8 rounded-full bg-[#546C18] text-[#DFEB38] flex items-center justify-center group-hover:translate-y-0.5 transition-transform shadow-xs">
+                      <ArrowDown className="w-4 h-4" />
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Right Spacer / Balance */}
+              <div className="hidden lg:block lg:col-span-3"></div>
+            </div>
+
+            {/* Bottom Row Overlaid on Field: 5 Cards (Smart Farm, +14.6%, +1.1%, Movement of Mandi Rates, +2400 Report) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4 items-stretch pt-8">
+              
+              {/* Card 1: Smart Farm Mechanization (Left White Card) */}
+              <div className="lg:col-span-4 bg-white rounded-3xl p-5 shadow-2xl border border-white/80 flex flex-col justify-between">
+                <div className="flex gap-4 items-center">
+                  <div className="w-28 h-28 rounded-2xl overflow-hidden shrink-0 shadow-inner">
+                    <img 
+                      src="https://images.unsplash.com/photo-1592982537447-7440770cbfc9?auto=format&fit=crop&w=300&q=80" 
+                      alt="Tractor in agricultural field" 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-[#022113] font-['Montserrat',sans-serif] leading-tight">
+                      Smart Farm <br />Mechanization
+                    </h3>
+                    <p className="text-[11px] text-stone-500 mt-1 leading-snug line-clamp-3">
+                      Track modern farm machinery rental rates, custom hiring center (CHC) availability, and fuel cost economics per acre.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-3 border-t border-stone-100">
+                  <button
+                    onClick={() => onNavigate('dashboard')}
+                    className="inline-flex items-center gap-2 bg-[#DFEB38] hover:bg-[#cde025] text-[#022113] px-5 py-2.5 rounded-full font-bold text-xs font-['Montserrat',sans-serif] transition shadow-xs cursor-pointer"
+                  >
+                    <span>Explore Fleet</span>
+                    <span className="w-5 h-5 rounded-full bg-[#546C18] text-[#DFEB38] flex items-center justify-center">
+                      <ArrowUpRight className="w-3 h-3" />
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Card 2: +14,6% (Frosted Card) */}
+              <div 
+                onClick={() => onNavigate('dashboard')}
+                className="lg:col-span-2 bg-[#546C18]/60 backdrop-blur-md rounded-3xl p-5 text-white border border-white/20 shadow-xl flex flex-col justify-between cursor-pointer hover:bg-[#546C18]/70 transition"
+              >
+                <div>
+                  <span className="text-[10px] uppercase tracking-wider text-stone-300 font-mono block">APMC Arbitrage</span>
+                  <span className="text-3xl lg:text-4xl font-extrabold font-['Montserrat',sans-serif] text-white block mt-1">
+                    +14,6%
+                  </span>
+                </div>
+                <p className="text-[11px] text-stone-200 leading-snug mt-2">
+                  Average net profit increase for farmers utilizing inter-mandi price arbitrage.
+                </p>
+              </div>
+
+              {/* Card 3: +1,1% (Frosted Card) */}
+              <div 
+                onClick={() => onNavigate('satellite')}
+                className="lg:col-span-2 bg-[#546C18]/60 backdrop-blur-md rounded-3xl p-5 text-white border border-white/20 shadow-xl flex flex-col justify-between cursor-pointer hover:bg-[#546C18]/70 transition"
+              >
+                <div>
+                  <span className="text-[10px] uppercase tracking-wider text-stone-300 font-mono block">NDVI Recovery</span>
+                  <span className="text-3xl lg:text-4xl font-extrabold font-['Montserrat',sans-serif] text-[#DFEB38] block mt-1">
+                    +1,1%
+                  </span>
+                </div>
+                <p className="text-[11px] text-stone-200 leading-snug mt-2">
+                  Monthly vegetative index recovery monitored by Sentinel-2 multispectral sensors.
+                </p>
+              </div>
+
+              {/* Card 4: Movement of Mandi Rates with 5 3D Neon Bars (Frosted Card) */}
+              <div 
+                onClick={() => onNavigate('dashboard')}
+                className="lg:col-span-2 bg-[#546C18]/60 backdrop-blur-md rounded-3xl p-5 text-white border border-white/20 shadow-xl flex flex-col justify-between relative cursor-pointer hover:bg-[#546C18]/70 transition"
+              >
+                <div className="flex items-start justify-between">
+                  <div>
+                    <h4 className="text-sm font-bold font-['Montserrat',sans-serif] text-white leading-tight">
+                      Movement of <br />Mandi Rates
+                    </h4>
+                    <p className="text-[10px] text-stone-300 mt-1">Modal price trend across 2,400+ APMC mandis</p>
+                    <span className="text-[11px] font-bold text-[#DFEB38] font-mono block mt-0.5">↑ +9,60%/month</span>
+                  </div>
+                  <span className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-white shrink-0">
+                    <ArrowUpRight className="w-3.5 h-3.5" />
+                  </span>
+                </div>
+
+                {/* 5 Neon Lime 3D Vertical Rising Bars */}
+                <div className="h-16 flex items-end gap-1.5 pt-3">
+                  <div className="flex-1 bg-[#DFEB38] rounded-t-lg shadow-[0_0_12px_rgba(223,235,56,0.5)] transition-all hover:brightness-110" style={{ height: '35%' }} />
+                  <div className="flex-1 bg-[#DFEB38] rounded-t-lg shadow-[0_0_12px_rgba(223,235,56,0.5)] transition-all hover:brightness-110" style={{ height: '55%' }} />
+                  <div className="flex-1 bg-[#DFEB38] rounded-t-lg shadow-[0_0_12px_rgba(223,235,56,0.5)] transition-all hover:brightness-110" style={{ height: '48%' }} />
+                  <div className="flex-1 bg-[#DFEB38] rounded-t-lg shadow-[0_0_12px_rgba(223,235,56,0.5)] transition-all hover:brightness-110" style={{ height: '78%' }} />
+                  <div className="flex-1 bg-[#DFEB38] rounded-t-lg shadow-[0_0_12px_rgba(223,235,56,0.5)] transition-all hover:brightness-110" style={{ height: '100%' }} />
+                </div>
+              </div>
+
+              {/* Card 5: +2,400 Report Column (Tall White Card with cross pattern) */}
+              <div 
+                onClick={() => onNavigate('dashboard')}
+                className="lg:col-span-2 bg-white rounded-3xl p-5 shadow-2xl border border-white/80 flex flex-col justify-between text-left cursor-pointer hover:shadow-lg transition"
+              >
+                <div>
+                  <span className="text-[10px] text-stone-500 font-medium block">
+                    KisanSathi Mandi Telemetry Report
+                  </span>
+
+                  {/* Diamond / Plus Pattern Texture */}
+                  <div className="py-3 grid grid-cols-5 gap-1.5 opacity-20 text-[10px] font-mono text-center text-[#022113]">
+                    {Array.from({ length: 15 }).map((_, i) => (
+                      <span key={i}>+</span>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <span className="text-3xl font-extrabold text-[#022113] font-['Montserrat',sans-serif] block">
+                    +2,400
+                  </span>
+                  <p className="text-[10px] text-stone-500 mt-0.5 leading-snug">
+                    Regulated APMC mandis connected with real-time price telemetry.
+                  </p>
+                </div>
+              </div>
+
+            </div>
           </div>
+        </div>
+      </section>
 
-          {/* Hero Editorial Header & Split */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-            {/* Left Column: Editorial Headline & Actions */}
-            <div className="lg:col-span-7 space-y-5">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-[#A5D6A7] text-xs font-mono font-bold">
-                <span className="w-2 h-2 rounded-full bg-[#4CAF50] animate-pulse"></span>
-                <span>Open Digital Public Good for Indian Agriculture</span>
+
+      {/* ── 2. EXACT 73K ANALYTICS & MISSION SECTION (Image 1 Bottom) ────────── */}
+      <section id="analytics-mission-section" className="mx-auto max-w-[1440px] px-3 sm:px-6 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+          
+          {/* Main White Container (73K Gauge + Smiling Farmer Photo + Analytics Copy) */}
+          <div className="lg:col-span-8 bg-white rounded-[2.5rem] p-6 sm:p-10 border border-[#022113]/10 shadow-sm flex flex-col md:flex-row items-center gap-8">
+            
+            {/* 73K Donut Gauge */}
+            <div className="flex flex-col items-center shrink-0">
+              <div className="relative w-36 h-36 flex items-center justify-center">
+                <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="40" stroke="#F0F2EB" strokeWidth="8" fill="none" />
+                  <circle 
+                    cx="50" 
+                    cy="50" 
+                    r="40" 
+                    stroke="#022113" 
+                    strokeWidth="8" 
+                    strokeDasharray="251.2" 
+                    strokeDashoffset="60" 
+                    strokeLinecap="round" 
+                    fill="none" 
+                  />
+                  <circle 
+                    cx="50" 
+                    cy="50" 
+                    r="40" 
+                    stroke="#59701E" 
+                    strokeWidth="8" 
+                    strokeDasharray="251.2" 
+                    strokeDashoffset="210" 
+                    strokeLinecap="round" 
+                    fill="none" 
+                  />
+                </svg>
+                <div className="absolute flex flex-col items-center">
+                  <span className="text-3xl font-extrabold text-[#022113] font-['Montserrat',sans-serif]">73K</span>
+                </div>
               </div>
 
-              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tight font-['Syne',sans-serif] leading-[1.14]">
-                Digital Agriculture Network for <span className="text-[#6FBF73] italic">India</span>
-              </h1>
-
-              <p className="text-white/80 text-sm sm:text-base leading-relaxed max-w-xl font-['Outfit',sans-serif]">
-                Democratising precision agriculture for 100M+ small & marginal farmers. Hyper-localised advisories fusing Sentinel-2 satellite imagery, soil health data, climate forecasting, and Gemini 2.0 Flash in 10+ Indian languages.
-              </p>
-
-              {/* Core Modules Action Buttons */}
-              <div className="flex flex-wrap items-center gap-3 pt-1">
-                <button
-                  onClick={() => onNavigate('advisory')}
-                  className="px-6 py-3.5 rounded-2xl bg-[#2E7D32] hover:bg-[#256628] text-white font-bold text-xs sm:text-sm flex items-center gap-2 shadow-lg transition-all cursor-pointer"
-                >
-                  <Sprout className="w-4 h-4 text-emerald-200" />
-                  <span>🌱 AI Crop Advisory</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
-
-                <button
-                  onClick={() => onNavigate('satellite')}
-                  className="px-5 py-3.5 rounded-2xl bg-white/15 hover:bg-white/25 text-white font-bold text-xs sm:text-sm flex items-center gap-2 border border-white/25 transition-all cursor-pointer backdrop-blur-sm"
-                >
-                  <Compass className="w-4 h-4 text-[#A5D6A7]" />
-                  <span>🛰️ Field Satellite Scan</span>
-                </button>
-
-                <button
-                  onClick={() => onNavigate('diagnose')}
-                  className="px-5 py-3.5 rounded-2xl bg-white/15 hover:bg-white/25 text-white font-bold text-xs sm:text-sm flex items-center gap-2 border border-white/25 transition-all cursor-pointer backdrop-blur-sm"
-                >
-                  <ShieldCheck className="w-4 h-4 text-[#FFE082]" />
-                  <span>🔬 Disease Scan</span>
-                </button>
-
-                <button
-                  onClick={() => onNavigate('gov')}
-                  className="px-5 py-3.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white font-semibold text-xs sm:text-sm border border-white/20 flex items-center gap-2 transition-all cursor-pointer backdrop-blur-sm"
-                >
-                  <Layers className="w-4 h-4 text-white" />
-                  <span>🔗 Gov Interop Portal</span>
-                </button>
-              </div>
-
-              {/* Trust Badges */}
-              <div className="pt-3 border-t border-white/15 flex flex-wrap items-center gap-4 text-xs text-white/65">
-                <div className="flex items-center gap-1.5 font-medium">
-                  <ShieldCheck className="w-4 h-4 text-[#6FBF73]" />
-                  <span>DPDP Act 2023 Compliant</span>
+              <div className="mt-3 space-y-1 text-xs">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-sm bg-[#022113]" />
+                  <span className="text-stone-600">Smallholder Farmers</span>
+                  <span className="font-bold text-[#022113] ml-auto">78%</span>
                 </div>
-                <div className="flex items-center gap-1.5 font-medium">
-                  <Award className="w-4 h-4 text-[#E8A238]" />
-                  <span>MeitY DPG Guidelines</span>
-                </div>
-                <div className="flex items-center gap-1.5 font-medium">
-                  <Database className="w-4 h-4 text-[#6FBF73]" />
-                  <span>Zero Price Hallucination</span>
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-sm bg-[#59701E]" />
+                  <span className="text-stone-600">FPOs & Agri-Traders</span>
+                  <span className="font-bold text-[#022113] ml-auto">22%</span>
                 </div>
               </div>
             </div>
 
-            {/* Right Column: Interactive National Agricultural Grid Map */}
-            <div className="lg:col-span-5 animate-slide-up">
-              <IndiaMarketsMap 
-                onNavigate={onNavigate} 
-                onSearchAndNavigate={onSearchAndNavigate} 
+            {/* Smiling Farmer Photo with straw hat & green produce */}
+            <div className="w-44 h-44 rounded-3xl overflow-hidden shrink-0 shadow-md border border-[#022113]/10">
+              <img 
+                src="https://images.unsplash.com/photo-1595974482597-4b8da8879bc5?auto=format&fit=crop&w=500&q=80" 
+                alt="Smiling woman farmer with straw hat and fresh greens" 
+                className="w-full h-full object-cover object-top"
+              />
+            </div>
+
+            {/* KisanSathi Analytics Text + Double Pill Button */}
+            <div className="space-y-3 text-left">
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-[#022113] font-['Montserrat',sans-serif] tracking-tight">
+                KisanSathi <br />Intelligence
+              </h2>
+
+              <p className="text-xs sm:text-sm text-stone-600 leading-relaxed font-normal">
+                India's sovereign agri-intelligence network combining Agmarknet terminal prices, ISRO & ESA Sentinel-2 multispectral satellite telemetry, and Gemini 2.0 AI agronomist advisory in 10 regional Indian dialects.
+              </p>
+
+              {/* Authentic Behance Double-Pill Button: Lime Pill + Circlepod Arrow */}
+              <div className="pt-2">
+                <button
+                  onClick={() => onNavigate('dashboard')}
+                  className="group inline-flex items-center gap-2 bg-[#DFEB38] hover:bg-[#d0df2a] text-[#022113] pl-6 pr-2 py-2 rounded-full font-bold text-xs font-['Montserrat',sans-serif] shadow-sm transition-all cursor-pointer"
+                >
+                  <span>Explore Analytics</span>
+                  <span className="w-7 h-7 rounded-full bg-white text-[#022113] flex items-center justify-center group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shadow-xs">
+                    <ArrowUpRight className="w-3.5 h-3.5" />
+                  </span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          {/* Right Dark Olive Card (Our Mission) */}
+          <div className="lg:col-span-4 bg-[#546C18] text-white rounded-[2.5rem] p-8 sm:p-10 shadow-lg flex flex-col justify-between min-h-[300px]">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center text-[#DFEB38]">
+                <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2v20M12 4c-3 0-5 2-5 5 0 2 2 3 5 3M12 4c3 0 5 2 5 5 0 2-2 3-5 3" />
+                </svg>
+              </div>
+              <span className="text-sm font-bold font-['Montserrat',sans-serif] tracking-tight text-white">KisanSathi</span>
+            </div>
+
+            <div className="my-6">
+              <h3 className="text-3xl font-extrabold font-['Montserrat',sans-serif] text-white">
+                Our mission
+              </h3>
+              <p className="text-xs sm:text-sm text-stone-100 leading-relaxed mt-3 font-normal">
+                Eliminate market information asymmetry, bridge fair farm-gate realizations, and equip every Indian farmer with sovereign AI decision support.
+              </p>
+            </div>
+
+            <div className="flex justify-center">
+              <button
+                onClick={() => onNavigate('about')}
+                className="w-12 h-12 rounded-full border border-white/30 hover:bg-white text-white hover:text-[#546C18] flex items-center justify-center transition cursor-pointer"
+              >
+                <ArrowDown className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+
+      {/* ── 3. EXACT OUR SERVICES SECTION (Image 2) ────────────────────────── */}
+      <section className="mx-auto max-w-[1440px] px-3 sm:px-6 py-12">
+        
+        {/* Section Header with Left Title and Right Carousel Navigation Circles */}
+        <div className="flex items-center justify-between gap-4 mb-8">
+          <div>
+            <h2 className="text-3xl sm:text-5xl font-extrabold text-[#022113] font-['Montserrat',sans-serif] uppercase tracking-tight">
+              Our Services
+            </h2>
+            <p className="text-xs sm:text-sm text-stone-500 mt-1">
+              Our platform <span className="text-[#59701E]">provides sovereign agricultural intelligence tools</span>
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button className="w-11 h-11 rounded-full border border-[#022113]/30 flex items-center justify-center hover:bg-white transition text-[#022113] cursor-pointer">
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <button className="w-11 h-11 rounded-full border border-[#022113]/30 flex items-center justify-center hover:bg-white transition text-[#022113] cursor-pointer">
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* 3 Services Cards (Mandi Price Terminal, Satellite NDVI, AI Pathology) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          
+          {/* Card 1: Mandi Price Terminal */}
+          <div 
+            onClick={() => onNavigate('dashboard')}
+            className="bg-[#F0F2EB] rounded-[2.5rem] p-7 sm:p-8 flex flex-col justify-between min-h-[460px] border border-[#022113]/5 hover:shadow-md transition cursor-pointer group"
+          >
+            <div>
+              <div className="flex items-start justify-between">
+                <span className="text-[11px] font-bold text-stone-500 font-mono">Live APMC Rates</span>
+                <span className="w-10 h-10 rounded-full border border-[#022113]/40 flex items-center justify-center text-[#022113] group-hover:bg-[#DFEB38] transition">
+                  <ArrowUpRight className="w-5 h-5" />
+                </span>
+              </div>
+              <h3 className="text-2xl sm:text-3xl font-bold font-['Montserrat',sans-serif] text-[#022113] mt-4">
+                Mandi Price <br />Terminal
+              </h3>
+            </div>
+
+            <div className="mt-8 rounded-3xl overflow-hidden aspect-[16/10] shadow-sm">
+              <img 
+                src="https://images.unsplash.com/photo-1592982537447-7440770cbfc9?auto=format&fit=crop&w=700&q=80" 
+                alt="Green tractors harvesting crops" 
+                className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+              />
+            </div>
+          </div>
+
+          {/* Card 2: Satellite Crop NDVI Analytics (Center Dark Olive Active Card) */}
+          <div className="bg-[#546C18] text-white rounded-[2.5rem] p-7 sm:p-8 flex flex-col justify-between min-h-[460px] shadow-xl">
+            <div>
+              <div className="flex items-start justify-between">
+                <span className="text-[11px] font-bold text-white/70 font-mono">Sentinel-2 Multispectral</span>
+                <span className="w-10 h-10 rounded-full border border-white/40 flex items-center justify-center text-white">
+                  <ArrowDown className="w-5 h-5 -rotate-45" />
+                </span>
+              </div>
+              <h3 className="text-2xl sm:text-3xl font-bold font-['Montserrat',sans-serif] text-white mt-4">
+                Satellite Crop <br />NDVI Analytics
+              </h3>
+            </div>
+
+            {/* Inner White Card with text and button */}
+            <div className="mt-8 bg-white text-[#022113] rounded-3xl p-6 shadow-md space-y-4">
+              <p className="text-xs leading-relaxed text-stone-600 font-normal">
+                Track field-level vegetative vigor, soil moisture anomalies, and nitrogen stress directly from orbit before symptoms become visible on the ground.
+              </p>
+              <button 
+                onClick={() => onNavigate('satellite')}
+                className="w-full py-2.5 px-4 rounded-full border border-[#022113] text-[#022113] hover:bg-[#DFEB38] font-bold text-xs font-['Montserrat',sans-serif] transition cursor-pointer"
+              >
+                Launch Satellite NDVI
+              </button>
+            </div>
+          </div>
+
+          {/* Card 3: AI Pathology & Agronomy Advisory */}
+          <div 
+            onClick={() => onNavigate('diagnose')}
+            className="bg-[#F0F2EB] rounded-[2.5rem] p-7 sm:p-8 flex flex-col justify-between min-h-[460px] border border-[#022113]/5 hover:shadow-md transition cursor-pointer group"
+          >
+            <div>
+              <div className="flex items-start justify-between">
+                <span className="text-[11px] font-bold text-stone-500 font-mono">Gemini 2.0 AI Vision</span>
+                <span className="w-10 h-10 rounded-full border border-[#022113]/40 flex items-center justify-center text-[#022113] group-hover:bg-[#DFEB38] transition">
+                  <ArrowUpRight className="w-5 h-5" />
+                </span>
+              </div>
+              <h3 className="text-2xl sm:text-3xl font-bold font-['Montserrat',sans-serif] text-[#022113] mt-4">
+                AI Pathology & <br />Agronomy Advisory
+              </h3>
+            </div>
+
+            <div className="mt-8 rounded-3xl overflow-hidden aspect-[16/10] shadow-sm">
+              <img 
+                src="https://images.unsplash.com/photo-1574943320219-553eb213f72d?auto=format&fit=crop&w=700&q=80" 
+                alt="Agronomist field inspection and plant leaf pathology diagnosis" 
+                className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
               />
             </div>
           </div>
@@ -287,254 +570,581 @@ export const HomePage: React.FC<HomePageProps> = ({
         </div>
       </section>
 
-      {/* SECTION 2: LIVE MARKET PRICE INPUT STREAM (Data Input for Advisory Engine) */}
-      <section className="bg-[#ECE8DE]/60 border-y border-[#E6E1D7] py-3.5 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-2 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-xs font-bold text-[#153424]">
-            <span className="w-2 h-2 rounded-full bg-[#2E7D32] animate-pulse"></span>
-            <span className="uppercase tracking-wider text-[11px] font-mono">Official Agmarknet / e-NAM Rate Stream (Input Signals)</span>
-          </div>
-          <span className="text-[11px] text-stone-500 font-mono hidden sm:block">Hover to pause • Click to inspect</span>
-        </div>
 
-        {/* Sliding Marquee Track */}
-        <div className="overflow-hidden w-full select-none py-1">
-          <div className="animate-slide-infinite flex items-center gap-3">
-            {[...liveTickers, ...liveTickers].map((item, idx) => (
-              <div
-                key={`${item.crop}-${idx}`}
-                onClick={() => {
-                  if (onSelectCropAndNavigate) onSelectCropAndNavigate(item.crop);
-                  else onNavigate('advisory');
-                }}
-                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl glass-card border border-white/80 hover:border-[#2E7D32] shadow-xs hover:shadow-sm transition-all cursor-pointer shrink-0"
-              >
-                <div className="flex flex-col">
-                  <span className="text-xs font-bold text-[#153424] flex items-center gap-1.5">
-                    <span>{item.crop}</span>
-                    <span className="text-[10px] text-stone-400 font-normal">({item.mandi})</span>
-                  </span>
-                  <div className="flex items-center gap-2 text-xs">
-                    <span className="font-mono font-black text-[#153424]">{item.modal}</span>
-                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 rounded font-mono">
-                      {item.change}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION 3: CONTINENTAL FARMERS GROUP ASYMMETRICAL MOSAIC */}
-      <ContinentalMosaic
-        onNavigate={onNavigate}
-        onSelectCrop={onSelectCropAndNavigate}
-      />
-
-      {/* SECTION 4: BENCHMARK COMMODITIES CAROUSEL */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 space-y-5">
-        <div className="flex items-end justify-between gap-4">
+      {/* ── 4. SATELLITE REMOTE SENSING & ORBITAL MAPPING ── */}
+      <section className="mx-auto max-w-[1440px] px-3 sm:px-6 py-12">
+        
+        {/* Header */}
+        <div className="flex items-center justify-between gap-4 mb-6">
           <div>
-            <span className="text-[11px] uppercase font-mono font-bold tracking-wider text-[#2E7D32] block mb-1">
-              Benchmark Crops
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-black text-[#153424] font-['Syne',sans-serif]">
-              Popular Crops & Expected Advisory Yield
+            <h2 className="text-3xl sm:text-5xl font-extrabold text-[#022113] font-['Montserrat',sans-serif] uppercase tracking-tight">
+              Revolution in <br />Satellite Agronomy
             </h2>
+            <p className="text-xs sm:text-sm text-stone-500 mt-1 max-w-xl">
+              Copernicus Sentinel-2 multispectral earth observation <span className="text-[#59701E]">captures vegetative vigor, canopy nitrogen, and root hydration across every farm parcel in India.</span>
+            </p>
           </div>
 
-          {/* Slider Prev / Next Controls */}
-          <div className="flex items-center gap-2">
-            <button
-              onClick={slideLeft}
-              className="w-10 h-10 rounded-full border border-[#E6E1D7] bg-white hover:bg-[#EAEFE9] text-[#153424] flex items-center justify-center transition-colors cursor-pointer shadow-xs"
-              aria-label="Slide left"
-            >
+          <div className="flex items-center gap-2 shrink-0">
+            <button className="w-11 h-11 rounded-full border border-[#022113]/30 flex items-center justify-center hover:bg-white transition text-[#022113] cursor-pointer">
               <ChevronLeft className="w-5 h-5" />
             </button>
-            <button
-              onClick={slideRight}
-              className="w-10 h-10 rounded-full border border-[#E6E1D7] bg-white hover:bg-[#EAEFE9] text-[#153424] flex items-center justify-center transition-colors cursor-pointer shadow-xs"
-              aria-label="Slide right"
-            >
+            <button className="w-11 h-11 rounded-full border border-[#022113]/30 flex items-center justify-center hover:bg-white transition text-[#022113] cursor-pointer">
               <ChevronRight className="w-5 h-5" />
             </button>
           </div>
         </div>
 
-        <div
-          ref={cropSliderRef}
-          className="flex items-stretch gap-4 overflow-x-auto pb-4 pt-1 slide-scroll-snap no-scrollbar"
+        {/* Unified Satellite Earth Observation Stage (Zero Nested Images) */}
+        <div 
+          className="relative rounded-[2.5rem] overflow-hidden bg-[#022113] border border-[#022113]/10 shadow-2xl py-12 sm:py-16 px-4 sm:px-12 min-h-[600px] sm:min-h-[680px] flex flex-col justify-between bg-cover bg-center"
+          style={{
+            backgroundImage: `url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=2400&q=85')`
+          }}
         >
-          {featuredCrops.map((c) => (
-            <div
-              key={c.name}
-              onClick={() => {
-                if (onSelectCropAndNavigate) onSelectCropAndNavigate(c.name);
-                else onNavigate('advisory');
-              }}
-              className="w-72 sm:w-80 shrink-0 p-5 rounded-2xl glass-card border border-white/80 hover:border-[#2E7D32] shadow-xs hover:shadow-md transition-all cursor-pointer flex flex-col justify-between space-y-4 hover-slide-up"
-            >
-              <div className="space-y-2">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="text-lg font-black text-[#153424] font-['Syne',sans-serif]">{c.name}</h3>
-                    <p className="text-xs text-stone-500 font-medium">{c.mandi}</p>
+          {/* Atmospheric Depth Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/20 to-black/75 pointer-events-none" />
+
+          {/* Left Decorative Pillar with Plus symbols */}
+          <div className="absolute left-6 top-10 bottom-10 hidden lg:flex flex-col justify-between opacity-30 text-xs font-mono text-white pointer-events-none">
+            {Array.from({ length: 12 }).map((_, i) => (
+              <span key={i}>+</span>
+            ))}
+          </div>
+
+          {/* Right Decorative Pillar with Plus symbols */}
+          <div className="absolute right-6 top-10 bottom-10 hidden lg:flex flex-col justify-between opacity-30 text-xs font-mono text-white pointer-events-none">
+            {Array.from({ length: 12 }).map((_, i) => (
+              <span key={i}>+</span>
+            ))}
+          </div>
+
+          {/* Center Title */}
+          <div className="relative z-10 text-center space-y-2 max-w-3xl mx-auto pt-2">
+            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/20 text-xs font-bold font-['Montserrat',sans-serif] uppercase tracking-wider text-[#DFEB38] shadow-sm">
+              <span className="w-2 h-2 rounded-full bg-[#DFEB38] animate-pulse" />
+              <span>Copernicus Sentinel-2 • Orbital Telemetry</span>
+            </div>
+            <h3 className="text-3xl sm:text-6xl font-black text-white font-['Montserrat',sans-serif] tracking-tight leading-tight">
+              Sentinel-2 for <br />
+              <span className="font-light italic text-[#DFEB38]">orbital field mapping</span>
+            </h3>
+          </div>
+
+          {/* 4 Interactive Hotspot Callout Cards - Positioned directly over the Earth */}
+          <div className="relative z-10 my-6 sm:my-10">
+            <div className="relative max-w-5xl mx-auto h-[320px] sm:h-[360px]">
+              {satelliteSpecs.map((spec) => (
+                <div 
+                  key={spec.id}
+                  className={`absolute ${spec.pos} z-20 transition-all duration-200 hover:scale-105 cursor-pointer`}
+                  onClick={() => setActiveSatelliteHotspot(activeSatelliteHotspot === spec.id ? null : spec.id)}
+                >
+                  <div className="bg-white/95 hover:bg-white backdrop-blur-md rounded-2xl p-3 sm:p-3.5 shadow-2xl border border-white/40 flex items-center gap-3 transition-shadow">
+                    <div>
+                      <div className="flex items-center gap-1.5 font-black text-xs text-[#022113] font-['Montserrat',sans-serif]">
+                        <span>{spec.pct}</span>
+                        <span className="w-2 h-2 rounded-full bg-[#546C18]" />
+                      </div>
+                      <p className="text-[11px] text-[#022113]/75 font-semibold max-w-[150px] leading-snug mt-0.5 font-['Open_Sans',sans-serif]">
+                        {spec.label}
+                      </p>
+                    </div>
+                    <div className="w-10 h-10 rounded-xl overflow-hidden shrink-0 border border-[#022113]/10 shadow-xs">
+                      <img src={spec.thumb} alt={spec.label} className="w-full h-full object-cover" />
+                    </div>
                   </div>
-                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full font-mono border border-emerald-200/60 shrink-0">
-                    {c.change}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Bottom Down-Arrow Circle */}
+          <div className="relative z-10 flex justify-center pb-2">
+            <button 
+              onClick={() => onNavigate('satellite')}
+              className="w-14 h-14 rounded-full bg-[#DFEB38] hover:bg-[#d0df2a] text-[#022113] flex items-center justify-center shadow-2xl transition-all cursor-pointer hover:scale-110 active:scale-95 group"
+              title="Launch Satellite NDVI Terminal"
+            >
+              <ArrowDown className="w-6 h-6 group-hover:translate-y-0.5 transition-transform stroke-[2.5]" />
+            </button>
+          </div>
+
+        </div>
+      </section>
+
+
+      {/* ── 5. EXACT FREQUENTLY ASKED QUESTIONS SECTION (Image 3) ──────────── */}
+      <section className="mx-auto max-w-[1440px] px-3 sm:px-6 py-12">
+        
+        {/* Header */}
+        <div className="flex items-center justify-between gap-4 mb-8">
+          <div>
+            <h2 className="text-3xl sm:text-5xl font-extrabold text-[#022113] font-['Montserrat',sans-serif] uppercase tracking-tight">
+              Frequently <br />Asked Questions
+            </h2>
+            <p className="text-xs sm:text-sm text-stone-500 mt-1 max-w-xl">
+              Our team has prepared a list of frequently asked questions <span className="text-[#59701E]">to help you quickly find answers to the most important issues.</span>
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <button className="w-11 h-11 rounded-full border border-[#022113]/30 flex items-center justify-center hover:bg-white transition text-[#022113] cursor-pointer">
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <button className="w-11 h-11 rounded-full border border-[#022113]/30 flex items-center justify-center hover:bg-white transition text-[#022113] cursor-pointer">
+              <ChevronRight className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* 4 FAQ Cards: Card 1 Featured with Greenhouse image, Cards 2-4 Off-white with Down-Arrow Button */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
+          
+          {/* Card 1: Featured Photo Card */}
+          <div className="rounded-[2.5rem] overflow-hidden relative p-7 sm:p-8 flex flex-col justify-end text-white min-h-[380px] shadow-lg">
+            <img 
+              src={faqs[0].image} 
+              alt="Greenhouse" 
+              className="absolute inset-0 w-full h-full object-cover filter brightness-75"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#022113] via-[#022113]/60 to-transparent" />
+            
+            <div className="relative z-10 space-y-3">
+              <h3 className="text-lg font-bold font-['Montserrat',sans-serif] text-white leading-snug">
+                {faqs[0].q}
+              </h3>
+              <p className="text-xs text-stone-200 leading-relaxed font-normal">
+                {faqs[0].a}
+              </p>
+            </div>
+          </div>
+
+          {/* Cards 2, 3, 4: Off-white Cards with Circle Down-Arrow */}
+          {faqs.slice(1).map((faq) => {
+            const isOpen = activeFaq === faq.id;
+            return (
+              <div 
+                key={faq.id}
+                onClick={() => setActiveFaq(isOpen ? null : faq.id)}
+                className="bg-[#F0F2EB] rounded-[2.5rem] p-7 sm:p-8 flex flex-col justify-between min-h-[380px] border border-[#022113]/5 hover:shadow-md transition cursor-pointer"
+              >
+                <div>
+                  <h3 className="text-base sm:text-lg font-bold font-['Montserrat',sans-serif] text-[#022113] leading-snug">
+                    {faq.q}
+                  </h3>
+                  {isOpen && (
+                    <p className="text-xs text-stone-600 mt-4 leading-relaxed animate-in fade-in">
+                      {faq.a}
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex justify-center pt-6">
+                  <span className={`w-12 h-12 rounded-full bg-white flex items-center justify-center text-[#022113] border border-[#022113]/20 shadow-xs transition-transform ${
+                    isOpen ? 'rotate-180 bg-[#DFEB38]' : ''
+                  }`}>
+                    <ArrowDown className="w-5 h-5" />
                   </span>
                 </div>
-                <p className="text-[11px] text-stone-500 font-['Outfit',sans-serif] leading-relaxed">{c.note}</p>
               </div>
+            );
+          })}
 
-              <div className="pt-3 border-t border-[#ECE8DE] flex items-center justify-between">
-                <span className="font-mono font-black text-base text-[#153424]">{c.modal} <span className="text-xs font-normal text-stone-500">/{c.unit}</span></span>
-                <span className="text-xs font-bold text-[#2E7D32] flex items-center gap-1 hover:underline">
-                  <span>Get Advisory</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+        </div>
+      </section>
+
+
+      {/* ── 6. QUICK MANDI REALIZATION TERMINAL (Behance AgroInvest Bento Redesign) ── */}
+      <section className="mx-auto max-w-[1440px] px-3 sm:px-6 py-10">
+        <div className="rounded-[2.5rem] bg-white border border-[#022113]/8 p-8 sm:p-12 shadow-xl hover:shadow-2xl transition-all">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-stretch">
+            
+            {/* Left Column: Context, Methodology & Value Prop */}
+            <div className="lg:col-span-5 flex flex-col justify-between space-y-6">
+              <div className="space-y-4">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#546C18] bg-[#F0F2EB] px-4 py-1.5 rounded-full inline-block font-['Montserrat',sans-serif] border border-[#022113]/8 shadow-sm">
+                  Agro-Financial Realization Terminal
                 </span>
+                <h3 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#022113] font-['Montserrat',sans-serif] tracking-tight leading-[1.08]">
+                  Calculate Real Net Returns <br className="hidden sm:inline" />
+                  <span className="text-[#546C18]">Before You Haul</span>
+                </h3>
+                <p className="text-xs sm:text-sm text-[#022113]/70 leading-relaxed font-normal">
+                  KisanSathi normalizes your harvest volume against live Agmarknet APMC modal prices, automatically deducting transit diesel costs and market cess to compute your true in-hand realization with zero price hallucination.
+                </p>
+                
+                <div className="pt-2 flex flex-wrap gap-2.5 text-xs font-bold text-[#022113] font-['Montserrat',sans-serif]">
+                  <span className="flex items-center gap-2 bg-[#F0F2EB] px-3.5 py-1.5 rounded-full border border-[#022113]/8">
+                    <CheckCircle2 className="w-4 h-4 text-[#546C18]" />
+                    Agmarknet Verified
+                  </span>
+                  <span className="flex items-center gap-2 bg-[#F0F2EB] px-3.5 py-1.5 rounded-full border border-[#022113]/8">
+                    <CheckCircle2 className="w-4 h-4 text-[#546C18]" />
+                    Fuel & Cess Deducted
+                  </span>
+                  <span className="flex items-center gap-2 bg-[#F0F2EB] px-3.5 py-1.5 rounded-full border border-[#022113]/8">
+                    <CheckCircle2 className="w-4 h-4 text-[#546C18]" />
+                    Zero Hallucination
+                  </span>
+                </div>
+              </div>
+
+              {/* Verified Mandi Telemetry Trust Card */}
+              <div className="bg-[#F0F2EB] p-5 sm:p-6 rounded-[2rem] border border-[#022113]/8 space-y-3">
+                <div className="flex items-center justify-between text-xs font-['Montserrat',sans-serif]">
+                  <span className="text-[#022113]/60 font-bold uppercase tracking-wider">APMC Network</span>
+                  <span className="text-[#546C18] font-black">2,400+ Mandis Live</span>
+                </div>
+                <div className="flex items-center justify-between text-xs font-['Montserrat',sans-serif]">
+                  <span className="text-[#022113]/60 font-bold uppercase tracking-wider">Daily Arrivals Tracked</span>
+                  <span className="text-[#022113] font-bold">100% Govt Audited</span>
+                </div>
+                <div className="flex items-center justify-between text-xs font-['Montserrat',sans-serif]">
+                  <span className="text-[#022113]/60 font-bold uppercase tracking-wider">Pricing Precision</span>
+                  <span className="text-[#546C18] font-bold">Real Auction Modal</span>
+                </div>
               </div>
             </div>
-          ))}
+
+            {/* Right Column: Redesigned Interactive Calculator Bento Card */}
+            <div className="lg:col-span-7 rounded-[2.5rem] bg-[#F0F2EB] border border-[#022113]/8 p-6 sm:p-9 shadow-lg flex flex-col justify-between space-y-6">
+              
+              {/* Form Controls */}
+              <form onSubmit={handleQuickLaunch} className="space-y-5">
+                
+                {/* 1. Crop Selection as Visual Capsule Pills */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold text-[#022113] uppercase tracking-wider font-['Montserrat',sans-serif]">
+                      Select Commodity / Produce
+                    </label>
+                    <span className="text-[11px] font-semibold text-[#546C18] bg-white px-2.5 py-0.5 rounded-full border border-[#022113]/8 font-['Montserrat',sans-serif]">
+                      Grade-A FAQ
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                    {QUICK_PRODUCE_OPTIONS.map((item) => {
+                      const isSelected = demoQuickCrop.toLowerCase() === item.name.toLowerCase();
+                      return (
+                        <button
+                          key={item.name}
+                          type="button"
+                          onClick={() => {
+                            setDemoQuickCrop(item.name);
+                            if (!demoQuickLocation || demoQuickLocation === 'Ballari') {
+                              setDemoQuickLocation(item.mandi.split(',')[0]);
+                            }
+                          }}
+                          className={`p-2.5 rounded-2xl border text-center transition-all cursor-pointer flex flex-col items-center justify-center ${
+                            isSelected
+                              ? 'bg-[#546C18] text-white border-[#546C18] shadow-md'
+                              : 'bg-white hover:bg-[#E5EAD7] text-[#022113] border-[#022113]/8'
+                          }`}
+                        >
+                          <span className={`text-xs font-black font-['Montserrat',sans-serif] ${isSelected ? 'text-[#DFEB38]' : 'text-[#022113]'}`}>
+                            {item.label}
+                          </span>
+                          <span className={`text-[10px] ${isSelected ? 'text-white/70' : 'text-[#022113]/50'}`}>
+                            {item.sub}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* 2. Target Mandi & District */}
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-[#022113] uppercase tracking-wider font-['Montserrat',sans-serif]">
+                    Target Mandi / Trade Hub
+                  </label>
+                  <div className="relative rounded-2xl border border-[#022113]/10 bg-white focus-within:border-[#546C18] transition-all shadow-inner px-4 py-3 flex items-center gap-3">
+                    <MapPin className="w-4 h-4 text-[#546C18] shrink-0" />
+                    <input
+                      type="text"
+                      value={demoQuickLocation}
+                      onChange={(e) => setDemoQuickLocation(e.target.value)}
+                      placeholder="e.g. Ballari, Nashik, Agra, Guntur"
+                      className="w-full bg-transparent text-xs sm:text-sm font-semibold text-[#022113] placeholder-[#022113]/40 outline-none"
+                    />
+                  </div>
+
+                  {/* Quick Mandi Chips */}
+                  <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                    <span className="text-[11px] font-bold text-[#022113]/50 font-['Montserrat',sans-serif] mr-1">
+                      Quick Hubs:
+                    </span>
+                    {['Ballari', 'Nashik', 'Agra', 'Davanagere', 'Guntur'].map(hub => (
+                      <button
+                        key={hub}
+                        type="button"
+                        onClick={() => setDemoQuickLocation(hub)}
+                        className={`px-3 py-1 rounded-full text-xs font-semibold font-['Montserrat',sans-serif] transition-all cursor-pointer ${
+                          demoQuickLocation.toLowerCase().includes(hub.toLowerCase())
+                            ? 'bg-[#546C18] text-[#DFEB38] shadow-xs'
+                            : 'bg-white text-[#022113] hover:bg-[#E5EAD7] border border-[#022113]/8'
+                        }`}
+                      >
+                        {hub}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 3. Produce Volume & Stepper / Slider */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs font-['Montserrat',sans-serif]">
+                    <label className="font-bold text-[#022113] uppercase tracking-wider">
+                      Batch Volume
+                    </label>
+                    <span className="font-extrabold text-[#546C18]">
+                      {demoQuickQty.toLocaleString('en-IN')} kg ({qtlCount} Quintals)
+                    </span>
+                  </div>
+
+                  {/* Quick Preset Volume Pills */}
+                  <div className="grid grid-cols-4 gap-2">
+                    {[500, 1000, 2500, 5000].map(val => (
+                      <button
+                        key={val}
+                        type="button"
+                        onClick={() => setDemoQuickQty(val)}
+                        className={`py-2 px-1 rounded-xl text-center text-xs font-bold font-['Montserrat',sans-serif] transition-all cursor-pointer ${
+                          demoQuickQty === val
+                            ? 'bg-[#546C18] text-white shadow-sm'
+                            : 'bg-white text-[#022113] hover:bg-[#E5EAD7] border border-[#022113]/8'
+                        }`}
+                      >
+                        {val >= 1000 ? `${val / 1000} Ton` : `${val} kg`}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Volume Slider with Custom Accent */}
+                  <input
+                    type="range"
+                    min="100"
+                    max="5000"
+                    step="100"
+                    value={demoQuickQty}
+                    onChange={(e) => setDemoQuickQty(Number(e.target.value))}
+                    className="w-full accent-[#546C18] cursor-pointer mt-1"
+                  />
+                </div>
+
+                {/* 4. Live Net Realization Card (Deep Utility & High Aesthetic) */}
+                <div className="bg-[#546C18] text-white rounded-[2rem] p-5 sm:p-6 shadow-md border border-[#546C18]/20 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold uppercase tracking-wider font-['Montserrat',sans-serif] bg-white/10 px-3 py-1 rounded-full text-white/90">
+                      Live Net Realization
+                    </span>
+                    <span className="px-2.5 py-0.5 rounded-full bg-[#DFEB38] text-[#022113] text-[11px] font-black font-['Montserrat',sans-serif] uppercase tracking-wider">
+                      {gainPct > 0 ? `+${gainPct}% Over MSP` : 'At Fair Market Value'}
+                    </span>
+                  </div>
+
+                  <div>
+                    <span className="text-[10px] text-white/70 font-['Montserrat',sans-serif] uppercase tracking-wider block">
+                      Estimated In-Hand Net Return
+                    </span>
+                    <div className="flex items-baseline gap-2 mt-0.5">
+                      <span className="text-3xl sm:text-4xl font-black text-white font-['Montserrat',sans-serif] tracking-tight">
+                        ₹{estimatedNet.toLocaleString('en-IN')}
+                      </span>
+                      <span className="text-xs text-white/70 font-normal">
+                        (@ ₹{(currentBenchmark.modalRate / 100).toFixed(2)}/kg)
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 pt-3 border-t border-white/15 text-xs">
+                    <div>
+                      <span className="text-white/60 text-[10px] uppercase font-bold tracking-wider font-['Montserrat',sans-serif] block">Gross Auction Value</span>
+                      <span className="font-bold text-white font-['Montserrat',sans-serif] mt-0.5 block">
+                        ₹{estimatedGross.toLocaleString('en-IN')}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-white/60 text-[10px] uppercase font-bold tracking-wider font-['Montserrat',sans-serif] block">Est. Freight & Cess</span>
+                      <span className="font-bold text-[#DFEB38] font-['Montserrat',sans-serif] mt-0.5 block">
+                        -₹{estimatedFreight.toLocaleString('en-IN')}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 5. Signature Electric Lime Action Button */}
+                <button
+                  type="submit"
+                  className="w-full py-4 rounded-full bg-[#DFEB38] hover:bg-[#d0df2a] text-[#022113] font-black text-xs uppercase tracking-wider transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:scale-[1.01] active:scale-[0.99] font-['Montserrat',sans-serif]"
+                >
+                  <span>Query 2,400+ Mandis in Real-Time Terminal</span>
+                  <ArrowRight className="w-4 h-4 text-[#022113] stroke-[2.5]" />
+                </button>
+              </form>
+
+            </div>
+
+          </div>
         </div>
       </section>
 
-      {/* SECTION 5: CORE INTEGRATED MODULES (PRD Section 5 & 6) */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 space-y-8">
-        <div className="text-center max-w-2xl mx-auto space-y-2">
-          <span className="text-xs font-bold uppercase tracking-widest text-[#2E7D32] bg-[#EAEFE9] px-3 py-1 rounded-full border border-[#D6DFD4]">
-            AgriMate Architecture
-          </span>
-          <h2 className="text-2xl sm:text-4xl font-black text-[#153424] font-['Syne',sans-serif]">
-            Core Technical Modules
-          </h2>
-          <p className="text-stone-600 text-xs sm:text-sm">
-            Integrated digital public good infrastructure defined in the AgriMate PRD.
-          </p>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-          {/* Module 1: Satellite Intelligence */}
-          <div 
-            onClick={() => onNavigate('satellite')}
-            className="glass-card p-6 rounded-2xl border border-white/80 shadow-xs space-y-3 hover-slide-up cursor-pointer hover:border-[#2E7D32] transition-all"
-          >
-            <div className="w-10 h-10 rounded-xl bg-[#EAEFE9] text-[#2E7D32] flex items-center justify-center">
-              <Compass className="w-5 h-5" />
+      {/* ── 7. EXACT COLLABORATION CTA & FOOTER (Image 4) ────────────────────── */}
+      <section className="mx-auto max-w-[1440px] px-3 sm:px-6 py-12">
+        <div className="bg-[#F0F2EB] rounded-[2.5rem] p-8 sm:p-14 border border-[#022113]/5">
+          
+          {/* Top CTA Row: Headline + Collaboration Double Pill Button on Left, Links on Right */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start pb-16 border-b border-[#022113]/10">
+            
+            <div className="lg:col-span-7 space-y-6">
+              <h2 className="text-3xl sm:text-5xl font-extrabold text-[#022113] font-['Montserrat',sans-serif] leading-tight">
+                Isn't it time to empower your farm with sovereign agricultural intelligence?
+              </h2>
+
+              {/* Exact Double-Pill Collaboration Button */}
+              <div>
+                <button
+                  onClick={() => onNavigate('dashboard')}
+                  className="group inline-flex items-center gap-3 bg-[#DFEB38] hover:bg-[#d0df2a] text-[#022113] pl-8 pr-2.5 py-2.5 rounded-full font-bold text-sm font-['Montserrat',sans-serif] shadow-sm transition-all cursor-pointer"
+                >
+                  <span>Launch Mandi Terminal</span>
+                  <span className="w-8 h-8 rounded-full bg-white text-[#022113] flex items-center justify-center group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shadow-xs">
+                    <ArrowUpRight className="w-4 h-4" />
+                  </span>
+                </button>
+              </div>
             </div>
-            <div>
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#2E7D32]">Sentinel-2 Telemetry</span>
-              <h3 className="text-base font-bold text-[#153424]">🛰️ Satellite Intelligence</h3>
+
+            {/* Links on Right: Sovereign Solutions & Public Infrastructure */}
+            <div className="lg:col-span-5 grid grid-cols-2 gap-8 text-sm">
+              <div>
+                <h4 className="text-base font-bold font-['Montserrat',sans-serif] text-[#022113] mb-4">
+                  Sovereign Solutions
+                </h4>
+                <ul className="space-y-2.5 text-stone-600 font-['Open_Sans',sans-serif]">
+                  <li>
+                    <button 
+                      onClick={() => onNavigate('dashboard')} 
+                      className="hover:text-[#546C18] text-left cursor-pointer transition-colors"
+                    >
+                      Mandi Price Terminal
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => onNavigate('satellite')} 
+                      className="hover:text-[#546C18] text-left cursor-pointer transition-colors"
+                    >
+                      Satellite NDVI Telemetry
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => onNavigate('advisory')} 
+                      className="hover:text-[#546C18] text-left cursor-pointer transition-colors"
+                    >
+                      AI Crop Advisory
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => onNavigate('diagnose')} 
+                      className="hover:text-[#546C18] text-left cursor-pointer transition-colors"
+                    >
+                      Plant Disease Diagnostics
+                    </button>
+                  </li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="text-base font-bold font-['Montserrat',sans-serif] text-[#022113] mb-4">
+                  Public Infrastructure
+                </h4>
+                <ul className="space-y-2.5 text-stone-600 font-['Open_Sans',sans-serif]">
+                  <li>
+                    <button 
+                      onClick={() => onNavigate('weather')} 
+                      className="hover:text-[#546C18] text-left cursor-pointer transition-colors"
+                    >
+                      Microclimate Telemetry
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => onNavigate('gov')} 
+                      className="hover:text-[#546C18] text-left cursor-pointer transition-colors"
+                    >
+                      State Extension Data Mesh
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => onNavigate('about')} 
+                      className="hover:text-[#546C18] text-left cursor-pointer transition-colors"
+                    >
+                      About KisanSathi Network
+                    </button>
+                  </li>
+                  <li>
+                    <button 
+                      onClick={() => onNavigate('contact')} 
+                      className="hover:text-[#546C18] text-left cursor-pointer transition-colors"
+                    >
+                      KVK Help & Grievances
+                    </button>
+                  </li>
+                </ul>
+              </div>
             </div>
-            <p className="text-stone-600 text-xs leading-relaxed">
-              Sentinel-2 multispectral imagery at ≤10m resolution. Computes NDVI, EVI, soil moisture, and daily irrigation schedule.
-            </p>
-            <div className="pt-2 text-xs font-bold text-[#2E7D32] flex items-center gap-1">
-              <span>View Field NDVI</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </div>
+
           </div>
 
-          {/* Module 2: AI Crop Advisory */}
-          <div 
-            onClick={() => onNavigate('advisory')}
-            className="glass-card p-6 rounded-2xl border border-white/80 shadow-xs space-y-3 hover-slide-up cursor-pointer hover:border-[#2E7D32] transition-all"
-          >
-            <div className="w-10 h-10 rounded-xl bg-[#FFF8E7] text-[#E8A238] flex items-center justify-center">
-              <Sprout className="w-5 h-5" />
-            </div>
-            <div>
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#E8A238]">AI Advisory</span>
-              <h3 className="text-base font-bold text-[#153424]">🌱 AI Crop Advisory</h3>
-            </div>
-            <p className="text-stone-600 text-xs leading-relaxed">
-              Gemini 2.0 Flash engine synthesising satellite data, soil NPK, and 7-day NWP weather with Regenerative Scores (A–F).
-            </p>
-            <div className="pt-2 text-xs font-bold text-[#E8A238] flex items-center gap-1">
-              <span>Generate Advisory</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </div>
-          </div>
-
-          {/* Module 3: Disease Diagnostics */}
-          <div 
-            onClick={() => onNavigate('diagnose')}
-            className="glass-card p-6 rounded-2xl border border-white/80 shadow-xs space-y-3 hover-slide-up cursor-pointer hover:border-[#2E7D32] transition-all"
-          >
-            <div className="w-10 h-10 rounded-xl bg-[#EAEFE9] text-[#2E7D32] flex items-center justify-center">
-              <ShieldCheck className="w-5 h-5" />
-            </div>
-            <div>
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#2E7D32]">Vision Diagnostics</span>
-              <h3 className="text-base font-bold text-[#153424]">🔬 Disease Diagnostics</h3>
-            </div>
-            <p className="text-stone-600 text-xs leading-relaxed">
-              Photo-based vision plant pathology. Delivers certified organic remedies and statutory chemical treatment with exact dilution.
-            </p>
-            <div className="pt-2 text-xs font-bold text-[#2E7D32] flex items-center gap-1">
-              <span>Scan Crop Leaf</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </div>
-          </div>
-
-          {/* Module 4: Interop Network */}
-          <div 
-            onClick={() => onNavigate('gov')}
-            className="glass-card p-6 rounded-2xl border border-white/80 shadow-xs space-y-3 hover-slide-up cursor-pointer hover:border-[#2E7D32] transition-all"
-          >
-            <div className="w-10 h-10 rounded-xl bg-[#FFF8E7] text-[#E8A238] flex items-center justify-center">
-              <Layers className="w-5 h-5" />
-            </div>
-            <div>
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#E8A238]">Gov Interoperability</span>
-              <h3 className="text-base font-bold text-[#153424]">🔗 Interop Network</h3>
-            </div>
-            <p className="text-stone-600 text-xs leading-relaxed">
-              Federated data architecture across Indian states using FIWARE NGSI-LD open standards and India Stack integration.
-            </p>
-            <div className="pt-2 text-xs font-bold text-[#E8A238] flex items-center gap-1">
-              <span>Open Gov Portal</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION 6: KISAN CALL CENTRE & VERNACULAR VOICE ADVISORY (PRD F-ADV-04) */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="bg-gradient-to-r from-[#153424] via-[#1c4430] to-[#153424] text-white p-8 sm:p-10 rounded-3xl shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="space-y-2 max-w-xl">
-            <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#E8A238] bg-white/10 px-2.5 py-0.5 rounded-full border border-white/20">
-              PRD Feature F-ADV-04 • Telephony Channel
-            </span>
-            <h3 className="text-xl sm:text-2xl font-black font-['Syne',sans-serif]">
-              24x7 Kisan Call Centre IVR & Vernacular Voice Advisory
-            </h3>
-            <p className="text-stone-300 text-xs leading-relaxed">
-              Feature-phone users dial <strong className="text-white font-mono">1800-180-1551</strong> (toll-free) to authenticate via mobile and receive a 90-second voice advisory in their regional language.
-            </p>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-center gap-3 shrink-0">
-            <button
-              onClick={() => onNavigate('advisory')}
-              className="px-6 py-3 rounded-2xl bg-[#E8A238] hover:bg-[#d6922b] text-[#153424] font-bold text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer shadow-md"
+          {/* Bottom Bar: KisanSathi Logo, Pill Navigation, Social Circles, Message Bubble */}
+          <div className="pt-8 flex flex-col md:flex-row items-center justify-between gap-6">
+            
+            {/* Logo */}
+            <div 
+              onClick={() => onNavigate('home')}
+              className="flex items-center gap-2 cursor-pointer select-none"
             >
-              <PhoneCall className="w-4 h-4" />
-              <span>Inspect IVR Script</span>
-            </button>
-            <button
-              onClick={() => onNavigate('contact')}
-              className="px-5 py-3 rounded-2xl bg-white/15 hover:bg-white/25 text-white font-semibold text-xs sm:text-sm border border-white/20 transition-all cursor-pointer"
-            >
-              <span>KVK Centres Directory</span>
-            </button>
+              <div className="w-8 h-8 rounded-2xl bg-[#546C18] flex items-center justify-center text-[#DFEB38]">
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                  <path d="M12 2v20M12 4c-3 0-5 2-5 5 0 2 2 3 5 3M12 4c3 0 5 2 5 5 0 2-2 3-5 3M12 10c-3.5 0-6 2.5-6 5.5 0 2 2.5 3.5 6 3.5M12 10c3.5 0 6 2.5 6 5.5 0 2-2.5 3.5-6 3.5" />
+                </svg>
+              </div>
+              <span className="text-2xl font-extrabold tracking-tight text-[#022113] font-['Montserrat',sans-serif]">
+                Kisan<span className="text-[#59701E]">Sathi</span>
+              </span>
+            </div>
+
+            {/* Pill Navigation Capsule */}
+            <div className="flex items-center gap-1 bg-white rounded-full p-1.5 shadow-xs border border-stone-200">
+              <button onClick={() => onNavigate('home')} className="px-4 py-1.5 rounded-full text-xs font-semibold text-[#022113] bg-[#F0F2EB] font-['Montserrat',sans-serif]">
+                Home page
+              </button>
+              <button onClick={() => onNavigate('about')} className="px-4 py-1.5 rounded-full text-xs font-semibold text-stone-600 hover:text-[#022113] font-['Montserrat',sans-serif]">
+                About us
+              </button>
+              <button onClick={() => onNavigate('advisory')} className="px-4 py-1.5 rounded-full text-xs font-semibold text-stone-600 hover:text-[#022113] font-['Montserrat',sans-serif]">
+                Our services
+              </button>
+              <button onClick={() => onNavigate('gov')} className="px-4 py-1.5 rounded-full text-xs font-semibold text-stone-600 hover:text-[#022113] font-['Montserrat',sans-serif]">
+                Latest news
+              </button>
+              <button onClick={() => onNavigate('dashboard')} className="px-4 py-1.5 rounded-full text-xs font-semibold text-stone-600 hover:text-[#022113] font-['Montserrat',sans-serif]">
+                Shares
+              </button>
+            </div>
+
           </div>
+
         </div>
       </section>
+
     </div>
   );
 };

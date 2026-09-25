@@ -1,21 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import type { Language, SyncStatusData, NavigationPage } from '../types';
-import { TRANSLATIONS } from '../i18n/translations';
-import { resolveCropFromQuery } from '../data/cropDictionary';
 import { 
   Globe, 
   Settings, 
   Menu, 
   X, 
-  ArrowRight,
-  Search,
-  ChevronDown,
-  Compass,
-  LayoutDashboard,
-  Info,
-  Sparkles,
-  Sprout,
-  Headphones
+  ArrowUpRight 
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -50,449 +40,245 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenSettings,
   currentPage,
   onNavigate,
-  onSearchAndNavigate
+  syncStatus: _syncStatus,
+  onTriggerSync: _onTriggerSync,
+  isSyncing: _isSyncing
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [searchModalOpen, setSearchModalOpen] = useState(false);
-  const [headerSearchQuery, setHeaderSearchQuery] = useState('');
-  const [langDropdownOpen, setLangDropdownOpen] = useState(false);
-  const [moreMenuOpen, setMoreMenuOpen] = useState(false);
-  const langDropdownRef = useRef<HTMLDivElement>(null);
-  const moreMenuRef = useRef<HTMLDivElement>(null);
-  const t = TRANSLATIONS[language];
-
-  // Close language dropdown & more menu on outside click or Escape
-  useEffect(() => {
-    const onMouse = (e: MouseEvent) => {
-      if (langDropdownRef.current && !langDropdownRef.current.contains(e.target as Node)) {
-        setLangDropdownOpen(false);
-      }
-      if (moreMenuRef.current && !moreMenuRef.current.contains(e.target as Node)) {
-        setMoreMenuOpen(false);
-      }
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setLangDropdownOpen(false);
-        setMoreMenuOpen(false);
-        setSearchModalOpen(false);
-      }
-    };
-    if (langDropdownOpen || moreMenuOpen) document.addEventListener('mousedown', onMouse);
-    document.addEventListener('keydown', onKey);
-    return () => {
-      document.removeEventListener('mousedown', onMouse);
-      document.removeEventListener('keydown', onKey);
-    };
-  }, [langDropdownOpen, moreMenuOpen]);
-
-  const primaryNavItems: { id: NavigationPage; label: string; icon: React.ComponentType<{ className?: string }>; badge?: string }[] = [
-    { id: 'home', label: t.navHome || 'Home', icon: Compass },
-    { id: 'satellite', label: 'Satellite NDVI', icon: Compass, badge: 'Sentinel-2' },
-    { id: 'advisory', label: t.navAdvisory || 'AI Advisory', icon: Sprout, badge: 'Gemini AI' },
-    { id: 'diagnose', label: t.navDiagnose || 'Disease Scan', icon: Info, badge: 'Vision AI' },
-    { id: 'gov', label: t.navGov || 'Gov Network', icon: LayoutDashboard, badge: 'Inter-State' },
-  ];
-
-  const secondaryNavItems: { id: NavigationPage; label: string; icon: React.ComponentType<{ className?: string }>; desc: string }[] = [
-    { id: 'weather', label: 'Weather & Climate', icon: Sparkles, desc: 'High-resolution agro-meteorological NWP forecast' },
-    { id: 'dashboard', label: 'e-NAM / Mandi Prices', icon: LayoutDashboard, desc: 'Official Agmarknet price feeds & market signals' },
-    { id: 'about', label: t.navAbout || 'About Platform', icon: Info, desc: 'Digital Public Good architecture & DPDP compliance' },
-    { id: 'contact', label: t.navContact || 'Kisan Support', icon: Headphones, desc: '24x7 Kisan Call Centre (1800-180-1551) & KVKs' },
-  ];
-
-  const isSecondaryActive = secondaryNavItems.some(item => item.id === currentPage);
-
-  const handleNavClick = (pageId: NavigationPage) => {
-    onNavigate(pageId);
-    setMobileMenuOpen(false);
-    setMoreMenuOpen(false);
-  };
-
-  const SEARCH_LABELS: Record<Language, string> = {
-    en: 'Search',
-    hi: 'खोजें',
-    kn: 'ಹುಡುಕಿ',
-    te: 'శోధించండి',
-    ta: 'தேடு',
-    mr: 'शोधा',
-    bn: 'অনুসন্ধান',
-    gu: 'શોધો',
-    pa: 'ਖੋਜੋ',
-    ml: 'തിരയുക'
-  };
-
-  const [isScrolled, setIsScrolled] = useState(false);
+  const [langMenuOpen, setLangMenuOpen] = useState(false);
+  const langMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 15);
+    const handleClickOutside = (event: MouseEvent) => {
+      if (langMenuRef.current && !langMenuRef.current.contains(event.target as Node)) {
+        setLangMenuOpen(false);
+      }
     };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const isHero = currentPage === 'home';
+  const navItems: { id: NavigationPage; label: string }[] = [
+    { id: 'home', label: 'Home Page' },
+    { id: 'dashboard', label: 'Mandi Terminal' },
+    { id: 'satellite', label: 'Satellite NDVI' },
+    { id: 'advisory', label: 'AI Advisory' },
+    { id: 'diagnose', label: 'Pathology' },
+    { id: 'weather', label: 'Weather NWP' },
+    { id: 'gov', label: 'Data Mesh' },
+    { id: 'about', label: 'About Us' },
+    { id: 'contact', label: 'Contact' },
+  ];
+
+  const handleNavClick = (page: NavigationPage) => {
+    onNavigate(page);
+    setMobileMenuOpen(false);
+  };
 
   return (
-    <header className={`sticky top-0 z-50 print:hidden transition-all duration-200 ${
-      isHero
-        ? (isScrolled 
-            ? 'bg-[#153424]/95 backdrop-blur-md shadow-md border-b border-white/10 py-2 sm:py-2.5' 
-            : 'bg-transparent pt-2.5 sm:pt-3')
-        : 'bg-[#FBFBFA]/95 backdrop-blur-md shadow-xs border-b border-[#E6E1D7] py-2 sm:py-2.5'
-    }`}>
-      {/* Main Brand & Multi-Page Navigation Bar */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-1 sm:py-1.5 flex items-center justify-between gap-4 relative">
-        {/* Brand Logo & Name (Minimalist Cultivo Style) */}
-        <div 
-          onClick={() => handleNavClick('home')}
-          className="flex items-center gap-2 cursor-pointer group select-none shrink-0"
-        >
-          <div className="w-8 h-8 sm:w-8.5 sm:h-8.5 rounded-full bg-[#153424] flex items-center justify-center text-white shadow-2xs group-hover:scale-105 transition-transform">
-            <span className="text-base select-none notranslate" translate="no">🌾</span>
+    <>
+      {/* ── KisanSathi Primary Navbar (Authentic Behance Style with Full Navigation) ─────────────────────────────── */}
+      <header className="sticky top-0 z-40 w-full bg-[#F8FAF6]/90 backdrop-blur-md border-b border-[#022113]/5 transition-colors shadow-xs">
+        <div className="mx-auto flex max-w-[1440px] items-center justify-between px-3 sm:px-6 py-3">
+          
+          {/* Left Brand: KisanSathi Logo with authentic wheat/leaf emblem */}
+          <div 
+            onClick={() => onNavigate('home')}
+            className="flex items-center gap-2.5 cursor-pointer select-none group shrink-0"
+          >
+            <div className="w-9 h-9 rounded-2xl bg-[#546C18] flex items-center justify-center text-[#DFEB38] group-hover:scale-105 transition-transform shadow-xs">
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 2v20" />
+                <path d="M12 4c-3 0-5 2-5 5 0 2 2 3 5 3" />
+                <path d="M12 4c3 0 5 2 5 5 0 2-2 3-5 3" />
+                <path d="M12 10c-3.5 0-6 2.5-6 5.5 0 2 2.5 3.5 6 3.5" />
+                <path d="M12 10c3.5 0 6 2.5 6 5.5 0 2-2.5 3.5-6 3.5" />
+              </svg>
+            </div>
+            <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-[#022113] font-['Montserrat',sans-serif]">
+              Kisan<span className="text-[#59701E]">Sathi</span>
+            </span>
           </div>
-          <span className={`text-lg sm:text-xl font-bold tracking-tight font-['Syne',sans-serif] notranslate transition-colors ${
-            isHero ? 'text-white drop-shadow-sm' : 'text-[#153424]'
-          }`} translate="no">
-            AgriMate
-          </span>
-        </div>
 
-        {/* Center: Dark Pill Capsule Navigation - Centered to align with search below */}
-        <nav className="hidden lg:flex items-center gap-1 p-1 notranslate absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 bg-[#181F1C] rounded-full border border-stone-800/80 shadow-md" translate="no">
-          {primaryNavItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = currentPage === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => handleNavClick(item.id)}
-                className={`px-3 py-1.5 rounded-full text-xs transition-all duration-200 cursor-pointer flex items-center gap-1.5 select-none ${
-                  isActive
-                    ? 'bg-white text-[#153424] font-bold shadow-xs'
-                    : 'text-stone-300 hover:text-white hover:bg-white/10 font-medium'
-                }`}
-              >
-                {isActive && <Icon className="w-3.5 h-3.5 text-[#153424] shrink-0" />}
-                <span>{item.label}</span>
-                {item.badge && (
-                  <span className={`text-[9px] px-1.5 py-0.2 rounded-full uppercase tracking-wider font-extrabold ${
-                    isActive ? 'bg-[#E8A238] text-[#123826]' : 'bg-[#2E7D32]/40 text-emerald-300'
-                  }`}>
-                    {item.badge}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-
-          {/* More Dropdown */}
-          <div className="relative" ref={moreMenuRef}>
+          {/* Center Floating Pill: All KisanSathi Modules */}
+          <nav className="hidden lg:flex items-center gap-0.5 bg-white border border-[#022113]/10 rounded-full p-1 shadow-xs">
             <button
-              onClick={() => setMoreMenuOpen(!moreMenuOpen)}
-              className={`px-3 py-1.5 rounded-full text-xs transition-all duration-200 cursor-pointer flex items-center gap-1 select-none ${
-                isSecondaryActive
-                  ? 'bg-white text-[#153424] font-bold shadow-xs'
-                  : 'text-stone-300 hover:text-white hover:bg-white/10 font-medium'
+              onClick={() => handleNavClick('home')}
+              className={`text-xs font-semibold px-3 py-1.5 rounded-full transition-all cursor-pointer font-['Montserrat',sans-serif] shrink-0 ${
+                currentPage === 'home'
+                  ? 'bg-[#546C18] text-white shadow-xs'
+                  : 'text-[#022113]/80 hover:text-[#546C18] hover:bg-[#F0F4EC]'
               }`}
             >
-              <span>More</span>
-              <ChevronDown className={`w-3 h-3 transition-transform ${moreMenuOpen ? 'rotate-180' : ''}`} />
+              Home
             </button>
+            <button
+              onClick={() => handleNavClick('dashboard')}
+              className={`text-xs font-semibold px-3 py-1.5 rounded-full transition-all cursor-pointer font-['Montserrat',sans-serif] shrink-0 ${
+                currentPage === 'dashboard'
+                  ? 'bg-[#546C18] text-white shadow-xs'
+                  : 'text-[#022113]/80 hover:text-[#546C18] hover:bg-[#F0F4EC]'
+              }`}
+            >
+              Mandi Terminal
+            </button>
+            <button
+              onClick={() => handleNavClick('satellite')}
+              className={`text-xs font-semibold px-3 py-1.5 rounded-full transition-all cursor-pointer font-['Montserrat',sans-serif] shrink-0 ${
+                currentPage === 'satellite'
+                  ? 'bg-[#546C18] text-white shadow-xs'
+                  : 'text-[#022113]/80 hover:text-[#546C18] hover:bg-[#F0F4EC]'
+              }`}
+            >
+              Satellite NDVI
+            </button>
+            <button
+              onClick={() => handleNavClick('advisory')}
+              className={`text-xs font-semibold px-3 py-1.5 rounded-full transition-all cursor-pointer font-['Montserrat',sans-serif] shrink-0 ${
+                currentPage === 'advisory'
+                  ? 'bg-[#546C18] text-white shadow-xs'
+                  : 'text-[#022113]/80 hover:text-[#546C18] hover:bg-[#F0F4EC]'
+              }`}
+            >
+              AI Advisory
+            </button>
+            <button
+              onClick={() => handleNavClick('diagnose')}
+              className={`text-xs font-semibold px-3 py-1.5 rounded-full transition-all cursor-pointer font-['Montserrat',sans-serif] shrink-0 ${
+                currentPage === 'diagnose'
+                  ? 'bg-[#546C18] text-white shadow-xs'
+                  : 'text-[#022113]/80 hover:text-[#546C18] hover:bg-[#F0F4EC]'
+              }`}
+            >
+              Pathology
+            </button>
+            <button
+              onClick={() => handleNavClick('weather')}
+              className={`text-xs font-semibold px-3 py-1.5 rounded-full transition-all cursor-pointer font-['Montserrat',sans-serif] shrink-0 ${
+                currentPage === 'weather'
+                  ? 'bg-[#546C18] text-white shadow-xs'
+                  : 'text-[#022113]/80 hover:text-[#546C18] hover:bg-[#F0F4EC]'
+              }`}
+            >
+              Weather
+            </button>
+            <button
+              onClick={() => handleNavClick('gov')}
+              className={`text-xs font-semibold px-3 py-1.5 rounded-full transition-all cursor-pointer font-['Montserrat',sans-serif] shrink-0 ${
+                currentPage === 'gov'
+                  ? 'bg-[#546C18] text-white shadow-xs'
+                  : 'text-[#022113]/80 hover:text-[#546C18] hover:bg-[#F0F4EC]'
+              }`}
+            >
+              Data Mesh
+            </button>
+            <div className="h-4 w-px bg-[#022113]/10 mx-0.5" />
+            <button
+              onClick={() => handleNavClick('about')}
+              className={`text-xs font-semibold px-3 py-1.5 rounded-full transition-all cursor-pointer font-['Montserrat',sans-serif] shrink-0 ${
+                currentPage === 'about'
+                  ? 'bg-[#546C18] text-white shadow-xs'
+                  : 'text-[#022113]/80 hover:text-[#546C18] hover:bg-[#F0F4EC]'
+              }`}
+            >
+              About
+            </button>
+            <button
+              onClick={() => handleNavClick('contact')}
+              className={`text-xs font-semibold px-3 py-1.5 rounded-full transition-all cursor-pointer font-['Montserrat',sans-serif] shrink-0 ${
+                currentPage === 'contact'
+                  ? 'bg-[#546C18] text-white shadow-xs'
+                  : 'text-[#022113]/80 hover:text-[#546C18] hover:bg-[#F0F4EC]'
+              }`}
+            >
+              Contact
+            </button>
+          </nav>
 
-            {moreMenuOpen && (
-              <div 
-                className="absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl shadow-xl border border-[#CCE0D0] p-2 z-50 animate-in fade-in zoom-in-95 duration-150 notranslate"
-                translate="no"
-                onClick={(e) => e.stopPropagation()}
+          {/* Right Action Icons (Minimal & Balanced) */}
+          <div className="flex items-center gap-2.5">
+            {/* Language Selector Dropdown */}
+            <div className="relative" ref={langMenuRef}>
+              <button
+                onClick={() => setLangMenuOpen(!langMenuOpen)}
+                className="flex items-center gap-1.5 rounded-full border border-[#022113]/10 bg-white px-3 py-1.5 text-xs font-bold font-['Montserrat',sans-serif] text-[#022113] hover:bg-[#F0F4EC] transition cursor-pointer shadow-xs"
               >
-                <div className="space-y-1">
-                  {secondaryNavItems.map((sec) => {
-                    const SecIcon = sec.icon;
-                    return (
+                <Globe strokeWidth={1.5} className="w-3.5 h-3.5 text-[#59701E]" />
+                <span>{LANGUAGES.find(l => l.code === language)?.name || 'EN'}</span>
+              </button>
+
+              {langMenuOpen && (
+                <div className="absolute right-0 mt-2 w-48 rounded-2xl border border-[#022113]/10 bg-white p-2 shadow-xl z-50 animate-in fade-in zoom-in-95">
+                  <div className="text-[10px] font-mono uppercase tracking-wider text-stone-400 px-2 py-1">
+                    Select Language
+                  </div>
+                  <div className="grid grid-cols-2 gap-1 mt-1">
+                    {LANGUAGES.map((lang) => (
                       <button
-                        key={sec.id}
-                        onClick={() => { handleNavClick(sec.id); setMoreMenuOpen(false); }}
-                        className={`w-full p-2.5 rounded-xl text-left transition-colors flex items-start gap-2.5 cursor-pointer ${
-                          currentPage === sec.id 
-                            ? 'bg-[#EBF5ED] text-[#123826] font-bold' 
-                            : 'hover:bg-[#F7FBF8] text-stone-700'
+                        key={lang.code}
+                        onClick={() => {
+                          onLanguageChange(lang.code);
+                          setLangMenuOpen(false);
+                        }}
+                        className={`text-left text-xs px-2.5 py-1.5 rounded-xl transition cursor-pointer flex items-center justify-between ${
+                          language === lang.code
+                            ? 'bg-[#546C18] text-white font-bold'
+                            : 'text-[#022113] hover:bg-[#F0F4EC]'
                         }`}
                       >
-                        <SecIcon className="w-4 h-4 text-[#2E7D32] mt-0.5 shrink-0" />
-                        <div>
-                          <div className="text-xs font-bold text-[#123826]">{sec.label}</div>
-                          <div className="text-[10px] text-stone-500 leading-tight">{sec.desc}</div>
-                        </div>
+                        <span className="font-semibold">{lang.name}</span>
+                        <span className="text-[10px] opacity-60">{lang.label}</span>
                       </button>
-                    );
-                  })}
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
-        </nav>
+              )}
+            </div>
 
-        {/* Right Actions: Ultra-Clean Search & Language (Adapts to page background) */}
-        <div className="flex items-center gap-2 sm:gap-2.5 relative shrink-0">
-          {/* Quick Search Link */}
-          <button
-            onClick={() => setSearchModalOpen(true)}
-            className={`text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 notranslate py-1.5 px-3 rounded-full ${
-              isHero 
-                ? 'text-white/90 hover:text-white hover:bg-white/15' 
-                : 'text-[#153424] bg-white/80 border border-[#E6E1D7] shadow-2xs hover:bg-white hover:border-[#2E7D32]/50 hover:text-[#2E7D32]'
-            }`}
-            translate="no"
-            title={SEARCH_LABELS[language] || 'Search'}
-          >
-            <Search className={`w-3.5 h-3.5 ${isHero ? 'text-white/80' : 'text-[#2E7D32]'}`} />
-            <span className="hidden sm:inline notranslate" translate="no">
-              {SEARCH_LABELS[language] || 'Search'}
-            </span>
-          </button>
-
-          {/* Language Switcher — Sleek Text Dropdown */}
-          <div ref={langDropdownRef} className="relative notranslate" translate="no">
-            <button
-              type="button"
-              className={`flex items-center text-xs font-semibold gap-1.5 notranslate cursor-pointer select-none transition-all py-1.5 px-3 rounded-full ${
-                isHero
-                  ? 'text-white/90 hover:text-white hover:bg-white/15'
-                  : 'text-[#153424] bg-white/80 border border-[#E6E1D7] shadow-2xs hover:bg-white hover:border-[#2E7D32]/50 hover:text-[#2E7D32]'
-              }`}
-              translate="no"
-              onClick={() => setLangDropdownOpen(v => !v)}
-              role="combobox"
-              aria-haspopup="listbox"
-              aria-expanded={langDropdownOpen}
-              aria-label="Select language"
-            >
-              <Globe className={`w-3.5 h-3.5 shrink-0 ${isHero ? 'text-white/80' : 'text-[#2E7D32]'}`} />
-              <span className="notranslate whitespace-nowrap">
-                {LANGUAGES.find(l => l.code === language)?.label ?? 'English'} ({LANGUAGES.find(l => l.code === language)?.name ?? 'EN'})
-              </span>
-              <ChevronDown className={`w-3 h-3 transition-transform shrink-0 ${langDropdownOpen ? 'rotate-180' : ''} ${isHero ? 'text-white/80' : 'text-[#153424]/70'}`} />
-            </button>
-
-            {langDropdownOpen && (
-              <div
-                className="absolute right-0 top-full mt-2 w-48 bg-white rounded-2xl border border-[#E6E1D7] shadow-xl z-50 py-1.5 max-h-72 overflow-y-auto notranslate"
-                translate="no"
-                role="listbox"
+            {/* Settings Trigger */}
+            {onOpenSettings && (
+              <button
+                onClick={onOpenSettings}
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-[#022113]/10 bg-white text-[#022113] hover:bg-[#F0F4EC] transition cursor-pointer shadow-xs"
+                title="Preferences & Profile"
               >
-                {LANGUAGES.map(lang => (
-                  <button
-                    key={lang.code}
-                    role="option"
-                    aria-selected={language === lang.code}
-                    onClick={() => { onLanguageChange(lang.code); setLangDropdownOpen(false); }}
-                    className={`w-full text-left px-3.5 py-2 text-xs font-semibold transition-colors cursor-pointer notranslate ${
-                      language === lang.code
-                        ? 'bg-[#EBF5ED] text-[#123826] font-bold'
-                        : 'text-stone-700 hover:bg-[#F4F8F5]'
-                    }`}
-                    translate="no"
-                  >
-                    {lang.label} <span className="text-stone-400 font-normal">({lang.name})</span>
-                  </button>
-                ))}
-              </div>
+                <Settings strokeWidth={1.5} className="w-3.5 h-3.5 text-[#59701E]" />
+              </button>
             )}
+
+            {/* Mobile Hamburger Menu Toggle */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="flex h-8 w-8 items-center justify-center rounded-full border border-[#022113]/10 bg-white text-[#022113] lg:hidden cursor-pointer shadow-xs"
+              aria-label="Toggle Navigation Menu"
+            >
+              {mobileMenuOpen ? <X strokeWidth={1.5} className="w-4 h-4" /> : <Menu strokeWidth={1.5} className="w-4 h-4 text-[#022113]" />}
+            </button>
           </div>
-
-          {/* Mobile Menu Toggle Button */}
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className={`lg:hidden p-1.5 rounded-full transition-colors cursor-pointer ${
-              isHero ? 'text-white hover:bg-white/10' : 'text-[#153424] hover:bg-black/5'
-            }`}
-            aria-label="Toggle Navigation Menu"
-          >
-            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
         </div>
-      </div>
 
-      {/* Mobile Drawer Menu */}
-      {mobileMenuOpen && (
-        <div className="lg:hidden border-t border-stone-200 bg-white px-4 py-4 space-y-3 shadow-lg animate-slide-down">
-          <div className="grid grid-cols-2 gap-2 notranslate" translate="no">
-            {[...primaryNavItems, ...secondaryNavItems].map((item) => {
-              const Icon = item.icon;
-              const isActive = currentPage === item.id;
-              return (
+        {/* Mobile Navigation Drawer */}
+        {mobileMenuOpen && (
+          <div className="border-t border-[#022113]/10 bg-white px-4 py-5 shadow-xl lg:hidden animate-in slide-in-from-top-4">
+            <nav className="flex flex-col gap-2">
+              {navItems.map((item) => (
                 <button
                   key={item.id}
                   onClick={() => handleNavClick(item.id)}
-                  className={`w-full p-2.5 rounded-xl text-xs font-bold text-left transition-all duration-200 cursor-pointer flex items-center gap-2 ${
-                    isActive
-                      ? 'bg-[#153424] text-white shadow-xs'
-                      : 'bg-stone-50 text-stone-700 hover:bg-stone-100 border border-stone-200'
+                  className={`flex items-center justify-between rounded-xl px-4 py-2.5 text-sm font-semibold transition text-left cursor-pointer font-['Montserrat',sans-serif] ${
+                    currentPage === item.id
+                      ? 'bg-[#546C18] text-white'
+                      : 'text-[#022113] hover:bg-[#F0F4EC]'
                   }`}
                 >
-                  <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-stone-500'}`} />
                   <span>{item.label}</span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Mobile Language Switcher */}
-          <div className="p-2.5 rounded-xl bg-stone-50 border border-stone-200 notranslate" translate="no">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-[#123826] mb-2">
-              <Globe className="w-3.5 h-3.5 text-[#2E7D32]" />
-              <span>Language</span>
-            </div>
-            <div className="grid grid-cols-2 gap-1.5">
-              {LANGUAGES.map(lang => (
-                <button
-                  key={lang.code}
-                  onClick={() => { onLanguageChange(lang.code); setMobileMenuOpen(false); }}
-                  className={`text-left px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer notranslate ${
-                    language === lang.code
-                      ? 'bg-[#123826] text-white'
-                      : 'bg-white text-stone-700 border border-[#E2ECE3] hover:bg-[#EBF5ED]'
-                  }`}
-                  translate="no"
-                >
-                  {lang.label} <span className={language === lang.code ? 'text-emerald-300' : 'text-stone-400'}>({lang.name})</span>
+                  <ArrowUpRight strokeWidth={1.5} className="w-4 h-4 opacity-60" />
                 </button>
               ))}
-            </div>
+            </nav>
           </div>
-
-          {/* Mobile Settings Button */}
-          {onOpenSettings && (
-            <button
-              onClick={() => { onOpenSettings(); setMobileMenuOpen(false); }}
-              className="w-full p-2.5 rounded-xl bg-stone-50 hover:bg-stone-100 border border-stone-200 text-xs font-bold text-[#153424] flex items-center justify-center gap-2 cursor-pointer transition-colors"
-            >
-              <Settings className="w-4 h-4 text-[#153424]" />
-              <span>Preferences & Data Sync</span>
-            </button>
-          )}
-        </div>
-      )}
-
-      {/* Global Quick Search Modal Palette */}
-      {searchModalOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-start justify-center pt-20 px-4 animate-in fade-in duration-150"
-          onClick={() => setSearchModalOpen(false)}
-        >
-          <div 
-            className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl border border-[#CCE0D0] overflow-hidden p-5 space-y-4 animate-in zoom-in-95 duration-150 cursor-default"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center gap-3 pb-3 border-b border-[#E2ECE3]">
-              <div className="w-10 h-10 rounded-xl bg-[#EBF5ED] text-[#2E7D32] flex items-center justify-center shrink-0">
-                <Search className="w-5 h-5" />
-              </div>
-              <input
-                type="text"
-                autoFocus
-                value={headerSearchQuery}
-                onChange={(e) => setHeaderSearchQuery(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    if (headerSearchQuery.trim()) {
-                      const resolved = resolveCropFromQuery(headerSearchQuery.trim());
-                      const targetCrop = resolved ? resolved.name : headerSearchQuery.trim();
-                      if (onSearchAndNavigate) onSearchAndNavigate(targetCrop, undefined);
-                      else handleNavClick('dashboard');
-                      setSearchModalOpen(false);
-                      setHeaderSearchQuery('');
-                    }
-                  } else if (e.key === 'Escape') {
-                    setSearchModalOpen(false);
-                  }
-                }}
-                placeholder="Type crop name (Tomato, Onion...) or APMC mandi (Kolar, Ballari)..."
-                className="w-full text-sm font-semibold text-[#123826] outline-none placeholder:text-stone-400 placeholder:font-normal"
-              />
-              <button
-                onClick={() => setSearchModalOpen(false)}
-                className="p-1.5 rounded-full text-stone-400 hover:text-stone-700 transition-colors cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Quick Match List */}
-            <div className="space-y-3 max-h-72 overflow-y-auto pr-1">
-              <span className="text-[10px] uppercase font-bold text-stone-500 tracking-wider block">
-                {headerSearchQuery ? 'Matching Commodities & Mandis' : 'Quick Access Commodities'}
-              </span>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {[
-                  { name: 'Groundnut', tag: 'Kadlekayi / ಕಡಲೆಕಾಯಿ', mandi: 'Ballari, Kolar, Hospet' },
-                  { name: 'Tomato', tag: 'Hybrid / Local', mandi: 'Ballari, Kolar' },
-                  { name: 'Onion', tag: 'Nashik Red', mandi: 'Lasalgaon, Hubballi' },
-                  { name: 'Maize', tag: 'Hybrid Yellow', mandi: 'Davanagere, Bellary' },
-                  { name: 'Green Chilli', tag: 'G-4 Hot', mandi: 'Guntur, Ballari' },
-                  { name: 'Potato', tag: 'Kufri Jyoti', mandi: 'Hassan, Agra' },
-                  { name: 'Cotton', tag: 'DCH-32', mandi: 'Hubballi, Raichur' },
-                  { name: 'Paddy / Rice', tag: 'Sona Masoori', mandi: 'Sindhanur, Davanagere' },
-                  { name: 'Soybean', tag: 'JS-335', mandi: 'Latur, Indore' }
-                ]
-                  .filter(item => 
-                    !headerSearchQuery || 
-                    item.name.toLowerCase().includes(headerSearchQuery.toLowerCase()) || 
-                    item.mandi.toLowerCase().includes(headerSearchQuery.toLowerCase()) ||
-                    item.tag.toLowerCase().includes(headerSearchQuery.toLowerCase())
-                  )
-                  .map((item) => (
-                    <div
-                      key={item.name}
-                      onClick={() => {
-                        if (onSearchAndNavigate) onSearchAndNavigate(item.name, undefined);
-                        else handleNavClick('dashboard');
-                        setSearchModalOpen(false);
-                        setHeaderSearchQuery('');
-                      }}
-                      className="p-2.5 rounded-xl bg-[#F7FBF8] hover:bg-[#EBF5ED] border border-[#E2ECE3] hover:border-[#2E7D32] transition-colors cursor-pointer flex items-center justify-between"
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <div>
-                          <strong className="text-xs text-[#123826] block">{item.name}</strong>
-                          <span className="text-[10px] text-stone-500">{item.tag}</span>
-                        </div>
-                      </div>
-                      <span className="text-[10px] font-bold text-[#2E7D32] bg-white px-2 py-0.5 rounded-md border border-[#D5E7D8]">
-                        APMC Rates
-                      </span>
-                    </div>
-                  ))}
-              </div>
-            </div>
-
-            <div className="pt-2 border-t border-[#E2ECE3] flex items-center justify-between text-[11px] text-stone-500">
-              <span>Press <kbd className="font-mono bg-stone-100 px-1.5 py-0.5 rounded border border-stone-300">Enter</kbd> to search terminal</span>
-              <button
-                onClick={() => {
-                  const query = headerSearchQuery || 'Tomato';
-                  const resolved = resolveCropFromQuery(query);
-                  const targetCrop = resolved ? resolved.name : query;
-                  if (onSearchAndNavigate) onSearchAndNavigate(targetCrop, undefined);
-                  else handleNavClick('dashboard');
-                  setSearchModalOpen(false);
-                  setHeaderSearchQuery('');
-                }}
-                className="font-bold text-[#2E7D32] hover:underline flex items-center gap-1 cursor-pointer"
-              >
-                <span>Launch Full Terminal</span>
-                <ArrowRight className="w-3 h-3" />
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </header>
+        )}
+      </header>
+    </>
   );
 };
-
-export default Header;

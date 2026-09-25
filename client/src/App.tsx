@@ -29,7 +29,8 @@ import {
 } from './utils/storage';
 import { setSiteLanguage, clearAllTranslateCookies } from './utils/translator';
 import { apiUrl } from './utils/api';
-import { CheckCircle2, ShieldCheck, MessageSquare } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
+import { MeadowCapture } from './components/MeadowCapture';
 
 export const App: React.FC = () => {
   // English is ALWAYS default on initial load / refresh per user instruction
@@ -338,19 +339,10 @@ export const App: React.FC = () => {
 
   return (
     <div 
-      className="min-h-screen text-[#153424] flex flex-col font-['Plus_Jakarta_Sans',sans-serif] relative" 
-      style={{ background: '#F0EDE6' }}
+      className="min-h-screen flex flex-col font-['Open_Sans',sans-serif] bg-[#F8FAF6] text-[#022113] relative selection:bg-[#DFEB38] selection:text-[#022113]" 
+      style={{ background: '#F8FAF6' }}
     >
-      {/* Global fixed farmland background — subtle on all pages */}
-      <div
-        className="fixed inset-0 bg-cover bg-center bg-no-repeat pointer-events-none"
-        style={{
-          backgroundImage: `url('https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=1800&q=80&auto=format&fit=crop')`,
-          opacity: 0.07,
-          zIndex: 0,
-        }}
-        aria-hidden="true"
-      />
+      <div className="grain fixed inset-0 opacity-15 pointer-events-none z-0"></div>
 
       {/* Editorial Header with Core Technical Modules, multi-page navigation, language switch & sync */}
       <Header
@@ -430,7 +422,7 @@ export const App: React.FC = () => {
         )}
 
         {currentPage === 'dashboard' && (
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+          <div className="max-w-[1440px] mx-auto px-3 sm:px-6 py-8">
             <DashboardPage
               language={language}
               activeTab={activeTab}
@@ -497,101 +489,12 @@ export const App: React.FC = () => {
         onClose={() => setExplanationTerm(null)}
       />
 
-      {/* Rich Multi-Column VerdaAgro Forest Green Footer — Grounded in PRD */}
-      <footer className="relative z-10 bg-[#153424] text-stone-300 text-xs py-14 border-t border-[#1f4a34] mt-auto print:hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 pb-10 border-b border-[#1f4a34]">
-            
-            {/* Column 1: Brand & DPG Identity */}
-            <div className="lg:col-span-2 space-y-3">
-              <div className="flex items-center gap-2.5 notranslate select-none" translate="no">
-                <span className="text-2xl notranslate select-none" translate="no">🌾</span>
-                <span className="font-black text-white text-xl font-['Syne',sans-serif] notranslate" translate="no">AgriMate</span>
-                <span className="text-[10px] uppercase font-mono font-bold tracking-wider px-2 py-0.5 rounded-full bg-[#1f4a34] text-[#A5D6A7] border border-[#2E7D32]">
-                  Digital Public Good
-                </span>
-              </div>
-              <p className="text-emerald-100/70 text-xs sm:text-sm leading-relaxed max-w-sm font-['Outfit',sans-serif]">
-                India's Interoperable Digital Agriculture Network. Delivering real-time, hyper-localised agro-advisories to small & marginal farmers by fusing Sentinel-2 satellite imagery, soil health data, climate forecasting, and Gemini 2.0 Flash.
-              </p>
-              <div className="pt-2 flex items-center gap-3 text-xs text-emerald-200/80">
-                <span className="flex items-center gap-1">
-                  <ShieldCheck className="w-3.5 h-3.5 text-[#A5D6A7]" />
-                  DPDP Act 2023 Compliant
-                </span>
-                <span>•</span>
-                <span>MeitY DPG Guidelines</span>
-                <span>•</span>
-                <span>India Stack</span>
-              </div>
-            </div>
-
-            {/* Column 2: Core Platform Modules */}
-            <div className="space-y-2.5">
-              <h4 className="text-white font-bold text-xs uppercase tracking-wider">Core Modules</h4>
-              <ul className="space-y-1.5 text-xs text-emerald-100/70">
-                <li><button onClick={() => navigateTo('satellite')} className="hover:text-white transition-colors cursor-pointer text-[#A5D6A7]">🛰️ Satellite Intelligence</button></li>
-                <li><button onClick={() => navigateTo('advisory')} className="hover:text-white transition-colors cursor-pointer text-[#A5D6A7]">🌱 AI Crop Advisory</button></li>
-                <li><button onClick={() => navigateTo('diagnose')} className="hover:text-white transition-colors cursor-pointer text-[#A5D6A7]">🔬 Disease Diagnostics</button></li>
-                <li><button onClick={() => navigateTo('gov')} className="hover:text-white transition-colors cursor-pointer text-[#A5D6A7]">🔗 Interop & Gov Network</button></li>
-                <li><button onClick={() => navigateTo('weather')} className="hover:text-white transition-colors cursor-pointer">🌤️ Weather & Climate NWP</button></li>
-                <li><button onClick={() => navigateTo('dashboard')} className="hover:text-white transition-colors cursor-pointer">📊 e-NAM / Mandi Prices</button></li>
-              </ul>
-            </div>
-
-            {/* Column 3: Agricultural Intelligence */}
-            <div className="space-y-2.5">
-              <h4 className="text-white font-bold text-xs uppercase tracking-wider">Capabilities</h4>
-              <ul className="space-y-1.5 text-xs text-emerald-100/70">
-                <li><span className="block text-emerald-200/90 font-medium">Sentinel-2 10m NDVI & EVI</span></li>
-                <li><span className="block text-emerald-200/90 font-medium">Regenerative Crop Planning (A-F)</span></li>
-                <li><span className="block text-emerald-200/90 font-medium">Vision Pathogen Identification</span></li>
-                <li><span className="block text-emerald-200/90 font-medium">Dual Organic / Chemical Rx</span></li>
-                <li><span className="block text-emerald-200/90 font-medium">FIWARE NGSI-LD Standards</span></li>
-                <li><span className="block text-emerald-200/90 font-medium">State Data Federation</span></li>
-              </ul>
-            </div>
-
-            {/* Column 4: Farmer Helpline & Community */}
-            <div className="space-y-2.5 shrink-0">
-              <h4 className="text-white font-bold text-xs uppercase tracking-wider">Farmer Helpline & IVR</h4>
-              <div className="space-y-2 text-xs text-emerald-100/70">
-                <a 
-                  href="#whatsapp-group" 
-                  onClick={(e) => {
-                    e.preventDefault();
-                    alert('AgriMate Farmers Community WhatsApp Group link will be active shortly.');
-                  }}
-                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#25D366] text-white font-bold text-xs hover:bg-[#20ba59] transition-colors shadow-xs cursor-pointer"
-                >
-                  <MessageSquare className="w-3.5 h-3.5" />
-                  <span>Join Farmer WhatsApp Group</span>
-                </a>
-                <p className="font-mono text-sm font-bold text-[#E8A238] pt-1">Kisan Helpline: 1800-180-1551</p>
-                <p className="text-[11px]">Toll-free 24x7 Ministry of Agriculture & Farmers Welfare (IVR Voice Advisory)</p>
-                <div className="pt-1">
-                  <span className="block text-[10px] text-emerald-300 uppercase font-bold">Supported Languages:</span>
-                  <p className="text-[11px]">English (Default) • 10 Indian Regional Languages</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Bottom Legal & Attribution Strip */}
-          <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-emerald-200/60">
-            <div>
-              © 2026 AgriMate. Interoperable Digital Agriculture Network for India. Published under Apache 2.0 Open Source License.
-            </div>
-            <div className="flex items-center gap-4">
-              <span>Zero Hallucination Guarantee</span>
-              <span>•</span>
-              <span>SQLite Edge Resilient</span>
-              <span>•</span>
-              <span>DPDP Act 2023 Compliant</span>
-            </div>
-          </div>
+      {/* AgroInvest DPG Sovereign Network Footer for Subpages */}
+      {currentPage !== 'home' && (
+        <div className="mt-auto print:hidden">
+          <MeadowCapture onNavigate={navigateTo} />
         </div>
-      </footer>
+      )}
     </div>
   );
 };

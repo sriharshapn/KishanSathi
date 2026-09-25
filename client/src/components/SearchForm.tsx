@@ -139,15 +139,15 @@ function getNearestDistrictName(lat: number, lon: number): string {
   };
 
   return (
-    <div className="glass-card rounded-3xl overflow-hidden border border-white/85 shadow-sm">
+    <div className="bg-white rounded-[2.5rem] overflow-hidden border border-[#022113]/8 shadow-xl hover:shadow-2xl transition-all font-['Open_Sans',sans-serif]">
       {/* Visual Subheader */}
-      <div className="bg-white/40 border-b border-white/60 px-6 py-4 flex items-center justify-between backdrop-blur-xs">
-        <h2 className="text-base sm:text-lg font-bold text-[#123826] flex items-center gap-2 font-['Syne',sans-serif]">
-          <SlidersHorizontal className="w-5 h-5 text-[#2E7D32]" />
+      <div className="bg-[#F0F2EB] border-b border-[#022113]/8 px-6 sm:px-8 py-5 flex items-center justify-between">
+        <h2 className="text-sm sm:text-base font-bold text-[#022113] flex items-center gap-2 font-['Montserrat',sans-serif]">
+          <SlidersHorizontal className="w-4 h-4 text-[#546C18]" strokeWidth={2} />
           <span>{t.searchTabForm}</span>
         </h2>
         <div className="flex items-center gap-2">
-          <span className="text-[11px] font-medium uppercase tracking-wider text-[#123826] bg-[#EBF5ED] border border-[#CCE0D0] px-3 py-1 rounded-full">
+          <span className="text-[10px] font-bold font-['Montserrat',sans-serif] uppercase tracking-wider text-[#546C18] bg-white border border-[#022113]/8 px-3.5 py-1 rounded-full shadow-2xs">
             Official Agmarknet Rates • Pan-India Search
           </span>
         </div>
@@ -156,15 +156,15 @@ function getNearestDistrictName(lat: number, lon: number): string {
       <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-6">
         {/* Commodity Selector Matrix */}
         <div>
-          <label htmlFor="cropInput" className="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-2">
-            {t.cropLabel} <span className="text-red-500">*</span>
+          <label htmlFor="cropInput" className="block text-xs font-bold font-['Montserrat',sans-serif] uppercase tracking-wider text-[#022113] mb-2">
+            {t.cropLabel} <span className="text-[#59701E]">*</span>
           </label>
 
           {/* Pan-India Universal Crop Input Bar */}
           <div className="relative mb-3">
-            <div className="flex items-center rounded-2xl overflow-hidden border border-white/80 bg-white/70 backdrop-blur-xs focus-within:border-[#2E7D32] focus-within:ring-2 focus-within:ring-[#2E7D32]/20 shadow-xs transition-all">
-              <div className="pl-4 pr-2 text-[#2E7D32]">
-                <Search className="w-4 h-4" />
+            <div className="flex items-center rounded-2xl overflow-hidden border border-[#E5EAD7] bg-[#F8FAF6] focus-within:border-[#59701E] transition-all">
+              <div className="pl-4 pr-2 text-[#59701E]">
+                <Search className="w-4 h-4" strokeWidth={2} />
               </div>
               <input
                 type="text"
@@ -173,13 +173,13 @@ function getNearestDistrictName(lat: number, lon: number): string {
                 value={selectedCrop}
                 onChange={(e) => onCropChange(e.target.value)}
                 placeholder="Type or select any crop e.g. Groundnut, Tomato, Ginger, Garlic..."
-                className="w-full py-3 pr-3 text-sm bg-transparent text-stone-900 font-bold focus:outline-none placeholder:text-stone-400 placeholder:font-normal"
+                className="w-full py-3.5 pr-3 text-xs sm:text-sm bg-transparent text-[#022113] font-medium focus:outline-none placeholder:text-[#889988]"
               />
               {selectedCrop && (
                 <button
                   type="button"
                   onClick={() => onCropChange('')}
-                  className="mr-3 text-xs text-stone-400 hover:text-stone-700 bg-stone-100 hover:bg-stone-200 px-2.5 py-1 rounded-full cursor-pointer transition-colors"
+                  className="mr-3 text-xs text-[#59701E] hover:text-[#022113] bg-[#E5EAD7] hover:bg-[#d5dec2] px-3 py-1 rounded-full cursor-pointer transition-colors font-semibold"
                 >
                   Clear
                 </button>
@@ -268,21 +268,20 @@ function getNearestDistrictName(lat: number, lon: number): string {
             </datalist>
           </div>
 
-
           {/* Variety Selector */}
           {activeCommodity && activeCommodity.varieties && activeCommodity.varieties.length > 0 && (
-            <div className="flex items-center gap-2 text-xs font-mono text-stone-600 bg-[#F4F8F5] p-3 rounded-2xl border border-[#CCE0D0]">
-              <span className="text-[#123826] font-bold">{t.varietyLabel}:</span>
+            <div className="flex items-center gap-2 text-xs text-[#022113] bg-[#F8FAF6] p-3 rounded-2xl border border-[#E5EAD7]">
+              <span className="font-bold font-['Montserrat',sans-serif]">{t.varietyLabel}:</span>
               <div className="flex flex-wrap gap-1.5">
                 {activeCommodity.varieties.map(v => (
                   <button
                     key={v}
                     type="button"
                     onClick={() => onVarietyChange(v)}
-                    className={`px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                    className={`px-3 py-1 rounded-full text-xs font-['Montserrat',sans-serif] font-medium transition-all cursor-pointer ${
                       variety === v 
-                        ? 'bg-[#123826] text-white shadow-xs font-bold' 
-                        : 'bg-white text-stone-700 hover:text-stone-900 border border-[#CCE0D0]'
+                        ? 'bg-[#546C18] text-[#DFEB38] font-bold shadow-xs' 
+                        : 'bg-[#F0F4EC] text-[#022113] hover:bg-[#DFEB38] border border-[#E5EAD7]'
                     }`}
                   >
                     {v}
@@ -297,19 +296,19 @@ function getNearestDistrictName(lat: number, lon: number): string {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {/* Location Input */}
           <div>
-            <label className="block text-xs uppercase tracking-wider font-semibold text-stone-600 mb-1.5 flex items-center justify-between">
-              <span className="flex items-center gap-1.5 text-stone-800">
-                <MapPin className="w-3.5 h-3.5 text-[#2E7D32]" />
+            <label className="block text-xs font-bold font-['Montserrat',sans-serif] uppercase tracking-wider text-[#022113] mb-2 flex items-center justify-between">
+              <span className="flex items-center gap-1.5 text-[#022113]">
+                <MapPin className="w-3.5 h-3.5 text-[#59701E]" strokeWidth={2} />
                 {t.locationLabel}
               </span>
               <button
                 type="button"
                 onClick={handleGpsClick}
                 disabled={locating}
-                className="text-xs text-[#123826] hover:text-[#2E7D32] font-semibold flex items-center gap-1 bg-[#EBF5ED] hover:bg-[#D5E7D8] px-2.5 py-0.5 rounded-full border border-[#CCE0D0] transition-all cursor-pointer shadow-xs"
+                className="text-xs text-[#022113] hover:text-[#022113] flex items-center gap-1 bg-[#F0F4EC] hover:bg-[#DFEB38] px-3 py-1 rounded-full border border-[#E5EAD7] transition-all cursor-pointer font-semibold"
                 aria-label="Use device GPS location"
               >
-                <Navigation className={`w-3 h-3 ${locating ? 'animate-spin text-[#2E7D32]' : 'text-[#2E7D32]'}`} />
+                <Navigation className={`w-3 h-3 ${locating ? 'animate-spin text-[#59701E]' : 'text-[#59701E]'}`} strokeWidth={2} />
                 <span>{locating ? 'Locating...' : (gpsActive ? t.gpsActive : t.useGps)}</span>
               </button>
             </label>
@@ -321,39 +320,39 @@ function getNearestDistrictName(lat: number, lon: number): string {
                 setGpsActive(false);
               }}
               placeholder={t.locationPlaceholder}
-              className="w-full px-4 py-3 text-sm bg-white/70 backdrop-blur-xs border border-white/80 rounded-2xl text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[#2E7D32] focus:ring-1 focus:ring-[#2E7D32] transition-all font-medium shadow-xs"
+              className="w-full px-4 py-3.5 text-xs sm:text-sm bg-[#F8FAF6] border border-[#E5EAD7] rounded-2xl text-[#022113] placeholder-[#889988] focus:outline-none focus:border-[#59701E] transition-all"
             />
-            <p className="text-[11px] text-stone-500 mt-1">
+            <p className="text-[11px] font-mono text-[#59701E] mt-1.5">
               Popular APMCs: Ballari, Kolar, Bangalore, Belagavi, Mysuru, Nashik, Pune, Guntur, Agra...
             </p>
           </div>
 
           {/* Quantity Input with Unit Selector */}
           <div>
-            <label className="block text-xs uppercase tracking-wider font-semibold text-stone-600 mb-1.5 flex items-center gap-1.5">
-              <Scale className="w-3.5 h-3.5 text-[#2E7D32]" />
-              <span className="text-stone-800">{t.quantityLabel}</span>
+            <label className="block text-xs font-bold font-['Montserrat',sans-serif] uppercase tracking-wider text-[#022113] mb-2 flex items-center gap-1.5">
+              <Scale className="w-3.5 h-3.5 text-[#59701E]" strokeWidth={2} />
+              <span className="text-[#022113]">{t.quantityLabel}</span>
             </label>
-            <div className="flex rounded-2xl overflow-hidden border border-white/80 bg-white/70 backdrop-blur-xs focus-within:border-[#2E7D32] focus-within:ring-1 focus-within:ring-[#2E7D32] transition-all shadow-xs">
+            <div className="flex rounded-2xl overflow-hidden border border-[#E5EAD7] bg-[#F8FAF6] focus-within:border-[#59701E] transition-all">
               <input
                 type="number"
                 min="0.1"
                 step="any"
                 value={quantity}
                 onChange={(e) => onQuantityChange(Math.max(0, parseFloat(e.target.value) || 0))}
-                className="w-full px-4 py-3 text-sm bg-transparent text-stone-900 font-mono font-bold focus:outline-none"
+                className="w-full px-4 py-3.5 text-xs sm:text-sm bg-transparent text-[#022113] font-['Montserrat',sans-serif] font-bold focus:outline-none"
                 placeholder="500"
               />
-              <div className="flex bg-[#F4F8F5] border-l border-[#CCE0D0] shrink-0 p-1 gap-1">
+              <div className="flex bg-[#F0F4EC] border-l border-[#E5EAD7] shrink-0 p-1 gap-1">
                 {(['kg', 'quintal', 'tonne'] as CropUnit[]).map((u) => (
                   <button
                     key={u}
                     type="button"
                     onClick={() => onUnitChange(u)}
-                    className={`px-3 py-1.5 text-xs font-semibold rounded-xl transition-all cursor-pointer ${
+                    className={`px-3 py-1.5 text-xs font-['Montserrat',sans-serif] rounded-xl transition-all cursor-pointer ${
                       unit === u 
-                        ? 'bg-[#123826] text-white shadow-xs font-bold' 
-                        : 'text-stone-600 hover:text-stone-900 hover:bg-white/60'
+                        ? 'bg-[#546C18] text-[#DFEB38] font-bold shadow-xs' 
+                        : 'text-[#59701E] hover:text-[#546C18]'
                     }`}
                   >
                     {u === 'kg' ? t.unitKg : (u === 'quintal' ? t.unitQuintal : t.unitTonne)}
@@ -363,12 +362,12 @@ function getNearestDistrictName(lat: number, lon: number): string {
             </div>
 
             {/* Live Normalized Quantity Preview */}
-            <div className="mt-2 text-xs bg-[#F4F8F5] border border-[#CCE0D0] text-stone-700 px-3.5 py-2 rounded-xl flex items-center justify-between font-mono">
-              <span className="text-stone-500">{t.normalizedPreview}:</span>
+            <div className="mt-2 text-xs bg-[#F8FAF6] border border-[#E5EAD7] text-[#022113] px-3.5 py-2 rounded-2xl flex items-center justify-between">
+              <span className="text-[#59701E]">{t.normalizedPreview}:</span>
               <span>
                 {numQty > 0 ? (
                   <>
-                    <strong className="text-[#123826] font-bold">{normalizedInQuintals} Quintals</strong> <span className="text-stone-500">({normalizedInKg} kg / {normalizedInTonnes} t)</span>
+                    <strong className="text-[#022113] font-bold font-['Montserrat',sans-serif]">{normalizedInQuintals} Quintals</strong> <span className="text-[#59701E]">({normalizedInKg} kg / {normalizedInTonnes} t)</span>
                   </>
                 ) : '0 Quintals'}
               </span>
@@ -381,16 +380,16 @@ function getNearestDistrictName(lat: number, lon: number): string {
           <button
             type="submit"
             disabled={isLoading || !selectedCrop}
-            className="w-full bg-[#123826] hover:bg-[#1B4D35] text-white font-black text-base py-3.5 px-6 rounded-2xl shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed font-['Syne',sans-serif] tracking-wide"
+            className="w-full bg-[#DFEB38] hover:bg-[#d0dc32] text-[#022113] font-bold font-['Montserrat',sans-serif] text-xs uppercase tracking-wider py-4 px-6 rounded-full transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-[0_4px_16px_rgba(223,235,56,0.3)]"
           >
             {isLoading ? (
               <>
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <div className="w-4 h-4 border-2 border-[#022113] border-t-transparent rounded-full animate-spin" />
                 <span>{t.searching}</span>
               </>
             ) : (
               <>
-                <Search className="w-5 h-5 text-[#A5D6A7]" />
+                <Search className="w-4 h-4 text-[#022113]" strokeWidth={2.5} />
                 <span>{t.searchButton}</span>
               </>
             )}

@@ -161,104 +161,104 @@ export const MarketComparison: React.FC<MarketComparisonProps> = ({
   }
 
   return (
-    <section className="space-y-4">
+    <section className="space-y-5 font-['Open_Sans',sans-serif]">
       {/* Section Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E6E1D7] pb-3.5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E5EAD7] pb-4">
         <div>
-          <h2 className="text-xl sm:text-2xl font-black text-[#153424] flex items-center gap-2.5 font-['Syne',sans-serif]">
+          <h2 className="text-xl sm:text-2xl font-bold text-[#022113] flex items-center gap-2.5 tracking-tight font-['Montserrat',sans-serif]">
             <span>{t.marketComparisonTitle}</span>
-            <span className="text-xs font-mono font-bold bg-[#EAEFE9] text-[#153424] border border-[#D6DFD4] px-2.5 py-0.5 rounded-full">
+            <span className="text-xs font-bold font-['Montserrat',sans-serif] uppercase tracking-wider bg-[#F0F4EC] text-[#59701E] border border-[#E5EAD7] px-3 py-1 rounded-full">
               {processedMarkets.length} of {markets.length} Mandis
             </span>
           </h2>
-          <p className="text-xs sm:text-sm text-stone-600 mt-1 max-w-3xl">
+          <p className="text-xs sm:text-sm text-[#4A5568] mt-1 max-w-3xl font-normal leading-relaxed">
             {t.marketComparisonSubtitle}
           </p>
         </div>
 
-        {/* PRD Principle Notice */}
-        <div className="flex items-center gap-1.5 text-xs font-mono text-stone-600 bg-[#FAF8F5] px-3 py-1.5 rounded-lg border border-[#E6E1D7] self-start sm:self-auto">
-          <Info className="w-3.5 h-3.5 text-[#2E7D32] shrink-0" />
-          <span>Verified APMC Rates • Sorted by Distance & Arrivals</span>
+        {/* Verified Notice */}
+        <div className="flex items-center gap-1.5 text-xs font-semibold text-[#022113] bg-[#DFEB38] px-3.5 py-1.5 rounded-full shadow-xs self-start sm:self-auto font-['Montserrat',sans-serif]">
+          <Info className="w-3.5 h-3.5 text-[#022113] shrink-0" strokeWidth={2} />
+          <span>Verified APMC Rates • Zero Price Hallucination</span>
         </div>
       </div>
 
       {/* Aggregate Stats Matrix */}
       {stats && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="glass-card-subtle p-3 rounded-xl border border-white/80 shadow-xs">
-            <span className="text-[10px] font-mono uppercase tracking-wider text-stone-500 block">Floor Price</span>
-            <strong className="text-base text-stone-800 font-mono tnum">₹{stats.minPrice.toLocaleString('en-IN')}/q</strong>
+          <div className="bg-white p-5 rounded-3xl border border-[#E5EAD7] shadow-[0_4px_24px_rgba(2,33,19,0.04)]">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[#59701E] font-['Montserrat',sans-serif] block">Floor Price</span>
+            <strong className="text-base sm:text-lg text-[#022113] font-['Montserrat',sans-serif] font-bold block mt-1">₹{stats.minPrice.toLocaleString('en-IN')}/q</strong>
           </div>
-          <div className="glass-card-subtle p-3 rounded-xl border border-white/80 shadow-xs">
-            <span className="text-[10px] font-mono uppercase tracking-wider text-[#153424] font-bold block flex items-center gap-1">
-              <TrendingUp className="w-3 h-3 text-[#2E7D32]" />
+          <div className="bg-white p-5 rounded-3xl border border-[#E5EAD7] shadow-[0_4px_24px_rgba(2,33,19,0.04)]">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[#59701E] font-['Montserrat',sans-serif] block flex items-center gap-1">
+              <TrendingUp className="w-3.5 h-3.5 text-[#59701E]" strokeWidth={2} />
               Ceiling Modal Price
             </span>
-            <strong className="text-base text-[#153424] font-mono font-black tnum">₹{stats.maxPrice.toLocaleString('en-IN')}/q</strong>
+            <strong className="text-base sm:text-lg text-[#022113] font-['Montserrat',sans-serif] font-bold block mt-1">₹{stats.maxPrice.toLocaleString('en-IN')}/q</strong>
           </div>
-          <div className="glass-card-subtle p-3 rounded-xl border border-white/80 shadow-xs">
-            <span className="text-[10px] font-mono uppercase tracking-wider text-stone-500 block">Regional Average</span>
-            <strong className="text-base text-stone-800 font-mono tnum">₹{stats.avgPrice.toLocaleString('en-IN')}/q</strong>
+          <div className="bg-white p-5 rounded-3xl border border-[#E5EAD7] shadow-[0_4px_24px_rgba(2,33,19,0.04)]">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[#59701E] font-['Montserrat',sans-serif] block">Regional Average</span>
+            <strong className="text-base sm:text-lg text-[#022113] font-['Montserrat',sans-serif] font-bold block mt-1">₹{stats.avgPrice.toLocaleString('en-IN')}/q</strong>
           </div>
-          <div className="glass-card-subtle p-3 rounded-xl border border-amber-200/80 bg-amber-50/40 shadow-xs">
-            <span className="text-[10px] font-mono uppercase tracking-wider text-amber-800 font-bold block flex items-center gap-1">
-              <BarChart2 className="w-3 h-3 text-amber-700" />
+          <div className="bg-white p-5 rounded-3xl border border-[#E5EAD7] shadow-[0_4px_24px_rgba(2,33,19,0.04)]">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[#59701E] font-['Montserrat',sans-serif] block flex items-center gap-1">
+              <BarChart2 className="w-3.5 h-3.5 text-[#59701E]" strokeWidth={2} />
               Total Recorded Arrivals
             </span>
-            <strong className="text-base text-amber-900 font-mono font-bold tnum">{stats.totalArrivals.toLocaleString('en-IN')} q</strong>
+            <strong className="text-base sm:text-lg text-[#022113] font-['Montserrat',sans-serif] font-bold block mt-1">{stats.totalArrivals.toLocaleString('en-IN')} q</strong>
           </div>
         </div>
       )}
 
       {/* Interactive Toolbar */}
-      <div className="glass-card p-3.5 rounded-xl border border-white/80 flex flex-wrap items-center justify-between gap-3 text-xs shadow-xs">
+      <div className="bg-white p-4 rounded-3xl border border-[#E5EAD7] shadow-[0_4px_24px_rgba(2,33,19,0.04)] flex flex-wrap items-center justify-between gap-3 text-xs">
         <div className="flex flex-wrap items-center gap-2">
           {/* State Filter */}
-          <div className="flex items-center gap-1.5 bg-white/60 backdrop-blur-xs px-2.5 py-1.5 rounded-lg border border-white/80 font-mono">
-            <Filter className="w-3.5 h-3.5 text-stone-500" />
-            <span className="text-stone-600 hidden sm:inline font-medium">State:</span>
+          <div className="flex items-center gap-1.5 bg-[#F8FAF6] px-3 py-1.5 rounded-full border border-[#E5EAD7]">
+            <Filter className="w-3.5 h-3.5 text-[#59701E]" strokeWidth={2} />
+            <span className="text-[#59701E] font-semibold hidden sm:inline">State:</span>
             <select
               value={selectedState}
               onChange={(e) => setSelectedState(e.target.value)}
-              className="bg-transparent text-[#153424] font-semibold cursor-pointer focus:outline-none"
+              className="bg-transparent text-[#022113] font-semibold cursor-pointer focus:outline-none"
             >
-              <option value="all" className="bg-white text-stone-900">All States</option>
+              <option value="all" className="bg-white text-[#022113]">All States</option>
               {availableStates.map(st => (
-                <option key={st} value={st} className="bg-white text-stone-900">{st}</option>
+                <option key={st} value={st} className="bg-white text-[#022113]">{st}</option>
               ))}
             </select>
           </div>
 
           {/* Distance Radius Filter */}
-          <div className="flex items-center gap-1.5 bg-white/60 backdrop-blur-xs px-2.5 py-1.5 rounded-lg border border-white/80 font-mono">
-            <span className="text-stone-600 font-medium">Radius:</span>
+          <div className="flex items-center gap-1.5 bg-[#F8FAF6] px-3 py-1.5 rounded-full border border-[#E5EAD7]">
+            <span className="text-[#59701E] font-semibold">Radius:</span>
             <select
               value={maxDistance}
               onChange={(e) => setMaxDistance(Number(e.target.value))}
-              className="bg-transparent text-[#153424] font-semibold cursor-pointer focus:outline-none"
+              className="bg-transparent text-[#022113] font-semibold cursor-pointer focus:outline-none"
             >
-              <option value={0} className="bg-white text-stone-900">Any Distance</option>
-              <option value={50} className="bg-white text-stone-900">&lt; 50 km</option>
-              <option value={100} className="bg-white text-stone-900">&lt; 100 km</option>
-              <option value={200} className="bg-white text-stone-900">&lt; 200 km</option>
+              <option value={0} className="bg-white text-[#022113]">Any Distance</option>
+              <option value={50} className="bg-white text-[#022113]">&lt; 50 km</option>
+              <option value={100} className="bg-white text-[#022113]">&lt; 100 km</option>
+              <option value={200} className="bg-white text-[#022113]">&lt; 200 km</option>
             </select>
           </div>
 
           {/* Sort By */}
-          <div className="flex items-center gap-1.5 bg-white/60 backdrop-blur-xs px-2.5 py-1.5 rounded-lg border border-white/80 font-mono">
-            <ArrowUpDown className="w-3.5 h-3.5 text-stone-500" />
-            <span className="text-stone-600 hidden sm:inline font-medium">Sort:</span>
+          <div className="flex items-center gap-1.5 bg-[#F8FAF6] px-3 py-1.5 rounded-full border border-[#E5EAD7]">
+            <ArrowUpDown className="w-3.5 h-3.5 text-[#59701E]" strokeWidth={2} />
+            <span className="text-[#59701E] font-semibold hidden sm:inline">Sort:</span>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="bg-transparent text-[#153424] font-semibold cursor-pointer focus:outline-none"
+              className="bg-transparent text-[#022113] font-semibold cursor-pointer focus:outline-none"
             >
-              <option value="distance" className="bg-white text-stone-900">Nearest Distance</option>
-              <option value="price_desc" className="bg-white text-stone-900">Highest Modal Price</option>
-              <option value="price_asc" className="bg-white text-stone-900">Lowest Modal Price</option>
-              <option value="arrivals_desc" className="bg-white text-stone-900">Highest Arrivals</option>
-              <option value="spread_asc" className="bg-white text-stone-900">Tightest Spread</option>
+              <option value="distance" className="bg-white text-[#022113]">Nearest Distance</option>
+              <option value="price_desc" className="bg-white text-[#022113]">Highest Modal Price</option>
+              <option value="price_asc" className="bg-white text-[#022113]">Lowest Modal Price</option>
+              <option value="arrivals_desc" className="bg-white text-[#022113]">Highest Arrivals</option>
+              <option value="spread_asc" className="bg-white text-[#022113]">Tightest Spread</option>
             </select>
           </div>
 
@@ -266,80 +266,76 @@ export const MarketComparison: React.FC<MarketComparisonProps> = ({
           {(selectedState !== 'all' || maxDistance > 0 || searchQuery.trim() || sortBy !== 'distance') && (
             <button
               onClick={handleResetFilters}
-              className="flex items-center gap-1 px-2.5 py-1.5 text-stone-600 hover:text-[#153424] font-mono rounded-lg hover:bg-[#ECE8DE] transition-colors cursor-pointer"
+              className="flex items-center gap-1 px-3 py-1.5 text-[#59701E] hover:text-[#022113] font-semibold rounded-full hover:bg-[#F0F4EC] transition-colors cursor-pointer"
             >
-              <RotateCcw className="w-3 h-3" />
+              <RotateCcw className="w-3 h-3" strokeWidth={2} />
               <span>Reset</span>
             </button>
           )}
         </div>
 
         {/* Quick Search */}
-        <div className="relative w-full sm:w-52">
-          <Search className="w-3.5 h-3.5 text-stone-400 absolute left-2.5 top-2.5" />
+        <div className="relative w-full sm:w-56">
+          <Search className="w-3.5 h-3.5 text-[#59701E] absolute left-3 top-2.5" strokeWidth={2} />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Filter mandi..."
-            className="w-full pl-8 pr-3 py-1.5 border border-[#CCE0D0] rounded-lg bg-white text-[#162E21] font-mono text-xs placeholder:text-stone-400 focus:outline-none focus:border-[#2E7D32]"
+            className="w-full pl-8 pr-3 py-2 border border-[#E5EAD7] rounded-full bg-[#F8FAF6] text-[#022113] text-xs placeholder:text-[#889988] focus:outline-none focus:border-[#59701E]"
           />
         </div>
       </div>
 
-      {/* Grid of market cards with staggered slide-up animations */}
+      {/* Grid of market cards */}
       {processedMarkets.length > 0 ? (
-        <div className="space-y-5">
+        <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {visibleMarkets.map((market, idx) => (
-              <div
+            {visibleMarkets.map((market) => (
+              <MarketCard
                 key={market.market_id}
-                className={`animate-slide-up stagger-${Math.min((idx % 6) + 1, 6)} hover-slide-up`}
-              >
-                <MarketCard
-                  market={market}
-                  language={language}
-                  isSelected={selectedMarket?.market_id === market.market_id}
-                  onSelect={onSelectMarket}
-                  onExplainTerm={onExplainTerm}
-                />
-              </div>
+                market={market}
+                language={language}
+                isSelected={selectedMarket?.market_id === market.market_id}
+                onSelect={onSelectMarket}
+                onExplainTerm={onExplainTerm}
+              />
             ))}
           </div>
 
           {/* Centered Show More Button */}
           {processedMarkets.length > INITIAL_BATCH_SIZE && (
-            <div className="flex justify-center pt-5 pb-2">
+            <div className="flex justify-center pt-4 pb-2">
               {visibleCount < processedMarkets.length ? (
                 <button
                   type="button"
                   onClick={() => setVisibleCount(prev => Math.min(prev + BATCH_INCREMENT, processedMarkets.length))}
-                  className="px-8 py-3 rounded-full bg-[#153424] hover:bg-[#1f4a34] text-white text-xs font-bold transition-all shadow-md hover:shadow-lg flex items-center gap-2 cursor-pointer group"
+                  className="px-8 py-3 rounded-full bg-[#DFEB38] hover:bg-[#d0df2a] text-[#022113] text-xs font-black font-['Montserrat',sans-serif] uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer shadow-md hover:scale-105"
                 >
                   <span>{SHOW_MORE_LABELS[language] || 'Show More'}</span>
-                  <ChevronDown className="w-4 h-4 text-emerald-300 group-hover:translate-y-0.5 transition-transform" />
+                  <ChevronDown className="w-4 h-4 text-[#022113]" strokeWidth={2.5} />
                 </button>
               ) : (
                 <button
                   type="button"
                   onClick={() => setVisibleCount(INITIAL_BATCH_SIZE)}
-                  className="px-7 py-2.5 rounded-full bg-white hover:bg-stone-100 text-stone-800 border border-[#E6E1D7] text-xs font-bold transition-all shadow-xs flex items-center gap-2 cursor-pointer group"
+                  className="px-7 py-2.5 rounded-full bg-white hover:bg-[#F8FAF6] text-[#022113] border border-[#E5EAD7] text-xs font-bold font-['Montserrat',sans-serif] uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer shadow-xs"
                 >
                   <span>{SHOW_LESS_LABELS[language] || 'Show Less'}</span>
-                  <ChevronUp className="w-4 h-4 text-stone-600 group-hover:-translate-y-0.5 transition-transform" />
+                  <ChevronUp className="w-4 h-4 text-[#022113]" strokeWidth={2} />
                 </button>
               )}
             </div>
           )}
         </div>
       ) : (
-        <div className="verda-card rounded-2xl border border-[#E2ECE3] p-8 text-center space-y-3">
-          <p className="text-stone-600 text-sm font-mono">
+        <div className="bg-white rounded-3xl border border-[#E5EAD7] p-8 text-center space-y-3 shadow-xs">
+          <p className="text-[#4A5568] text-xs">
             No markets match your current filter parameters.
           </p>
           <button
             onClick={handleResetFilters}
-            className="px-4 py-2 bg-[#2E7D32] text-white text-xs font-bold rounded-xl hover:bg-[#1B5E20] transition-colors cursor-pointer font-mono shadow-sm"
+            className="px-6 py-2.5 bg-[#DFEB38] text-[#022113] text-xs font-bold rounded-full hover:bg-[#d0dc32] transition-colors cursor-pointer font-['Montserrat',sans-serif]"
           >
             Show All {markets.length} Markets
           </button>

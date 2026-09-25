@@ -1,0 +1,8 @@
+# Visual Directives: Verge / Scrolltide Style
+
+- Backgrounds: Use `#08080A` for canvas, `#0F0F12` for cards. Never use pure #000000 or default Tailwind gray-900.
+- Borders: All containers must use subtle hairline borders: `border border-white/[0.08]`. Never use solid opaque borders.
+- Emojis: Strictly forbidden. Use only `lucide-react` SVG icons with `strokeWidth={1.5}`.
+- Spacing: Sections need `py-16 md:py-24`, cards need `p-6 md:p-8`, grids need `gap-6 md:gap-8`. No cramped layouts.
+- Typography: Headings must use `text-white tracking-[-0.03em] font-semibold`. Subtext must use `text-zinc-400`. Monospace metadata uses `font-mono text-xs uppercase tracking-wider text-zinc-500`.
+- Preserve Logic: When refactoring, do NOT change state, hooks, props, or API integrations. Only edit JSX classes, wrappers, and motion primitives.
