@@ -1,0 +1,232 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: 'Syne', sans-serif;
+  --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'Inter', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  --color-forest-950: #0A1F14;
+  --color-forest-900: #123826;
+  --color-forest-850: #16422D;
+  --color-forest-800: #1B4D35;
+  --color-forest-700: #236344;
+  --color-forest-600: #2E7D55;
+
+  --color-leaf-600: #2E7D32;
+  --color-leaf-500: #3FA744;
+  --color-leaf-400: #4CAF50;
+  --color-leaf-100: #E8F5E9;
+  --color-leaf-50: #F1F8F2;
+
+  --color-sage-100: #EBF5ED;
+  --color-sage-50: #F4F8F5;
+
+  --color-harvest-500: #E8A238;
+  --color-harvest-600: #D97706;
+  --color-harvest-50: #FEF8ED;
+
+  --color-cream-bg: #FBFDF9;
+  --color-cream-card: #FFFFFF;
+  --color-cream-border: #E2ECE3;
+}
+
+@layer base {
+  body {
+    background-color: #FBFDF9;
+    color: #162E21;
+    font-family: var(--font-sans);
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  /* Monospace figures for financial rates */
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* AgriMate Card & Container System */
+.agrimate-card,
+.verda-card {
+  background: #FFFFFF;
+  border: 1px solid #E2ECE3;
+  box-shadow: 0 4px 20px -2px rgba(18, 56, 38, 0.05), 0 2px 6px -1px rgba(18, 56, 38, 0.03);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.agrimate-card:hover,
+.verda-card:hover {
+  border-color: #C3D9C6;
+  box-shadow: 0 12px 30px -4px rgba(18, 56, 38, 0.08), 0 4px 10px -2px rgba(18, 56, 38, 0.04);
+}
+
+.agrimate-card-elevated,
+.verda-card-elevated {
+  background: #FFFFFF;
+  border: 1px solid #D1E3D4;
+  box-shadow: 0 16px 36px -6px rgba(18, 56, 38, 0.09), 0 6px 16px -2px rgba(18, 56, 38, 0.05);
+}
+
+.agrimate-card-sage,
+.verda-card-sage {
+  background: #F4F8F5;
+  border: 1px solid #E0ECE2;
+}
+
+.agrimate-badge,
+.verda-badge {
+  background: #EBF5ED;
+  color: #123826;
+  border: 1px solid #D5E7D8;
+}
+
+/* Backward compatibility classes mapped to AgriMate light styling */
+.glass-panel {
+  background: #FFFFFF;
+  border: 1px solid #E2ECE3;
+  box-shadow: 0 6px 24px -2px rgba(18, 56, 38, 0.06);
+}
+
+.glass-panel-elevated {
+  background: #FFFFFF;
+  border: 1px solid #CCE0D0;
+  box-shadow: 0 14px 35px -4px rgba(18, 56, 38, 0.09);
+}
+
+.glow-mint {
+  box-shadow: 0 0 25px -4px rgba(46, 125, 50, 0.25);
+}
+
+.glow-subtle {
+  box-shadow: 0 0 35px -5px rgba(46, 125, 50, 0.12);
+}
+
+.hairline-border {
+  border: 1px solid #E2ECE3;
+}
+
+/* Custom Light Nature Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #F4F8F5;
+}
+::-webkit-scrollbar-thumb {
+  background: #C8DCD0;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #2E7D32;
+}
+
+/* Print styles - Isolated, clean, single/multi-page printouts */
+@media print {
+  @page {
+    margin: 10mm;
+    size: auto;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 11pt;
+    line-height: 1.35;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .no-print,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  header,
+  footer,
+  nav {
+    display: none !important;
+  }
+
+  /* -----------------------------------------------------------------
+     CASE 1: MANDI DISPATCH GATE SLIP MODAL PRINT MODE
+     Completely hides the entire background website (all 12 pages)
+     and renders ONLY the official gate voucher slip as a single 1-page pass.
+     ----------------------------------------------------------------- */
+  body.printing-mandi-slip main,
+  body.mandi-slip-modal-open main,
+  body:has(#printable-voucher) main {
+    display: none !important;
+  }
+
+  body.printing-mandi-slip [role="dialog"],
+  body.mandi-slip-modal-open [role="dialog"],
+  body:has(#printable-voucher) [role="dialog"] {
+    position: static !important;
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  body.printing-mandi-slip [role="dialog"] > div,
+  body.mandi-slip-modal-open [role="dialog"] > div,
+  body:has(#printable-voucher) [role="dialog"] > div {
+    max-width: 100% !important;
+    width: 100% !important;
+    box-shadow: none !important;
+    border: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  #printable-voucher {
+    display: block !important;
+    width: 100% !important;
+    max-width: 740px !important;
+    margin: 0 auto !important;
+    padding: 20px 24px !important;
+    background: white !important;
+    border: 2px solid #123826 !important;
+    border-radius: 16px !important;
+    box-shadow: none !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+  }
+
+  /* -----------------------------------------------------------------
+     CASE 2: SELLING PROTOCOL CHECKLIST PRINT MODE
+     Hides all other dashboard sections so only the 11-step checklist
+     prints cleanly without the rest of the website.
+     ----------------------------------------------------------------- */
+  body.printing-checklist .print-hide-on-checklist {
+    display: none !important;
+  }
+
+  body.printing-checklist #printable-checklist {
+    display: block !important;
+    width: 100% !important;
+    max-width: 800px !important;
+    margin: 0 auto !important;
+    padding: 20px !important;
+    background: white !important;
+    border: 1px solid #123826 !important;
+    border-radius: 16px !important;
+    box-shadow: none !important;
+    page-break-after: auto;
+  }
+
+  body.printing-checklist #printable-checklist .no-print {
+    display: none !important;
+  }
+
+  .glass-panel, .glass-panel-elevated, .verda-card {
+    box-shadow: none !important;
+  }
+}

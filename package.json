@@ -1,0 +1,19 @@
+{
+  "name": "mandimate-app",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "AI-assisted agricultural market intelligence platform for small and marginal farmers",
+  "private": true,
+  "scripts": {
+    "build": "npm run build --prefix client",
+    "start": "node server/server.js",
+    "install:all": "npm install --prefix client && npm install --prefix server",
+    "dev:server": "cd server && npm run dev",
+    "dev:client": "cd client && npm run dev",
+    "test": "node tests/run-checks.js && node tests/hackathon-checks.js && node tests/api-integration-test.js"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "keywords": ["agriculture", "mandimate", "apmc", "agmarknet", "farmer", "ai"]
+}

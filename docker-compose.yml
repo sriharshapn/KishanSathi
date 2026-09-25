@@ -1,0 +1,23 @@
+version: "3.9"
+
+services:
+  agrimate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: agrimate_fullstack
+    restart: unless-stopped
+    ports:
+      - "5001:5001"
+    environment:
+      - NODE_ENV=production
+      - PORT=5001
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+    volumes:
+      - ./server/database:/app/server/database
+      - ./server/uploads:/app/server/uploads
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:5001/api/health').then(r => r.ok ? process.exit(0) : process.exit(1)).catch(() => process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
