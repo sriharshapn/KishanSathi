@@ -140,7 +140,7 @@ export interface UserPreferences {
   preferred_units: CropUnit;
 }
 
-export type NavigationPage = 'home' | 'dashboard' | 'about' | 'services' | 'crops' | 'dispatch' | 'contact' | 'advisory' | 'diagnose' | 'satellite' | 'gov';
+export type NavigationPage = 'home' | 'dashboard' | 'about' | 'services' | 'crops' | 'dispatch' | 'contact' | 'advisory' | 'diagnose' | 'satellite' | 'gov' | 'weather';
 
 // ── Crop Advisory ──────────────────────────────────
 export interface CropRecommendation {
@@ -211,4 +211,70 @@ export interface NDVIResult {
   cloud_coverage_pct: number;
   timeseries: NDVITimeseriesItem[];
 }
+
+// ── Live Microclimate Weather ─────────────────────
+export interface WeatherCurrent {
+  temperature: number;
+  apparent_temperature: number;
+  condition: string;
+  icon: string;
+  temp_max: number;
+  temp_min: number;
+  humidity: number;
+  dew_point: number;
+  pressure: number;
+  pressure_trend: string;
+  wind_speed: number;
+  wind_gust: number;
+  wind_direction: number;
+  wind_cardinal: string;
+  wind_force: string;
+  visibility_km: number;
+  visibility_status: string;
+  aqi: number;
+  aqi_status: string;
+  uv_index: number;
+  uv_status: string;
+  sunrise: string;
+  sunset: string;
+  sun_hours: string;
+  updated_at: string;
+}
+
+export interface WeatherDayForecast {
+  date: string;
+  day_name: string;
+  temp_max: number;
+  temp_min: number;
+  precip_prob: number;
+  weather_code: number;
+  condition: string;
+  icon: string;
+}
+
+export interface WeatherHourlyItem {
+  time_label: string;
+  temp: number;
+  precip_prob: number;
+}
+
+export interface WeatherAgriAdvisory {
+  spraying: string;
+  irrigation: string;
+  harvesting: string;
+}
+
+export interface WeatherData {
+  summary: string;
+  rainfall: string;
+  source: string;
+  is_live: boolean;
+  coords: { lat: number; lon: number };
+  location_name: string;
+  current: WeatherCurrent;
+  forecast_7day: WeatherDayForecast[];
+  hourly_trend: WeatherHourlyItem[];
+  agri_advisory: WeatherAgriAdvisory;
+}
+
 

@@ -18,7 +18,8 @@ import {
   Search, 
   Send,
   X,
-  MapPin
+  MapPin,
+  CloudSun
 } from 'lucide-react';
 
 interface HomePageProps {
@@ -58,11 +59,12 @@ export const HomePage: React.FC<HomePageProps> = ({
     { label: 'Satellite Crop NDVI', value: '0.76', sub: 'Dense vegetative canopy', icon: Sprout, color: 'text-[#2E7D32] bg-[#EBF5ED]' },
   ];
 
-  // AgriMate 5 Core Pillars
+  // AgriMate 6 Core Pillars
   const categoryBadges = [
+    { title: 'Weather Radar', desc: 'Hyperlocal hourly curve, AQI, UV & 7-day outlook', icon: CloudSun, bg: 'bg-[#E0F2FE] text-[#0284C7] border-[#BAE6FD]', link: 'weather' as NavigationPage },
     { title: 'AI Advisory', desc: 'Precision crop recommendations via Gemini Flash', icon: Sprout, bg: 'bg-[#EBF5ED] text-[#2E7D32] border-[#CCE0D0]', link: 'advisory' as NavigationPage },
     { title: 'Disease Scan', desc: 'Pathogen detection with Gemini Vision AI', icon: BookOpen, bg: 'bg-[#FEF3C7] text-[#D97706] border-[#FDE68A]', link: 'diagnose' as NavigationPage },
-    { title: 'Sentinel NDVI', desc: '10m satellite vegetative canopy monitoring', icon: Sun, bg: 'bg-[#E0F2FE] text-[#0284C7] border-[#BAE6FD]', link: 'satellite' as NavigationPage },
+    { title: 'Sentinel NDVI', desc: '10m satellite vegetative canopy monitoring', icon: Sun, bg: 'bg-[#FEF9C3] text-[#CA8A04] border-[#FEF08A]', link: 'satellite' as NavigationPage },
     { title: 'Market Access', desc: 'Verified APMC mandi rates for 15,000+ growers', icon: Store, bg: 'bg-[#F3E8FF] text-[#7C3AED] border-[#DDD6FE]', link: 'dashboard' as NavigationPage },
     { title: 'Inter-State Mesh', desc: 'Digital Public Good cross-state collaboration', icon: Tractor, bg: 'bg-[#FFF8E7] text-[#E8A238] border-[#FFE0A3]', link: 'gov' as NavigationPage },
   ];
@@ -313,6 +315,13 @@ export const HomePage: React.FC<HomePageProps> = ({
                 </button>
 
                 <button
+                  onClick={() => onNavigate('weather')}
+                  className="px-4 py-3 rounded-2xl bg-[#E0F2FE] hover:bg-[#cce7fa] text-[#0284C7] font-bold text-xs sm:text-sm flex items-center gap-1.5 border border-[#BAE6FD] transition-all cursor-pointer"
+                >
+                  <span>🌤️ Weather Radar</span>
+                </button>
+
+                <button
                   onClick={() => onNavigate('diagnose')}
                   className="px-4 py-3 rounded-2xl bg-white hover:bg-[#F2F8F4] text-[#123826] font-semibold text-xs sm:text-sm border border-[#CCE0D0] shadow-xs flex items-center gap-2 transition-all cursor-pointer"
                 >
@@ -455,8 +464,8 @@ export const HomePage: React.FC<HomePageProps> = ({
             </div>
           </div>
 
-          {/* SECTION 3: AGRIHUB 5 QUICK CATEGORY BADGES STRIP */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
+          {/* SECTION 3: AGRIHUB 6 QUICK CATEGORY BADGES STRIP */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
             {categoryBadges.map((badge, i) => {
               const Icon = badge.icon;
               return (

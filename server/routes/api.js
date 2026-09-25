@@ -407,12 +407,12 @@ router.get('/satellite/ndvi', (req, res) => {
   res.json({ success: true, state, district, ...ndviData });
 });
 
-// ── Live Weather (Open-Meteo Integration) ─────────
-// GET /api/weather?state=Karnataka&district=Ballari
+// ── Live Weather (Open-Meteo High-Resolution NWP) ─
+// GET /api/weather?state=Karnataka&district=Ballari&lat=13.03&lon=77.57
 router.get('/weather', async (req, res) => {
-  const { state = 'Karnataka', district = 'Ballari' } = req.query;
+  const { state = 'Karnataka', district = 'Ballari', lat, lon } = req.query;
   try {
-    const weather = await getLiveWeather(state, district);
+    const weather = await getLiveWeather(state, district, lat ? Number(lat) : undefined, lon ? Number(lon) : undefined);
     res.json({ success: true, state, district, weather });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });

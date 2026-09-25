@@ -44,6 +44,7 @@ export const Header: React.FC<HeaderProps> = ({
   const primaryNavItems: { id: NavigationPage; label: string; icon?: string; badge?: string }[] = [
     { id: 'home', label: t.navHome },
     { id: 'dashboard', label: t.navDashboard },
+    { id: 'weather', label: t.navWeather || 'Weather', icon: '🌤️', badge: 'Live' },
     { id: 'advisory', label: t.navAdvisory || 'AI Advisory', icon: '🌱', badge: 'AI' },
     { id: 'diagnose', label: t.navDiagnose || 'Disease Scan', icon: '🔬', badge: 'Vision' },
     { id: 'satellite', label: t.navSatellite || 'Field NDVI', icon: '🛰️' },

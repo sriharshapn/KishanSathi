@@ -26,6 +26,7 @@ import { AdvisoryPage } from './pages/AdvisoryPage';
 import { DiagnosePage } from './pages/DiagnosePage';
 import { SatellitePage } from './pages/SatellitePage';
 import { GovDashboardPage } from './pages/GovDashboardPage';
+import { WeatherDashboardPage } from './pages/WeatherDashboardPage';
 import { 
   saveSearchResultToCache, 
   getCachedSearchResult 
@@ -382,6 +383,13 @@ export const App: React.FC = () => {
               onNavigate={navigateTo}
             />
           </div>
+        )}
+
+        {currentPage === 'weather' && (
+          <WeatherDashboardPage
+            language={language}
+            onNavigate={navigateTo}
+          />
         )}
 
         {currentPage === 'advisory' && (
