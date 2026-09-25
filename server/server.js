@@ -68,6 +68,7 @@ process.on('unhandledRejection', (reason) => {
 
 import db from './database/db.js';
 import { refreshCache } from './services/marketService.js';
+import { syncMarketData } from './services/syncService.js';
 
 // Initialize SQLite database and warm cache
 async function startServer() {
@@ -76,6 +77,20 @@ async function startServer() {
     await db.initDb();
     await refreshCache();
     console.log("🌾 AgriMate SQLite database ready and verified.");
+
+    // Initial Live Sync with Data.gov.in on startup
+    syncMarketData()
+      .then(res => console.log(`🌾 Initial live mandi sync complete: ${res.records_synced} records (${res.live_records || 0} live Data.gov.in)`))
+      .catch(err => console.warn("🌾 Initial live sync notice:", err.message));
+
+    // Recurring 30-minute live sync for continuous fresh mandi rate updates
+    const SYNC_INTERVAL_MS = 30 * 60 * 1000;
+    setInterval(() => {
+      console.log("🌾 [Auto-Sync] Scheduled 30-min live mandi rate update running...");
+      syncMarketData()
+        .then(res => console.log(`🌾 [Auto-Sync] Complete: ${res.records_synced} records (${res.live_records || 0} live Data.gov.in)`))
+        .catch(err => console.warn("🌾 [Auto-Sync Notice] Background sync failed:", err.message));
+    }, SYNC_INTERVAL_MS);
 
     app.listen(PORT, '0.0.0.0', () => {
       console.log(`🌾 AgriMate full-stack service running on http://localhost:${PORT}`);
