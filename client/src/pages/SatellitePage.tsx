@@ -279,6 +279,19 @@ export const SatellitePage: React.FC<SatellitePageProps> = ({ onNavigate }) => {
     fetchNDVI(selectedState, selectedDistrict);
   }, [selectedState, selectedDistrict]);
 
+  // Custom Polygon Adjustment state
+  const [customAdjustedArea, setCustomAdjustedArea] = useState<number | null>(null);
+  const [customAdjustedPolygon, setCustomAdjustedPolygon] = useState<{ lat: number; lng: number }[] | null>(null);
+
+  const handlePolygonAdjust = (coords: { lat: number; lng: number }[], areaHa: number) => {
+    setCustomAdjustedArea(areaHa);
+    setCustomAdjustedPolygon(coords);
+    if (focusedField) {
+      setFocusedField(prev => prev ? { ...prev, area_hectares: areaHa } : null);
+      setFields(prev => prev.map(f => f.field_id === focusedField.field_id ? { ...f, area_hectares: areaHa } : f));
+    }
+  };
+
   const handleStateChange = (st: string) => {
     setSelectedState(st);
     const districtList = STATE_DISTRICTS[st] || [];
@@ -286,6 +299,8 @@ export const SatellitePage: React.FC<SatellitePageProps> = ({ onNavigate }) => {
     setSelectedDistrict(newDist);
     setFocusedField(null);
     setGovPlotResult(null);
+    setCustomAdjustedArea(null);
+    setCustomAdjustedPolygon(null);
     setTalukInput(newDist);
     setVillageInput('Central Village');
     setGpsMessage(null);
@@ -295,6 +310,8 @@ export const SatellitePage: React.FC<SatellitePageProps> = ({ onNavigate }) => {
     setSelectedDistrict(dist);
     setFocusedField(null);
     setGovPlotResult(null);
+    setCustomAdjustedArea(null);
+    setCustomAdjustedPolygon(null);
     setTalukInput(dist);
     setVillageInput('Central Village');
     setGpsMessage(null);
@@ -304,12 +321,17 @@ export const SatellitePage: React.FC<SatellitePageProps> = ({ onNavigate }) => {
     setFocusedField(field);
     setSelectedState(field.state);
     setSelectedDistrict(field.district);
+    setCustomAdjustedArea(null);
+    setCustomAdjustedPolygon(null);
     setGpsMessage(null);
     fetchNDVI(field.state, field.district);
   };
 
   const handleClearFocus = () => {
     setFocusedField(null);
+    setGovPlotResult(null);
+    setCustomAdjustedArea(null);
+    setCustomAdjustedPolygon(null);
   };
 
   const handleUseGps = () => {
@@ -407,9 +429,10 @@ export const SatellitePage: React.FC<SatellitePageProps> = ({ onNavigate }) => {
   }, [focusedField, govPlotResult, selectedState, selectedDistrict]);
 
   const currentArea = useMemo(() => {
+    if (customAdjustedArea !== null) return customAdjustedArea;
     if (focusedField) return focusedField.area_hectares;
     return 2.5; // Default representative plot size in ha
-  }, [focusedField]);
+  }, [customAdjustedArea, focusedField]);
 
   // Dynamic Sub-Plot Zonation breakdown
   const zonation = useMemo(() => {
@@ -568,6 +591,20 @@ export const SatellitePage: React.FC<SatellitePageProps> = ({ onNavigate }) => {
               </button>
             </div>
           )}
+
+          {customAdjustedArea && (
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs font-semibold font-['Montserrat',sans-serif] animate-in fade-in">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Adjusted: {customAdjustedArea} ha</span>
+              <button
+                onClick={() => { setCustomAdjustedArea(null); setCustomAdjustedPolygon(null); }}
+                className="ml-1 text-emerald-700 hover:text-emerald-900 p-0.5 rounded cursor-pointer"
+                title="Reset custom boundary"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Spectral View Mode Toggle */}
@@ -617,23 +654,25 @@ export const SatellitePage: React.FC<SatellitePageProps> = ({ onNavigate }) => {
           </button>
         </div>
 
-        <button
-          onClick={() => setShowGeeScriptModal(true)}
-          className="px-3.5 py-1.5 rounded-full bg-[#F0F4EC] hover:bg-[#E5EAD7] border border-[#022113]/8 text-[#022113] text-xs font-bold font-['Montserrat',sans-serif] transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
-          title="Inspect Google Earth Engine (GEE) Python/JS API Pipeline"
-        >
-          <Database className="w-3.5 h-3.5 text-[#59701E]" strokeWidth={2} />
-          <span>GEE Script</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowGeeScriptModal(true)}
+            className="px-3.5 py-1.5 rounded-full bg-[#F0F4EC] hover:bg-[#E5EAD7] border border-[#022113]/8 text-[#022113] text-xs font-bold font-['Montserrat',sans-serif] transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
+            title="Inspect Google Earth Engine (GEE) Python/JS API Pipeline"
+          >
+            <Database className="w-3.5 h-3.5 text-[#59701E]" strokeWidth={2} />
+            <span>GEE Script</span>
+          </button>
 
-        <button
-          onClick={() => fetchNDVI(selectedState, selectedDistrict)}
-          disabled={loading}
-          className="p-2 rounded-full bg-[#DFEB38] hover:bg-[#d0df2a] text-[#022113] transition-colors cursor-pointer shadow-xs"
-          title="Refresh Sentinel-2 satellite pass"
-        >
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} strokeWidth={2} />
-        </button>
+          <button
+            onClick={() => fetchNDVI(selectedState, selectedDistrict)}
+            disabled={loading}
+            className="p-2 rounded-full bg-[#DFEB38] hover:bg-[#d0df2a] text-[#022113] transition-colors cursor-pointer shadow-xs"
+            title="Refresh Sentinel-2 satellite pass"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} strokeWidth={2} />
+          </button>
+        </div>
       </div>
 
       {/* GPS Locked Status Notice */}
@@ -695,8 +734,9 @@ export const SatellitePage: React.FC<SatellitePageProps> = ({ onNavigate }) => {
             onViewModeChange={setViewMode}
             focusedField={focusedField}
             areaHectares={currentArea}
-            customGovPolygon={govPlotResult?.geospatial?.boundary_polygon}
+            customGovPolygon={customAdjustedPolygon || govPlotResult?.geospatial?.boundary_polygon}
             govPlotRecord={govPlotResult}
+            onPolygonAdjust={handlePolygonAdjust}
           />
 
           <div className="pt-2 flex flex-wrap items-center justify-between text-xs text-[#718096] gap-2">
