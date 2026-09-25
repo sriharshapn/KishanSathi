@@ -17,8 +17,195 @@ import {
   PhoneCall,
   X,
   Copy,
-  Check
+  Check,
+  LocateFixed
 } from 'lucide-react';
+
+export const STATE_DISTRICTS: Record<string, string[]> = {
+  'Karnataka': [
+    'Ballari', 'Kolar', 'Chikkaballapur', 'Bengaluru Urban', 'Bengaluru Rural',
+    'Belagavi', 'Mysuru', 'Davanagere', 'Dharwad', 'Mandya', 'Hassan',
+    'Shivamogga', 'Haveri', 'Tumakuru', 'Bagalkote', 'Vijayapura',
+    'Kalaburagi', 'Raichur', 'Koppal', 'Yadgir', 'Chitradurga', 'Gadag',
+    'Udupi', 'Dakshina Kannada', 'Uttara Kannada', 'Kodagu', 'Chamarajanagar',
+    'Ramanagara', 'Chikkamagaluru', 'Bidar', 'Vijayanagara'
+  ],
+  'Maharashtra': [
+    'Nashik', 'Pune', 'Ahmednagar', 'Solapur', 'Kolhapur', 'Satara', 'Sangli',
+    'Jalgaon', 'Dhule', 'Chhatrapati Sambhajinagar', 'Jalna', 'Parbhani',
+    'Beed', 'Nanded', 'Dharashiv', 'Latur', 'Buldhana', 'Akola', 'Washim',
+    'Amravati', 'Yavatmal', 'Wardha', 'Nagpur', 'Bhandara', 'Gondia',
+    'Chandrapur', 'Gadchiroli', 'Nandurbar', 'Raigad', 'Ratnagiri', 'Sindhudurg', 'Thane', 'Palghar'
+  ],
+  'Punjab': [
+    'Ludhiana', 'Jalandhar', 'Amritsar', 'Patiala', 'Bathinda', 'Sangrur',
+    'Firozpur', 'Fazilka', 'Gurdaspur', 'Hoshiarpur', 'Kapurthala', 'Mansa',
+    'Moga', 'Muktsar', 'Shaheed Bhagat Singh Nagar', 'Rupnagar', 'SAS Nagar (Mohali)',
+    'Tarn Taran', 'Barnala', 'Fatehgarh Sahib', 'Faridkot', 'Malerkotla', 'Pathankot'
+  ],
+  'Tamil Nadu': [
+    'Thanjavur', 'Tiruvarur', 'Nagapattinam', 'Madurai', 'Coimbatore',
+    'Tiruchirappalli', 'Salem', 'Erode', 'Tirunelveli', 'Dindigul', 'Theni',
+    'Virudhunagar', 'Cuddalore', 'Villupuram', 'Vellore', 'Tiruvannamalai',
+    'Kanchipuram', 'Tiruvallur', 'Dharmapuri', 'Krishnagiri', 'Namakkal',
+    'Karur', 'Perambalur', 'Pudukkottai', 'Sivaganga', 'Ramanathapuram',
+    'Thoothukudi', 'Kanyakumari', 'Tiruppur', 'Ranipet', 'Tenkasi', 'Mayiladuthurai'
+  ],
+  'Andhra Pradesh': [
+    'Guntur', 'Kurnool', 'Krishna', 'West Godavari', 'East Godavari',
+    'Anantapur', 'Chittoor', 'YSR Kadapa', 'Prakasam', 'SPSR Nellore',
+    'Visakhapatnam', 'Vizianagaram', 'Srikakulam', 'Bapatla', 'Palnadu',
+    'Nandyal', 'Eluru', 'Kakinada', 'Konaseema', 'Anakapalli', 'Alluri Sitharama Raju',
+    'Parvathipuram Manyam', 'Sri Sathya Sai', 'Annamayya', 'Tirupati'
+  ],
+  'Telangana': [
+    'Warangal', 'Karimnagar', 'Nalgonda', 'Khammam', 'Nizamabad',
+    'Mahabubnagar', 'Medak', 'Rangareddy', 'Adilabad', 'Sangareddy',
+    'Siddipet', 'Suryapet', 'Jagtial', 'Peddapalli', 'Kamareddy',
+    'Mancherial', 'Nirmal', 'Kumuram Bheem Asifabad', 'Bhadradri Kothagudem',
+    'Mahabubabad', 'Jangaon', 'Jayashankar Bhupalpally', 'Jogulamba Gadwal',
+    'Wanaparthy', 'Nagarkurnool', 'Narayanpet', 'Vikarabad', 'Medchal Malkajgiri', 'Hyderabad'
+  ],
+  'Uttar Pradesh': [
+    'Agra', 'Aligarh', 'Mathura', 'Meerut', 'Muzaffarnagar', 'Saharanpur',
+    'Bareilly', 'Moradabad', 'Kanpur Nagar', 'Lucknow', 'Varanasi',
+    'Prayagraj', 'Gorakhpur', 'Jhansi', 'Barabanki', 'Ayodhya', 'Basti',
+    'Hardoi', 'Lakhimpur Kheri', 'Sitapur', 'Bulandshahr', 'Firozabad',
+    'Mainpuri', 'Etah', 'Badaun', 'Shahjahanpur', 'Pilibhit', 'Rampur',
+    'Bijnor', 'Amroha', 'Sambhal', 'Hathras', 'Kasganj', 'Farrukhabad',
+    'Kannauj', 'Etawah', 'Auraiya', 'Kanpur Dehat', 'Unnao', 'Rae Bareli',
+    'Amethi', 'Sultanpur', 'Fatehpur', 'Pratapgarh', 'Kaushambi', 'Banda',
+    'Hamirpur', 'Mahoba', 'Chitrakoot', 'Jalaun', 'Lalitpur', 'Mirzapur',
+    'Sonbhadra', 'Bhadohi', 'Jaunpur', 'Ghazipur', 'Chandauli', 'Ballia',
+    'Mau', 'Azamgarh', 'Deoria', 'Kushinagar', 'Maharajganj', 'Siddharthnagar',
+    'Sant Kabir Nagar', 'Gonda', 'Balrampur', 'Shravasti', 'Bahraich'
+  ],
+  'Rajasthan': [
+    'Jaipur', 'Jodhpur', 'Kota', 'Bikaner', 'Sri Ganganagar', 'Hanumangarh',
+    'Alwar', 'Bharatpur', 'Ajmer', 'Udaipur', 'Sikar', 'Jhunjhunu', 'Nagaur',
+    'Pali', 'Barmer', 'Jalore', 'Bhilwara', 'Chittorgarh', 'Tonk',
+    'Sawai Madhopur', 'Bundi', 'Baran', 'Jhalawar', 'Churu', 'Dausa',
+    'Dholpur', 'Karauli', 'Rajsamand', 'Banswara', 'Dungarpur', 'Pratapgarh', 'Sirohi', 'Jaisalmer'
+  ],
+  'Gujarat': [
+    'Rajkot', 'Surat', 'Ahmedabad', 'Vadodara', 'Bhavnagar', 'Jamnagar',
+    'Junagadh', 'Amreli', 'Mehsana', 'Banaskantha', 'Sabarkantha', 'Patan',
+    'Kheda', 'Anand', 'Bharuch', 'Navsari', 'Valsad', 'Surendranagar',
+    'Morbi', 'Gir Somnath', 'Devbhumi Dwarka', 'Porbandar', 'Kutch',
+    'Gandhinagar', 'Aravalli', 'Mahisagar', 'Panchmahal', 'Dahod',
+    'Chhota Udaipur', 'Narmada', 'Tapi', 'Dang', 'Botad'
+  ],
+  'Madhya Pradesh': [
+    'Indore', 'Ujjain', 'Bhopal', 'Jabalpur', 'Gwalior', 'Sagar', 'Dewas',
+    'Dhar', 'Khargone', 'Khandwa', 'Ratlam', 'Mandsaur', 'Neemuch',
+    'Narmadapuram', 'Sehore', 'Raisen', 'Harda', 'Vidisha', 'Chhindwara',
+    'Narsinghpur', 'Rewa', 'Satna', 'Seoni', 'Balaghat', 'Betul', 'Burhanpur',
+    'Barwani', 'Alirajpur', 'Jhabua', 'Agar Malwa', 'Shajapur', 'Rajgarh',
+    'Guna', 'Ashoknagar', 'Shivpuri', 'Sheopur', 'Morena', 'Bhind', 'Datia'
+  ],
+  'Haryana': [
+    'Karnal', 'Kurukshetra', 'Ambala', 'Yamunanagar', 'Panipat', 'Sonipat',
+    'Rohtak', 'Hisar', 'Sirsa', 'Fatehabad', 'Jind', 'Kaithal', 'Bhiwani',
+    'Charkhi Dadri', 'Mahendragarh', 'Rewari', 'Jhajjar', 'Gurugram',
+    'Faridabad', 'Palwal', 'Nuh', 'Panchkula'
+  ]
+};
+
+export interface DistrictCentroid {
+  district: string;
+  state: string;
+  lat: number;
+  lon: number;
+}
+
+export const DISTRICT_CENTROIDS: DistrictCentroid[] = [
+  // Karnataka
+  { district: 'Ballari', state: 'Karnataka', lat: 15.1394, lon: 76.9214 },
+  { district: 'Bengaluru Urban', state: 'Karnataka', lat: 12.9716, lon: 77.5946 },
+  { district: 'Kolar', state: 'Karnataka', lat: 13.1378, lon: 78.1291 },
+  { district: 'Belagavi', state: 'Karnataka', lat: 15.8497, lon: 74.4977 },
+  { district: 'Mysuru', state: 'Karnataka', lat: 12.2958, lon: 76.6394 },
+  { district: 'Davanagere', state: 'Karnataka', lat: 14.4644, lon: 75.9218 },
+  { district: 'Dharwad', state: 'Karnataka', lat: 15.4589, lon: 75.0078 },
+  { district: 'Kalaburagi', state: 'Karnataka', lat: 17.3297, lon: 76.8343 },
+  { district: 'Shivamogga', state: 'Karnataka', lat: 13.9299, lon: 75.5681 },
+  { district: 'Raichur', state: 'Karnataka', lat: 16.2120, lon: 77.3439 },
+  { district: 'Tumakuru', state: 'Karnataka', lat: 13.3409, lon: 77.1010 },
+  // Maharashtra
+  { district: 'Nashik', state: 'Maharashtra', lat: 19.9975, lon: 73.7898 },
+  { district: 'Pune', state: 'Maharashtra', lat: 18.5204, lon: 73.8567 },
+  { district: 'Nagpur', state: 'Maharashtra', lat: 21.1458, lon: 79.0882 },
+  { district: 'Chhatrapati Sambhajinagar', state: 'Maharashtra', lat: 19.8762, lon: 75.3433 },
+  { district: 'Ahmednagar', state: 'Maharashtra', lat: 19.0952, lon: 74.7480 },
+  { district: 'Solapur', state: 'Maharashtra', lat: 17.6599, lon: 75.9064 },
+  { district: 'Kolhapur', state: 'Maharashtra', lat: 16.7050, lon: 74.2433 },
+  { district: 'Wardha', state: 'Maharashtra', lat: 20.7453, lon: 78.6022 },
+  { district: 'Amravati', state: 'Maharashtra', lat: 20.9320, lon: 77.7523 },
+  { district: 'Jalgaon', state: 'Maharashtra', lat: 21.0077, lon: 75.5626 },
+  // Punjab
+  { district: 'Ludhiana', state: 'Punjab', lat: 30.9010, lon: 75.8573 },
+  { district: 'Amritsar', state: 'Punjab', lat: 31.6340, lon: 74.8723 },
+  { district: 'Jalandhar', state: 'Punjab', lat: 31.3260, lon: 75.5762 },
+  { district: 'Patiala', state: 'Punjab', lat: 30.3398, lon: 76.3869 },
+  { district: 'Bathinda', state: 'Punjab', lat: 30.2110, lon: 74.9455 },
+  // Tamil Nadu
+  { district: 'Thanjavur', state: 'Tamil Nadu', lat: 10.7870, lon: 79.1378 },
+  { district: 'Madurai', state: 'Tamil Nadu', lat: 9.9252, lon: 78.1198 },
+  { district: 'Coimbatore', state: 'Tamil Nadu', lat: 11.0168, lon: 76.9558 },
+  { district: 'Tiruchirappalli', state: 'Tamil Nadu', lat: 10.7905, lon: 78.7047 },
+  { district: 'Salem', state: 'Tamil Nadu', lat: 11.6643, lon: 78.1460 },
+  // Andhra Pradesh
+  { district: 'Guntur', state: 'Andhra Pradesh', lat: 16.3067, lon: 80.4365 },
+  { district: 'Kurnool', state: 'Andhra Pradesh', lat: 15.8281, lon: 78.0373 },
+  { district: 'Visakhapatnam', state: 'Andhra Pradesh', lat: 17.6868, lon: 83.2185 },
+  { district: 'Tirupati', state: 'Andhra Pradesh', lat: 13.6288, lon: 79.4192 },
+  { district: 'Anantapur', state: 'Andhra Pradesh', lat: 14.6819, lon: 77.6006 },
+  // Telangana
+  { district: 'Warangal', state: 'Telangana', lat: 17.9689, lon: 79.5941 },
+  { district: 'Hyderabad', state: 'Telangana', lat: 17.3850, lon: 78.4867 },
+  { district: 'Karimnagar', state: 'Telangana', lat: 18.4386, lon: 79.1288 },
+  { district: 'Nizamabad', state: 'Telangana', lat: 18.6725, lon: 78.0941 },
+  // Uttar Pradesh
+  { district: 'Agra', state: 'Uttar Pradesh', lat: 27.1767, lon: 78.0081 },
+  { district: 'Lucknow', state: 'Uttar Pradesh', lat: 26.8467, lon: 80.9462 },
+  { district: 'Kanpur Nagar', state: 'Uttar Pradesh', lat: 26.4499, lon: 80.3319 },
+  { district: 'Varanasi', state: 'Uttar Pradesh', lat: 25.3176, lon: 82.9739 },
+  { district: 'Prayagraj', state: 'Uttar Pradesh', lat: 25.4358, lon: 81.8463 },
+  { district: 'Meerut', state: 'Uttar Pradesh', lat: 28.9845, lon: 77.7064 },
+  // Rajasthan
+  { district: 'Jaipur', state: 'Rajasthan', lat: 26.9124, lon: 75.7873 },
+  { district: 'Jodhpur', state: 'Rajasthan', lat: 26.2389, lon: 73.0243 },
+  { district: 'Kota', state: 'Rajasthan', lat: 25.2138, lon: 75.8648 },
+  { district: 'Bikaner', state: 'Rajasthan', lat: 28.0229, lon: 73.3119 },
+  { district: 'Udaipur', state: 'Rajasthan', lat: 24.5854, lon: 73.7125 },
+  // Gujarat
+  { district: 'Rajkot', state: 'Gujarat', lat: 22.3039, lon: 70.8022 },
+  { district: 'Ahmedabad', state: 'Gujarat', lat: 23.0225, lon: 72.5714 },
+  { district: 'Surat', state: 'Gujarat', lat: 21.1702, lon: 72.8311 },
+  { district: 'Vadodara', state: 'Gujarat', lat: 22.3072, lon: 73.1812 },
+  // Madhya Pradesh
+  { district: 'Indore', state: 'Madhya Pradesh', lat: 22.7196, lon: 75.8577 },
+  { district: 'Bhopal', state: 'Madhya Pradesh', lat: 23.2599, lon: 77.4126 },
+  { district: 'Jabalpur', state: 'Madhya Pradesh', lat: 23.1815, lon: 79.9864 },
+  { district: 'Gwalior', state: 'Madhya Pradesh', lat: 26.2183, lon: 78.1828 },
+  // Haryana
+  { district: 'Karnal', state: 'Haryana', lat: 29.6857, lon: 76.9905 },
+  { district: 'Hisar', state: 'Haryana', lat: 29.1492, lon: 75.7217 },
+  { district: 'Ambala', state: 'Haryana', lat: 30.3782, lon: 76.7767 },
+  { district: 'Rohtak', state: 'Haryana', lat: 28.8955, lon: 76.6066 }
+];
+
+function getDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
 
 interface AdvisoryPageProps {
   language: Language;
@@ -34,6 +221,10 @@ export const AdvisoryPage: React.FC<AdvisoryPageProps> = ({ language, onNavigate
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<AdvisoryResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // GPS Geolocation state
+  const [gpsLoading, setGpsLoading] = useState(false);
+  const [gpsMessage, setGpsMessage] = useState<string | null>(null);
 
   // History & IVR Telephony
   const [historyOpen, setHistoryOpen] = useState(false);
@@ -72,6 +263,7 @@ export const AdvisoryPage: React.FC<AdvisoryPageProps> = ({ language, onNavigate
       if (item.crop) setCrop(item.crop);
       if (item.soil_type) setSoilType(item.soil_type);
       if (item.season) setSeason(item.season);
+      setGpsMessage(null);
     }
     setHistoryOpen(false);
   };
@@ -100,20 +292,104 @@ export const AdvisoryPage: React.FC<AdvisoryPageProps> = ({ language, onNavigate
     }
   };
 
-  const states = [
-    'Karnataka', 'Maharashtra', 'Punjab', 'Tamil Nadu', 
-    'Andhra Pradesh', 'Uttar Pradesh', 'Rajasthan', 'Gujarat', 
-    'Madhya Pradesh', 'Haryana', 'Telangana'
-  ];
+  const handleStateChange = (newState: string) => {
+    setState(newState);
+    const validDistricts = STATE_DISTRICTS[newState] || [];
+    if (!validDistricts.includes(district)) {
+      setDistrict(validDistricts[0] || '');
+    }
+    setGpsMessage(null);
+  };
 
-  const handleGenerate = async () => {
+  const handleUseGps = () => {
+    if (!navigator.geolocation) {
+      setError('Geolocation is not supported by your browser.');
+      return;
+    }
+    setGpsLoading(true);
+    setGpsMessage(null);
+    setError(null);
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+
+        let matchedState = '';
+        let matchedDistrict = '';
+
+        // 1. Try free reverse geocoding
+        try {
+          const response = await fetch(
+            `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`
+          );
+          if (response.ok) {
+            const data = await response.json();
+            const foundState = Object.keys(STATE_DISTRICTS).find(s => 
+              data.principalSubdivision && data.principalSubdivision.toLowerCase().includes(s.toLowerCase())
+            );
+            if (foundState) {
+              matchedState = foundState;
+              const districtList = STATE_DISTRICTS[foundState];
+              const foundDistrict = districtList.find(d => 
+                (data.city && data.city.toLowerCase().includes(d.toLowerCase())) ||
+                (data.locality && data.locality.toLowerCase().includes(d.toLowerCase()))
+              );
+              if (foundDistrict) {
+                matchedDistrict = foundDistrict;
+              }
+            }
+          }
+        } catch (err) {
+          console.warn('Online reverse geocoding fallback to centroid mapping:', err);
+        }
+
+        // 2. If reverse geocoding was inconclusive or offline, use nearest centroid
+        if (!matchedState || !matchedDistrict) {
+          let minDist = Infinity;
+          for (const c of DISTRICT_CENTROIDS) {
+            const dist = getDistanceKm(lat, lon, c.lat, c.lon);
+            if (dist < minDist) {
+              minDist = dist;
+              matchedState = c.state;
+              matchedDistrict = c.district;
+            }
+          }
+        }
+
+        if (matchedState && matchedDistrict) {
+          setState(matchedState);
+          setDistrict(matchedDistrict);
+          setGpsMessage(`GPS Locked: ${matchedDistrict}, ${matchedState} (${lat.toFixed(3)}°N, ${lon.toFixed(3)}°E)`);
+          // Automatically recompute advisory with new GPS location!
+          handleGenerate(matchedState, matchedDistrict);
+        } else {
+          setError('Could not pinpoint nearest agricultural district for your GPS coordinates.');
+        }
+        setGpsLoading(false);
+      },
+      (err) => {
+        setGpsLoading(false);
+        let errMsg = 'Failed to acquire GPS location.';
+        if (err.code === 1) errMsg = 'Location permission was denied. Please allow location access in your browser.';
+        else if (err.code === 2) errMsg = 'GPS position unavailable. Please choose your state & district manually.';
+        else if (err.code === 3) errMsg = 'GPS request timed out. Please try again or select manually.';
+        setError(errMsg);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+    );
+  };
+
+  const handleGenerate = async (overrideState?: string, overrideDistrict?: string) => {
+    const targetState = overrideState || state;
+    const targetDistrict = overrideDistrict || district;
     setLoading(true);
     setError(null);
     try {
       const res = await fetch('/api/advisory', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ state, district, crop, soilType, season, language })
+        body: JSON.stringify({ state: targetState, district: targetDistrict, crop, soilType, season, language })
       });
       const data = await res.json();
       if (data.success && data.advisory) {
@@ -165,34 +441,81 @@ export const AdvisoryPage: React.FC<AdvisoryPageProps> = ({ language, onNavigate
 
       {/* Field Configuration Bar */}
       <div className="bg-white rounded-2xl border border-[#CCE0D0] p-5 shadow-xs">
-        <div className="flex items-center gap-2 mb-4 pb-2 border-b border-[#E2ECE3]">
-          <MapPin className="w-4 h-4 text-[#2E7D32]" />
-          <h2 className="text-xs uppercase tracking-wider font-extrabold text-[#123826]">
-            Configure Field & Agro-Climatic Parameters
-          </h2>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-2 border-b border-[#E2ECE3]">
+          <div className="flex items-center gap-2">
+            <MapPin className="w-4 h-4 text-[#2E7D32]" />
+            <h2 className="text-xs uppercase tracking-wider font-extrabold text-[#123826]">
+              Configure Field & Agro-Climatic Parameters
+            </h2>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleUseGps}
+            disabled={gpsLoading}
+            className="px-3 py-1.5 rounded-xl bg-[#EBF5ED] hover:bg-[#D4EAD9] border border-[#CCE0D0] text-[#123826] text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 self-start sm:self-auto shadow-2xs"
+            title="Detect your current location and auto-populate State and District"
+          >
+            {gpsLoading ? (
+              <RefreshCw className="w-3.5 h-3.5 text-[#2E7D32] animate-spin" />
+            ) : (
+              <LocateFixed className="w-3.5 h-3.5 text-[#2E7D32]" />
+            )}
+            <span>{gpsLoading ? 'Acquiring GPS...' : 'Use My GPS'}</span>
+          </button>
         </div>
+
+        {/* GPS Locked Status Notice */}
+        {gpsMessage && (
+          <div className="mb-4 px-3.5 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs font-medium flex items-center justify-between gap-2 animate-in fade-in">
+            <div className="flex items-center gap-2">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+              </span>
+              <span>{gpsMessage}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setGpsMessage(null)}
+              className="text-emerald-700 hover:text-emerald-900 text-[11px] font-bold underline cursor-pointer"
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5">
           <div>
             <label className="block text-[11px] font-bold text-stone-600 mb-1">State</label>
             <select
               value={state}
-              onChange={(e) => setState(e.target.value)}
+              onChange={(e) => handleStateChange(e.target.value)}
               className="w-full bg-[#F7FBF8] border border-[#CCE0D0] rounded-xl px-3 py-2 text-xs font-semibold text-[#123826] focus:outline-none focus:border-[#2E7D32]"
             >
-              {states.map(s => <option key={s} value={s}>{s}</option>)}
+              {Object.keys(STATE_DISTRICTS).map(s => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
 
           <div>
-            <label className="block text-[11px] font-bold text-stone-600 mb-1">District / Region</label>
-            <input
-              type="text"
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-[11px] font-bold text-stone-600">District / Region</label>
+              <span className="text-[10px] text-[#2E7D32] font-semibold">in {state}</span>
+            </div>
+            <select
               value={district}
-              onChange={(e) => setDistrict(e.target.value)}
-              placeholder="e.g. Ballari, Kolar"
+              onChange={(e) => {
+                setDistrict(e.target.value);
+                setGpsMessage(null);
+              }}
               className="w-full bg-[#F7FBF8] border border-[#CCE0D0] rounded-xl px-3 py-2 text-xs font-semibold text-[#123826] focus:outline-none focus:border-[#2E7D32]"
-            />
+            >
+              {(STATE_DISTRICTS[state] || [district]).map((d) => (
+                <option key={d} value={d}>
+                  {d}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div>
@@ -243,6 +566,15 @@ export const AdvisoryPage: React.FC<AdvisoryPageProps> = ({ language, onNavigate
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
+              onClick={handleUseGps}
+              disabled={gpsLoading}
+              className="px-3.5 py-2 rounded-xl bg-[#F7FBF8] border border-[#CCE0D0] hover:bg-[#EBF5ED] text-[#123826] text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs disabled:opacity-50"
+            >
+              <LocateFixed className="w-3.5 h-3.5 text-[#2E7D32]" />
+              <span>{gpsLoading ? 'Detecting...' : 'Use My GPS'}</span>
+            </button>
+            <button
+              type="button"
               onClick={handleOpenHistory}
               className="px-3.5 py-2 rounded-xl bg-white border border-[#CCE0D0] hover:bg-[#F7FBF8] text-[#123826] text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
             >
@@ -258,7 +590,7 @@ export const AdvisoryPage: React.FC<AdvisoryPageProps> = ({ language, onNavigate
               <span>Kisan Call Centre IVR</span>
             </button>
             <button
-              onClick={handleGenerate}
+              onClick={() => handleGenerate()}
               disabled={loading}
               className="px-5 py-2 rounded-xl bg-[#123826] hover:bg-[#1B4D35] text-white text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-md disabled:opacity-50"
             >
@@ -287,6 +619,25 @@ export const AdvisoryPage: React.FC<AdvisoryPageProps> = ({ language, onNavigate
 
       {result && (
         <div className="space-y-6 animate-in fade-in duration-300">
+          {/* Active Field Geolocation Tag */}
+          <div className="flex items-center justify-between flex-wrap gap-2 px-1">
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#2E7D32]"></span>
+              <span className="text-xs font-bold text-[#123826]">
+                Target Region: <span className="font-extrabold text-[#2E7D32]">{district}, {state}</span>
+              </span>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-[#F7FBF8] border border-[#CCE0D0] text-stone-600">
+                {crop} • {soilType} • {season}
+              </span>
+            </div>
+            {gpsMessage && (
+              <span className="text-[11px] font-semibold text-emerald-700 flex items-center gap-1">
+                <LocateFixed className="w-3 h-3 text-emerald-600" />
+                <span>GPS Location Active</span>
+              </span>
+            )}
+          </div>
+
           {/* Telemetry Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="p-4 rounded-2xl bg-white border border-[#CCE0D0] shadow-xs flex items-start gap-3">
