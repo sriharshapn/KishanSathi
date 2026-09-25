@@ -13,6 +13,24 @@ function getClient() {
   return new GoogleGenerativeAI(key);
 }
 
+const PREFERRED_GEMINI_MODELS = ['gemini-flash-latest', 'gemini-3.8-flash', 'gemini-2.0-flash'];
+
+async function generateWithFallbackModel(client, contents) {
+  let lastErr = null;
+  for (const modelName of PREFERRED_GEMINI_MODELS) {
+    try {
+      const model = client.getGenerativeModel({ model: modelName });
+      const result = await model.generateContent(contents);
+      return result.response.text();
+    } catch (e) {
+      lastErr = e;
+      if (e.message && e.message.includes('404')) continue;
+      throw e;
+    }
+  }
+  throw lastErr;
+}
+
 export const STATE_COORDINATES = {
   'Karnataka': { lat: 15.14, lon: 76.92, defaultDistrict: 'Ballari' },
   'Maharashtra': { lat: 19.99, lon: 73.79, defaultDistrict: 'Nashik' },
@@ -122,9 +140,8 @@ Include exactly 3 crop recommendations and 4 farming calendar milestones. Return
   if (!client) return getFallbackAdvisory(state, district, crop, season, language);
 
   try {
-    const model = client.getGenerativeModel({ model: 'gemini-2.0-flash' });
-    const result = await model.generateContent(prompt);
-    const text = result.response.text().trim()
+    const rawText = await generateWithFallbackModel(client, prompt);
+    const text = rawText.trim()
       .replace(/^```json\s*/i, '').replace(/\s*```$/i, '').trim();
     return JSON.parse(text);
   } catch (err) {
@@ -181,12 +198,11 @@ Include 1-2 diagnoses. Return ONLY the JSON.`;
     const base64Image = imageData.toString('base64');
     const mimeType = imagePath.toLowerCase().endsWith('.png') ? 'image/png' : 'image/jpeg';
 
-    const model = client.getGenerativeModel({ model: 'gemini-2.0-flash' });
-    const result = await model.generateContent([
+    const rawText = await generateWithFallbackModel(client, [
       prompt,
       { inlineData: { data: base64Image, mimeType } }
     ]);
-    const text = result.response.text().trim()
+    const text = rawText.trim()
       .replace(/^```json\s*/i, '').replace(/\s*```$/i, '').trim();
     return JSON.parse(text);
   } catch (err) {
