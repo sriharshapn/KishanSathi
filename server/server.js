@@ -50,6 +50,22 @@ if (fs.existsSync(distPath)) {
   });
 }
 
+// Global error handling middleware - prevents server from crashing on route errors
+app.use((err, req, res, next) => {
+  console.error(`[Unhandled Error] ${req.method} ${req.url}:`, err);
+  if (!res.headersSent) {
+    res.status(500).json({ success: false, error: err.message || "Internal server error" });
+  }
+});
+
+// Process safety: prevent server from ever exiting on unexpected async errors
+process.on('uncaughtException', (err) => {
+  console.error('[CRITICAL] Uncaught exception caught safely:', err);
+});
+process.on('unhandledRejection', (reason) => {
+  console.error('[CRITICAL] Unhandled promise rejection caught safely:', reason);
+});
+
 import db from './database/db.js';
 import { refreshCache } from './services/marketService.js';
 
@@ -61,8 +77,9 @@ async function startServer() {
     await refreshCache();
     console.log("🌾 AgriMate SQLite database ready and verified.");
 
-    app.listen(PORT, () => {
+    app.listen(PORT, '0.0.0.0', () => {
       console.log(`🌾 AgriMate full-stack service running on http://localhost:${PORT}`);
+      console.log(`🌾 Also accessible on http://127.0.0.1:${PORT}`);
       console.log(`🌾 Verified agricultural intelligence ready.`);
     });
   } catch (err) {

@@ -16,6 +16,7 @@ import { explainMarketWithBedrock, getBedrockConfig } from '../services/bedrockS
 import { getDynamoConfig } from '../services/dynamoService.js';
 import { getSellingChecklist } from '../services/checklistService.js';
 import { parseNaturalLanguageQuery } from '../services/nlpService.js';
+import { syncMarketData, getSyncStatus } from '../services/syncService.js';
 import { 
   generateCropAdvisory, 
   diagnoseCropDisease, 
