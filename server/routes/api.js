@@ -35,7 +35,7 @@ const __dirname = path.dirname(__filename);
 const router = express.Router();
 
 // ── Upload config for disease images ──────────────
-const uploadDir = path.join(__dirname, '../uploads');
+const uploadDir = process.env.VERCEL ? path.join('/tmp', 'uploads') : path.join(__dirname, '../uploads');
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
 const upload = multer({

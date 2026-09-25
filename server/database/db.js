@@ -6,7 +6,20 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const dbFile = path.join(__dirname, 'mandimate.db');
+let dbFile = path.join(__dirname, 'mandimate.db');
+
+if (process.env.VERCEL) {
+  try {
+    const tmpDb = path.join('/tmp', 'mandimate.db');
+    if (!fs.existsSync(tmpDb) && fs.existsSync(dbFile)) {
+      fs.copyFileSync(dbFile, tmpDb);
+    }
+    dbFile = tmpDb;
+  } catch (err) {
+    console.warn('Vercel tmp sqlite copy warning:', err.message);
+  }
+}
+
 const db = new sqlite3.Database(dbFile);
 
 export function query(sql, params = []) {

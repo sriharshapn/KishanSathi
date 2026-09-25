@@ -5,15 +5,31 @@
   "description": "AI-assisted agricultural market intelligence platform for small and marginal farmers",
   "private": true,
   "scripts": {
-    "build": "npm run build --prefix client",
+    "build": "npm --prefix client install && npm --prefix client run build",
     "start": "node server/server.js",
-    "install:all": "npm install --prefix client && npm install --prefix server",
+    "install:all": "npm install && npm install --prefix client && npm install --prefix server",
     "dev:server": "cd server && npm run dev",
     "dev:client": "cd client && npm run dev",
     "test": "node tests/run-checks.js && node tests/hackathon-checks.js && node tests/api-integration-test.js && node tests/test-google-architecture.js"
   },
+  "dependencies": {
+    "@google/earthengine": "^1.7.45",
+    "@google/generative-ai": "^0.24.1",
+    "cors": "^2.8.5",
+    "dotenv": "^18.0.3",
+    "express": "^4.21.2",
+    "multer": "^2.4.0",
+    "sqlite3": "^6.0.1"
+  },
   "engines": {
     "node": ">=20.0.0"
   },
-  "keywords": ["agriculture", "mandimate", "apmc", "agmarknet", "farmer", "ai"]
+  "keywords": [
+    "agriculture",
+    "mandimate",
+    "apmc",
+    "agmarknet",
+    "farmer",
+    "ai"
+  ]
 }
