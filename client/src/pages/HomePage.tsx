@@ -10,6 +10,7 @@ import {
   ArrowRight,
   MapPin
 } from 'lucide-react';
+import { AgriIntelligenceNetworkHero } from '../components/AgriIntelligenceNetworkHero';
 
 interface HomePageProps {
   language: Language;
@@ -123,9 +124,16 @@ export const HomePage: React.FC<HomePageProps> = ({
   return (
     <div className="min-h-screen bg-[#F8FAF6] text-[#022113] font-['Open_Sans',sans-serif] selection:bg-[#DFEB38] selection:text-[#022113]">
       
-      {/* ── 1. EXACT BEHANCE HERO SECTION (Image 1) ───────────────────────── */}
-      <section className="mx-auto max-w-[1440px] px-3 sm:px-6 pt-4 pb-10">
-        
+      {/* ── 1. NATIONAL AGRICULTURAL INTELLIGENCE NETWORK HERO (Pic 1) ────────── */}
+      <section className="mx-auto max-w-[1440px] px-3 sm:px-6 pt-4 pb-4">
+        <AgriIntelligenceNetworkHero 
+          onNavigate={onNavigate} 
+          onSearchAndNavigate={onSearchAndNavigate} 
+        />
+      </section>
+
+      {/* ── 2. BEHANCE AGRO-INVEST & MANDI TERMINAL HERO (Pic 2) ───────── */}
+      <section className="mx-auto max-w-[1440px] px-3 sm:px-6 pt-2 pb-10">
         {/* Main Hero Outer Canvas Box */}
         <div className="relative rounded-[2.5rem] overflow-hidden bg-cover bg-center border border-[#022113]/10 shadow-xl"
           style={{
