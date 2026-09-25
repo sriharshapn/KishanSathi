@@ -1,8 +1,47 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import type { MarketItem, Language } from '../types';
 import { TRANSLATIONS } from '../i18n/translations';
 import { MarketCard } from './MarketCard';
-import { Info, Filter, ArrowUpDown, Search, RotateCcw, TrendingUp, BarChart2 } from 'lucide-react';
+import { 
+  Info, 
+  Filter, 
+  ArrowUpDown, 
+  Search, 
+  RotateCcw, 
+  TrendingUp, 
+  BarChart2,
+  ChevronDown,
+  ChevronUp
+} from 'lucide-react';
+
+const INITIAL_BATCH_SIZE = 6;
+const BATCH_INCREMENT = 6;
+
+const SHOW_MORE_LABELS: Record<Language, string> = {
+  en: 'Show More',
+  hi: 'और देखें',
+  kn: 'ಇನ್ನಷ್ಟು ತೋರಿಸಿ',
+  te: 'మరిన్ని చూపించు',
+  ta: 'மேலும் காட்டு',
+  mr: 'आणखी दाखवा',
+  bn: 'আরও দেখুন',
+  gu: 'વધુ જુઓ',
+  pa: 'ਹੋਰ ਵੇਖੋ',
+  ml: 'കൂടുതൽ കാണിക്കുക'
+};
+
+const SHOW_LESS_LABELS: Record<Language, string> = {
+  en: 'Show Less',
+  hi: 'कम देखें',
+  kn: 'ಕಡಿಮೆ ತೋರಿಸಿ',
+  te: 'తక్కువ చూపించు',
+  ta: 'குறைவாகக் காட்டு',
+  mr: 'कमी दाखवा',
+  bn: 'কম দেখুন',
+  gu: 'ઓછું જુઓ',
+  pa: 'ਘੱਟ ਵੇਖੋ',
+  ml: 'കുറച്ച് കാണിക്കുക'
+};
 
 interface MarketComparisonProps {
   markets: MarketItem[];
@@ -26,6 +65,7 @@ export const MarketComparison: React.FC<MarketComparisonProps> = ({
   const [maxDistance, setMaxDistance] = useState<number>(0); // 0 = all
   const [sortBy, setSortBy] = useState<string>('distance');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [visibleCount, setVisibleCount] = useState<number>(INITIAL_BATCH_SIZE);
 
   // Extract unique states
   const availableStates = useMemo(() => {
@@ -77,6 +117,25 @@ export const MarketComparison: React.FC<MarketComparisonProps> = ({
     return result;
   }, [markets, selectedState, maxDistance, searchQuery, sortBy]);
 
+  // Reset visibleCount whenever filters change
+  useEffect(() => {
+    setVisibleCount(INITIAL_BATCH_SIZE);
+  }, [selectedState, maxDistance, sortBy, searchQuery]);
+
+  // If selectedMarket is set and outside the current visible slice, auto-expand to include it
+  useEffect(() => {
+    if (selectedMarket) {
+      const idx = processedMarkets.findIndex(m => m.market_id === selectedMarket.market_id);
+      if (idx >= visibleCount) {
+        setVisibleCount(Math.ceil((idx + 1) / BATCH_INCREMENT) * BATCH_INCREMENT);
+      }
+    }
+  }, [selectedMarket, processedMarkets, visibleCount]);
+
+  const visibleMarkets = useMemo(() => {
+    return processedMarkets.slice(0, visibleCount);
+  }, [processedMarkets, visibleCount]);
+
   // Aggregate Market Stats
   const stats = useMemo(() => {
     if (markets.length === 0) return null;
@@ -94,6 +153,7 @@ export const MarketComparison: React.FC<MarketComparisonProps> = ({
     setMaxDistance(0);
     setSortBy('distance');
     setSearchQuery('');
+    setVisibleCount(INITIAL_BATCH_SIZE);
   };
 
   if (markets.length === 0) {
@@ -103,11 +163,11 @@ export const MarketComparison: React.FC<MarketComparisonProps> = ({
   return (
     <section className="space-y-4">
       {/* Section Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E2ECE3] pb-3.5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#E6E1D7] pb-3.5">
         <div>
-          <h2 className="text-xl sm:text-2xl font-black text-[#123826] flex items-center gap-2.5 font-['Syne',sans-serif]">
+          <h2 className="text-xl sm:text-2xl font-black text-[#153424] flex items-center gap-2.5 font-['Syne',sans-serif]">
             <span>{t.marketComparisonTitle}</span>
-            <span className="text-xs font-mono font-bold bg-[#EBF5ED] text-[#123826] border border-[#CCE0D0] px-2.5 py-0.5 rounded-full">
+            <span className="text-xs font-mono font-bold bg-[#EAEFE9] text-[#153424] border border-[#D6DFD4] px-2.5 py-0.5 rounded-full">
               {processedMarkets.length} of {markets.length} Mandis
             </span>
           </h2>
@@ -117,7 +177,7 @@ export const MarketComparison: React.FC<MarketComparisonProps> = ({
         </div>
 
         {/* PRD Principle Notice */}
-        <div className="flex items-center gap-1.5 text-xs font-mono text-stone-600 bg-[#F4F8F5] px-3 py-1.5 rounded-lg border border-[#E2ECE3] self-start sm:self-auto">
+        <div className="flex items-center gap-1.5 text-xs font-mono text-stone-600 bg-[#FAF8F5] px-3 py-1.5 rounded-lg border border-[#E6E1D7] self-start sm:self-auto">
           <Info className="w-3.5 h-3.5 text-[#2E7D32] shrink-0" />
           <span>Verified APMC Rates • Sorted by Distance & Arrivals</span>
         </div>
@@ -126,22 +186,22 @@ export const MarketComparison: React.FC<MarketComparisonProps> = ({
       {/* Aggregate Stats Matrix */}
       {stats && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="verda-card p-3 rounded-xl border border-[#E2ECE3]">
+          <div className="glass-card-subtle p-3 rounded-xl border border-white/80 shadow-xs">
             <span className="text-[10px] font-mono uppercase tracking-wider text-stone-500 block">Floor Price</span>
             <strong className="text-base text-stone-800 font-mono tnum">₹{stats.minPrice.toLocaleString('en-IN')}/q</strong>
           </div>
-          <div className="verda-card p-3 rounded-xl border border-[#A5D6A7] bg-[#F4F8F5]">
-            <span className="text-[10px] font-mono uppercase tracking-wider text-[#123826] font-bold block flex items-center gap-1">
+          <div className="glass-card-subtle p-3 rounded-xl border border-white/80 shadow-xs">
+            <span className="text-[10px] font-mono uppercase tracking-wider text-[#153424] font-bold block flex items-center gap-1">
               <TrendingUp className="w-3 h-3 text-[#2E7D32]" />
               Ceiling Modal Price
             </span>
-            <strong className="text-base text-[#123826] font-mono font-black tnum">₹{stats.maxPrice.toLocaleString('en-IN')}/q</strong>
+            <strong className="text-base text-[#153424] font-mono font-black tnum">₹{stats.maxPrice.toLocaleString('en-IN')}/q</strong>
           </div>
-          <div className="verda-card p-3 rounded-xl border border-[#E2ECE3]">
+          <div className="glass-card-subtle p-3 rounded-xl border border-white/80 shadow-xs">
             <span className="text-[10px] font-mono uppercase tracking-wider text-stone-500 block">Regional Average</span>
             <strong className="text-base text-stone-800 font-mono tnum">₹{stats.avgPrice.toLocaleString('en-IN')}/q</strong>
           </div>
-          <div className="verda-card p-3 rounded-xl border border-amber-200 bg-amber-50/50">
+          <div className="glass-card-subtle p-3 rounded-xl border border-amber-200/80 bg-amber-50/40 shadow-xs">
             <span className="text-[10px] font-mono uppercase tracking-wider text-amber-800 font-bold block flex items-center gap-1">
               <BarChart2 className="w-3 h-3 text-amber-700" />
               Total Recorded Arrivals
@@ -152,16 +212,16 @@ export const MarketComparison: React.FC<MarketComparisonProps> = ({
       )}
 
       {/* Interactive Toolbar */}
-      <div className="verda-card p-3.5 rounded-xl border border-[#E2ECE3] flex flex-wrap items-center justify-between gap-3 text-xs">
+      <div className="glass-card p-3.5 rounded-xl border border-white/80 flex flex-wrap items-center justify-between gap-3 text-xs shadow-xs">
         <div className="flex flex-wrap items-center gap-2">
           {/* State Filter */}
-          <div className="flex items-center gap-1.5 bg-[#F4F8F5] px-2.5 py-1.5 rounded-lg border border-[#CCE0D0] font-mono">
+          <div className="flex items-center gap-1.5 bg-white/60 backdrop-blur-xs px-2.5 py-1.5 rounded-lg border border-white/80 font-mono">
             <Filter className="w-3.5 h-3.5 text-stone-500" />
             <span className="text-stone-600 hidden sm:inline font-medium">State:</span>
             <select
               value={selectedState}
               onChange={(e) => setSelectedState(e.target.value)}
-              className="bg-transparent text-[#123826] font-semibold cursor-pointer focus:outline-none"
+              className="bg-transparent text-[#153424] font-semibold cursor-pointer focus:outline-none"
             >
               <option value="all" className="bg-white text-stone-900">All States</option>
               {availableStates.map(st => (
@@ -171,12 +231,12 @@ export const MarketComparison: React.FC<MarketComparisonProps> = ({
           </div>
 
           {/* Distance Radius Filter */}
-          <div className="flex items-center gap-1.5 bg-[#F4F8F5] px-2.5 py-1.5 rounded-lg border border-[#CCE0D0] font-mono">
+          <div className="flex items-center gap-1.5 bg-white/60 backdrop-blur-xs px-2.5 py-1.5 rounded-lg border border-white/80 font-mono">
             <span className="text-stone-600 font-medium">Radius:</span>
             <select
               value={maxDistance}
               onChange={(e) => setMaxDistance(Number(e.target.value))}
-              className="bg-transparent text-[#123826] font-semibold cursor-pointer focus:outline-none"
+              className="bg-transparent text-[#153424] font-semibold cursor-pointer focus:outline-none"
             >
               <option value={0} className="bg-white text-stone-900">Any Distance</option>
               <option value={50} className="bg-white text-stone-900">&lt; 50 km</option>
@@ -186,13 +246,13 @@ export const MarketComparison: React.FC<MarketComparisonProps> = ({
           </div>
 
           {/* Sort By */}
-          <div className="flex items-center gap-1.5 bg-[#F4F8F5] px-2.5 py-1.5 rounded-lg border border-[#CCE0D0] font-mono">
+          <div className="flex items-center gap-1.5 bg-white/60 backdrop-blur-xs px-2.5 py-1.5 rounded-lg border border-white/80 font-mono">
             <ArrowUpDown className="w-3.5 h-3.5 text-stone-500" />
             <span className="text-stone-600 hidden sm:inline font-medium">Sort:</span>
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="bg-transparent text-[#123826] font-semibold cursor-pointer focus:outline-none"
+              className="bg-transparent text-[#153424] font-semibold cursor-pointer focus:outline-none"
             >
               <option value="distance" className="bg-white text-stone-900">Nearest Distance</option>
               <option value="price_desc" className="bg-white text-stone-900">Highest Modal Price</option>
@@ -206,7 +266,7 @@ export const MarketComparison: React.FC<MarketComparisonProps> = ({
           {(selectedState !== 'all' || maxDistance > 0 || searchQuery.trim() || sortBy !== 'distance') && (
             <button
               onClick={handleResetFilters}
-              className="flex items-center gap-1 px-2.5 py-1.5 text-stone-600 hover:text-[#123826] font-mono rounded-lg hover:bg-[#EBF5ED] transition-colors cursor-pointer"
+              className="flex items-center gap-1 px-2.5 py-1.5 text-stone-600 hover:text-[#153424] font-mono rounded-lg hover:bg-[#ECE8DE] transition-colors cursor-pointer"
             >
               <RotateCcw className="w-3 h-3" />
               <span>Reset</span>
@@ -227,19 +287,50 @@ export const MarketComparison: React.FC<MarketComparisonProps> = ({
         </div>
       </div>
 
-      {/* Grid of market cards */}
+      {/* Grid of market cards with staggered slide-up animations */}
       {processedMarkets.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {processedMarkets.map((market) => (
-            <MarketCard
-              key={market.market_id}
-              market={market}
-              language={language}
-              isSelected={selectedMarket?.market_id === market.market_id}
-              onSelect={onSelectMarket}
-              onExplainTerm={onExplainTerm}
-            />
-          ))}
+        <div className="space-y-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {visibleMarkets.map((market, idx) => (
+              <div
+                key={market.market_id}
+                className={`animate-slide-up stagger-${Math.min((idx % 6) + 1, 6)} hover-slide-up`}
+              >
+                <MarketCard
+                  market={market}
+                  language={language}
+                  isSelected={selectedMarket?.market_id === market.market_id}
+                  onSelect={onSelectMarket}
+                  onExplainTerm={onExplainTerm}
+                />
+              </div>
+            ))}
+          </div>
+
+          {/* Centered Show More Button */}
+          {processedMarkets.length > INITIAL_BATCH_SIZE && (
+            <div className="flex justify-center pt-5 pb-2">
+              {visibleCount < processedMarkets.length ? (
+                <button
+                  type="button"
+                  onClick={() => setVisibleCount(prev => Math.min(prev + BATCH_INCREMENT, processedMarkets.length))}
+                  className="px-8 py-3 rounded-full bg-[#153424] hover:bg-[#1f4a34] text-white text-xs font-bold transition-all shadow-md hover:shadow-lg flex items-center gap-2 cursor-pointer group"
+                >
+                  <span>{SHOW_MORE_LABELS[language] || 'Show More'}</span>
+                  <ChevronDown className="w-4 h-4 text-emerald-300 group-hover:translate-y-0.5 transition-transform" />
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setVisibleCount(INITIAL_BATCH_SIZE)}
+                  className="px-7 py-2.5 rounded-full bg-white hover:bg-stone-100 text-stone-800 border border-[#E6E1D7] text-xs font-bold transition-all shadow-xs flex items-center gap-2 cursor-pointer group"
+                >
+                  <span>{SHOW_LESS_LABELS[language] || 'Show Less'}</span>
+                  <ChevronUp className="w-4 h-4 text-stone-600 group-hover:-translate-y-0.5 transition-transform" />
+                </button>
+              )}
+            </div>
+          )}
         </div>
       ) : (
         <div className="verda-card rounded-2xl border border-[#E2ECE3] p-8 text-center space-y-3">

@@ -388,7 +388,7 @@ export const WeatherDashboardPage: React.FC<WeatherDashboardPageProps> = ({ onNa
           {/* 7-Day Forecast Carousel Row */}
           <div className="pt-2 border-t border-[#F0F4F8] relative">
             <div className="grid grid-cols-7 gap-1.5 text-center">
-              {forecast.slice(0, 7).map((day, i) => (
+              {forecast.slice(0, 7).map((day: any, i: number) => (
                 <div 
                   key={day.date}
                   className={`p-2 rounded-2xl transition-all ${
@@ -442,7 +442,7 @@ export const WeatherDashboardPage: React.FC<WeatherDashboardPageProps> = ({ onNa
                 <path d={hourlySvgPoints.dPath} fill="none" stroke="#F97316" strokeWidth="2.5" />
 
                 {/* Data Points and Temp Labels */}
-                {hourlySvgPoints.pts.map((p, idx) => (
+                {hourlySvgPoints.pts.map((p: any, idx: number) => (
                   <g key={idx}>
                     <circle cx={p.x} cy={p.y} r="3" fill="#F97316" stroke="#FFFFFF" strokeWidth="2" />
                     <text 
@@ -466,7 +466,7 @@ export const WeatherDashboardPage: React.FC<WeatherDashboardPageProps> = ({ onNa
 
             {/* Precipitation % and Hour Labels */}
             <div className="grid grid-cols-8 text-center pt-1">
-              {hourly.map((h, i) => (
+              {hourly.map((h: any, i: number) => (
                 <div key={i} className="space-y-0.5">
                   <div className="text-[10px] text-sky-600 font-bold flex items-center justify-center gap-0.5">
                     <Droplets className="w-2.5 h-2.5 text-sky-500 fill-sky-400" />

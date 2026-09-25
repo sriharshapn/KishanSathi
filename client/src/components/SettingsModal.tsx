@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { Language, CropUnit, SyncStatusData } from '../types';
 import { X, Settings, Check, MapPin, Globe, Scale, RefreshCw, Database, ShieldCheck } from 'lucide-react';
+import { apiUrl } from '../utils/api';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -64,7 +65,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     onUnitChange(localUnit);
 
     try {
-      await fetch('/api/preferences', {
+      await fetch(apiUrl('/preferences'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -92,11 +93,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       onClick={onClose}
     >
       <div
-        className="verda-card bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-xl border border-[#CCE0D0] animate-in fade-in zoom-in-95 cursor-default"
+        className="glass-card rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-white/90 animate-in fade-in zoom-in-95 cursor-default"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="bg-[#F4F8F5] text-[#123826] px-6 py-4 flex items-center justify-between border-b border-[#E2ECE3]">
+        <div className="bg-white/40 text-[#123826] px-6 py-4 flex items-center justify-between border-b border-white/60 backdrop-blur-xs">
           <div className="flex items-center gap-2 font-bold text-base font-['Syne',sans-serif]">
             <Settings className="w-5 h-5 text-[#2E7D32]" />
             <span>Infrastructure & Farmer Profile</span>
@@ -117,17 +118,24 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <Globe className="w-3.5 h-3.5 text-[#2E7D32]" />
               <span>Preferred Dialect / Language</span>
             </label>
-            <div className="grid grid-cols-3 gap-2 font-mono text-xs">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 font-mono text-xs notranslate" translate="no">
               {[
-                { id: 'en', label: 'English' },
+                { id: 'en', label: 'English (Default)' },
                 { id: 'hi', label: 'हिन्दी (Hindi)' },
-                { id: 'kn', label: 'ಕನ್ನಡ (Kannada)' }
+                { id: 'kn', label: 'ಕನ್ನಡ (Kannada)' },
+                { id: 'te', label: 'తెలుగు (Telugu)' },
+                { id: 'ta', label: 'தமிழ் (Tamil)' },
+                { id: 'mr', label: 'मराठी (Marathi)' },
+                { id: 'bn', label: 'বাংলা (Bengali)' },
+                { id: 'gu', label: 'ગુજરાતી (Gujarati)' },
+                { id: 'pa', label: 'ਪੰਜਾਬੀ (Punjabi)' },
+                { id: 'ml', label: 'മലയാളം (Malayalam)' }
               ].map(langItem => (
                 <button
                   key={langItem.id}
                   type="button"
                   onClick={() => setLocalLang(langItem.id as Language)}
-                  className={`py-2 px-3 rounded-xl border transition-all cursor-pointer ${
+                  className={`py-2 px-3 rounded-xl border transition-all cursor-pointer text-left ${
                     localLang === langItem.id
                       ? 'bg-[#EBF5ED] border-2 border-[#2E7D32] text-[#123826] shadow-xs font-bold'
                       : 'bg-[#F4F8F5] border-[#CCE0D0] text-stone-700 hover:bg-[#EBF5ED]'
@@ -198,17 +206,25 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <span>Data Sync & Storage</span>
             </span>
 
-            <div className="p-3.5 bg-[#F7FAF8] rounded-xl border border-[#E2ECE3] text-xs font-mono space-y-2">
+            <div className="p-3.5 glass-card-subtle rounded-xl border border-white/80 text-xs font-mono space-y-2">
               <div className="flex items-center justify-between text-stone-700">
                 <span className="flex items-center gap-1.5">
                   <ShieldCheck className="w-3.5 h-3.5 text-[#2E7D32]" />
                   <span>Market Feed Source:</span>
                 </span>
-                <span className="text-stone-900 font-semibold">Agmarknet / DMI</span>
+                <span className="text-stone-900 font-semibold">Agmarknet / DMI Live</span>
               </div>
               <div className="flex items-center justify-between text-stone-700">
-                <span>Storage Status:</span>
-                <span className="text-[#123826] font-bold">Cloud & Offline Synced</span>
+                <span>Cloud Database:</span>
+                <span className="text-[#123826] font-bold">AWS DynamoDB (4 Tables)</span>
+              </div>
+              <div className="flex items-center justify-between text-stone-700">
+                <span>Edge Engine:</span>
+                <span className="text-[#2E7D32] font-semibold">Local SQLite (0% Firebase)</span>
+              </div>
+              <div className="flex items-center justify-between text-stone-700">
+                <span>AI Layer:</span>
+                <span className="text-stone-900 font-semibold">Amazon Bedrock (Claude 3)</span>
               </div>
               <div className="flex items-center justify-between text-stone-700">
                 <span>Verified APMC Records:</span>

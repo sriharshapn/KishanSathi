@@ -1,16 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import type { Language, SyncStatusData, NavigationPage } from '../types';
 import { TRANSLATIONS } from '../i18n/translations';
+import { resolveCropFromQuery } from '../data/cropDictionary';
 import { 
   Globe, 
   Settings, 
   Menu, 
   X, 
   ArrowRight,
-  Bell,
   Search,
-  CheckCircle2,
-  ChevronDown
+  ChevronDown,
+  Compass,
+  LayoutDashboard,
+  Info,
+  Sparkles,
+  Sprout,
+  Truck,
+  Headphones
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -26,6 +32,19 @@ interface HeaderProps {
   onSearchAndNavigate?: (crop?: string, location?: string) => void;
 }
 
+const LANGUAGES: { code: Language; label: string; name: string }[] = [
+  { code: 'en', label: 'English', name: 'EN' },
+  { code: 'hi', label: 'हिन्दी', name: 'HI' },
+  { code: 'kn', label: 'ಕನ್ನಡ', name: 'KN' },
+  { code: 'te', label: 'తెలుగు', name: 'TE' },
+  { code: 'ta', label: 'தமிழ்', name: 'TA' },
+  { code: 'mr', label: 'मराठी', name: 'MR' },
+  { code: 'bn', label: 'বাংলা', name: 'BN' },
+  { code: 'gu', label: 'ગુજરાતી', name: 'GU' },
+  { code: 'pa', label: 'ਪੰਜਾਬੀ', name: 'PA' },
+  { code: 'ml', label: 'മലയാളം', name: 'ML' }
+];
+
 export const Header: React.FC<HeaderProps> = ({
   language,
   onLanguageChange,
@@ -35,27 +54,55 @@ export const Header: React.FC<HeaderProps> = ({
   onSearchAndNavigate
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [headerSearchQuery, setHeaderSearchQuery] = useState('');
+  const [langDropdownOpen, setLangDropdownOpen] = useState(false);
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
+  const langDropdownRef = useRef<HTMLDivElement>(null);
+  const moreMenuRef = useRef<HTMLDivElement>(null);
   const t = TRANSLATIONS[language];
 
-  const primaryNavItems: { id: NavigationPage; label: string; icon?: string; badge?: string }[] = [
-    { id: 'home', label: t.navHome },
-    { id: 'dashboard', label: t.navDashboard },
-    { id: 'weather', label: t.navWeather || 'Weather', icon: '🌤️', badge: 'Live' },
-    { id: 'advisory', label: t.navAdvisory || 'AI Advisory', icon: '🌱', badge: 'AI' },
-    { id: 'diagnose', label: t.navDiagnose || 'Disease Scan', icon: '🔬', badge: 'Vision' },
-    { id: 'satellite', label: t.navSatellite || 'Field NDVI', icon: '🛰️' },
-    { id: 'gov', label: t.navGov || 'Gov. Network', icon: '🏛️' },
+  // Close language dropdown & more menu on outside click or Escape
+  useEffect(() => {
+    const onMouse = (e: MouseEvent) => {
+      if (langDropdownRef.current && !langDropdownRef.current.contains(e.target as Node)) {
+        setLangDropdownOpen(false);
+      }
+      if (moreMenuRef.current && !moreMenuRef.current.contains(e.target as Node)) {
+        setMoreMenuOpen(false);
+      }
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setLangDropdownOpen(false);
+        setMoreMenuOpen(false);
+        setSearchModalOpen(false);
+      }
+    };
+    if (langDropdownOpen || moreMenuOpen) document.addEventListener('mousedown', onMouse);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onMouse);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [langDropdownOpen, moreMenuOpen]);
+
+  const primaryNavItems: { id: NavigationPage; label: string; icon: React.ComponentType<{ className?: string }>; badge?: string }[] = [
+    { id: 'home', label: t.navHome, icon: Compass },
+    { id: 'dashboard', label: t.navDashboard, icon: LayoutDashboard },
+    { id: 'weather', label: t.navWeather || 'Weather', icon: Sparkles, badge: 'Live' },
+    { id: 'advisory', label: t.navAdvisory || 'AI Advisory', icon: Sprout, badge: 'AI' },
+    { id: 'crops', label: t.navCrops, icon: Sprout },
+    { id: 'dispatch', label: t.navDispatch, icon: Truck },
   ];
 
-  const secondaryNavItems: { id: NavigationPage; label: string; icon: string; desc: string; badge?: string }[] = [
-    { id: 'crops', label: t.navCrops, icon: '🌾', desc: 'Verified commodity directory & APMC specs' },
-    { id: 'dispatch', label: t.navDispatch, icon: '📄', desc: 'Freight calculator & official mandi pass' },
-    { id: 'about', label: t.navAbout, icon: '📖', desc: 'Platform principles & data integrity rules' },
-    { id: 'contact', label: t.navContact, icon: '📞', desc: 'Toll-free Kisan helpline & KVK directory' },
+  const secondaryNavItems: { id: NavigationPage; label: string; icon: React.ComponentType<{ className?: string }>; desc: string }[] = [
+    { id: 'diagnose', label: t.navDiagnose || 'Disease Scan', icon: Info, desc: 'Vision AI plant pathogen scanner' },
+    { id: 'satellite', label: t.navSatellite || 'Field NDVI', icon: Compass, desc: '10m Sentinel-2 vegetative canopy index' },
+    { id: 'gov', label: t.navGov || 'Gov. Network', icon: LayoutDashboard, desc: 'Digital Public Good telemetry & states' },
+    { id: 'services', label: t.navServices, icon: Sparkles, desc: 'Farm calculators & interactive tools' },
+    { id: 'about', label: t.navAbout, icon: Info, desc: 'Platform principles & data integrity rules' },
+    { id: 'contact', label: t.navContact, icon: Headphones, desc: 'Kisan helpline & APMC directory' },
   ];
 
   const isSecondaryActive = secondaryNavItems.some(item => item.id === currentPage);
@@ -66,239 +113,205 @@ export const Header: React.FC<HeaderProps> = ({
     setMoreMenuOpen(false);
   };
 
+  const SEARCH_LABELS: Record<Language, string> = {
+    en: 'Search',
+    hi: 'खोजें',
+    kn: 'ಹುಡುಕಿ',
+    te: 'శోధించండి',
+    ta: 'தேடு',
+    mr: 'शोधा',
+    bn: 'অনুসন্ধান',
+    gu: 'શોધો',
+    pa: 'ਖੋਜੋ',
+    ml: 'തിരയുക'
+  };
+
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 15);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const isHero = currentPage === 'home';
+
   return (
-    <header className="bg-white/95 backdrop-blur-md border-b border-[#E2ECE3] sticky top-0 z-50 shadow-[0_4px_20px_-4px_rgba(18,56,38,0.06)] print:hidden">
+    <header className={`sticky top-0 z-50 print:hidden transition-all duration-200 ${
+      isHero
+        ? (isScrolled 
+            ? 'bg-[#153424]/95 backdrop-blur-md shadow-md border-b border-white/10 py-2 sm:py-2.5' 
+            : 'bg-transparent pt-2.5 sm:pt-3')
+        : 'bg-[#FBFBFA]/95 backdrop-blur-md shadow-xs border-b border-[#E6E1D7] py-2 sm:py-2.5'
+    }`}>
       {/* Main Brand & Multi-Page Navigation Bar */}
-      <div className="max-w-7xl mx-auto px-4 py-2.5 flex items-center justify-between gap-3">
-        {/* Brand Logo & Name */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-1 sm:py-1.5 flex items-center justify-between gap-4 relative">
+        {/* Brand Logo & Name (Minimalist Cultivo Style) */}
         <div 
           onClick={() => handleNavClick('home')}
-          className="flex items-center gap-3 cursor-pointer group shrink-0"
+          className="flex items-center gap-2 cursor-pointer group select-none shrink-0"
         >
-          <div className="relative w-9 h-9 rounded-2xl bg-[#EBF5ED] border border-[#CCE0D0] flex items-center justify-center text-lg shadow-xs shrink-0 group-hover:scale-105 transition-transform">
-            🌾
-            <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-[#2E7D32] rounded-full border-2 border-white"></div>
+          <div className="w-8 h-8 sm:w-8.5 sm:h-8.5 rounded-full bg-[#153424] flex items-center justify-center text-white shadow-2xs group-hover:scale-105 transition-transform">
+            <span className="text-base select-none notranslate" translate="no">🌾</span>
           </div>
-          <div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-lg sm:text-xl font-black tracking-tight text-[#123826] font-['Syne',sans-serif] block leading-none">
-                AgriMate
-              </span>
-              <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-[#EBF5ED] text-[#2E7D32] border border-[#CCE0D0] uppercase tracking-wider font-mono">
-                DPG 2026
-              </span>
-            </div>
-            <p className="text-stone-500 text-[10px] font-medium hidden sm:block mt-0.5">
-              {t.appTagline}
-            </p>
-          </div>
+          <span className={`text-lg sm:text-xl font-bold tracking-tight font-['Syne',sans-serif] notranslate transition-colors ${
+            isHero ? 'text-white drop-shadow-sm' : 'text-[#153424]'
+          }`} translate="no">
+            AgriMate
+          </span>
         </div>
 
-        {/* Desktop Multi-Page Navigation Links */}
-        <nav className="hidden lg:flex items-center gap-1 bg-[#F4F8F5] p-1 rounded-2xl border border-[#E2ECE3]">
-          {primaryNavItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => handleNavClick(item.id)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shrink-0 ${
-                currentPage === item.id
-                  ? 'bg-[#123826] text-white shadow-xs'
-                  : 'text-stone-600 hover:text-[#123826] hover:bg-white/70'
-              }`}
-            >
-              {item.icon && <span className="text-xs">{item.icon}</span>}
-              <span>{item.label}</span>
-              {item.badge && (
-                <span className={`text-[9px] px-1.5 py-0.2 rounded-full uppercase tracking-wider font-extrabold ${
-                  currentPage === item.id ? 'bg-[#E8A238] text-[#123826]' : 'bg-[#EBF5ED] text-[#2E7D32]'
-                }`}>
-                  {item.badge}
-                </span>
-              )}
-            </button>
-          ))}
+        {/* Center: Dark Pill Capsule Navigation - Centered to align with search below */}
+        <nav className="hidden lg:flex items-center gap-1 p-1 notranslate absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 bg-[#181F1C] rounded-full border border-stone-800/80 shadow-md" translate="no">
+          {primaryNavItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = currentPage === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => handleNavClick(item.id)}
+                className={`px-3 py-1.5 rounded-full text-xs transition-all duration-200 cursor-pointer flex items-center gap-1.5 select-none ${
+                  isActive
+                    ? 'bg-white text-[#153424] font-bold shadow-xs'
+                    : 'text-stone-300 hover:text-white hover:bg-white/10 font-medium'
+                }`}
+              >
+                {isActive && <Icon className="w-3.5 h-3.5 text-[#153424] shrink-0" />}
+                <span>{item.label}</span>
+                {item.badge && (
+                  <span className={`text-[9px] px-1.5 py-0.2 rounded-full uppercase tracking-wider font-extrabold ${
+                    isActive ? 'bg-[#E8A238] text-[#123826]' : 'bg-[#2E7D32]/40 text-emerald-300'
+                  }`}>
+                    {item.badge}
+                  </span>
+                )}
+              </button>
+            );
+          })}
 
-          {/* More Dropdown Button */}
-          <div className="relative">
+          {/* More Dropdown */}
+          <div className="relative" ref={moreMenuRef}>
             <button
               onClick={() => setMoreMenuOpen(!moreMenuOpen)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
+              className={`px-3 py-1.5 rounded-full text-xs transition-all duration-200 cursor-pointer flex items-center gap-1 select-none ${
                 isSecondaryActive
-                  ? 'bg-[#123826] text-white shadow-xs'
-                  : 'text-stone-600 hover:text-[#123826] hover:bg-white/70'
+                  ? 'bg-white text-[#153424] font-bold shadow-xs'
+                  : 'text-stone-300 hover:text-white hover:bg-white/10 font-medium'
               }`}
             >
               <span>More</span>
-              <ChevronDown className={`w-3.5 h-3.5 transition-transform ${moreMenuOpen ? 'rotate-180' : ''}`} />
+              <ChevronDown className={`w-3 h-3 transition-transform ${moreMenuOpen ? 'rotate-180' : ''}`} />
             </button>
 
-            {/* More Dropdown Menu */}
             {moreMenuOpen && (
               <div 
-                className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-[#D5E7D8] p-2 z-50 animate-in fade-in zoom-in-95 duration-150"
+                className="absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl shadow-xl border border-[#CCE0D0] p-2 z-50 animate-in fade-in zoom-in-95 duration-150 notranslate"
+                translate="no"
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="space-y-1">
-                  {secondaryNavItems.map((sec) => (
-                    <button
-                      key={sec.id}
-                      onClick={() => handleNavClick(sec.id)}
-                      className={`w-full p-2.5 rounded-xl text-left transition-colors flex items-start gap-2.5 cursor-pointer ${
-                        currentPage === sec.id 
-                          ? 'bg-[#EBF5ED] text-[#123826]' 
-                          : 'hover:bg-[#F7FBF8] text-stone-700'
-                      }`}
-                    >
-                      <span className="text-base p-1.5 rounded-lg bg-[#F4F8F5] border border-[#E2ECE3] shrink-0">
-                        {sec.icon}
-                      </span>
-                      <div>
-                        <strong className="text-xs font-bold text-[#123826] block">{sec.label}</strong>
-                        <p className="text-[10px] text-stone-500 leading-snug">{sec.desc}</p>
-                      </div>
-                    </button>
-                  ))}
+                  {secondaryNavItems.map((sec) => {
+                    const SecIcon = sec.icon;
+                    return (
+                      <button
+                        key={sec.id}
+                        onClick={() => { handleNavClick(sec.id); setMoreMenuOpen(false); }}
+                        className={`w-full p-2.5 rounded-xl text-left transition-colors flex items-start gap-2.5 cursor-pointer ${
+                          currentPage === sec.id 
+                            ? 'bg-[#EBF5ED] text-[#123826] font-bold' 
+                            : 'hover:bg-[#F7FBF8] text-stone-700'
+                        }`}
+                      >
+                        <SecIcon className="w-4 h-4 text-[#2E7D32] mt-0.5 shrink-0" />
+                        <div>
+                          <div className="text-xs font-bold text-[#123826]">{sec.label}</div>
+                          <div className="text-[10px] text-stone-500 leading-tight">{sec.desc}</div>
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
           </div>
         </nav>
 
-        {/* Action Button & Mobile Hamburger */}
-        <div className="flex items-center gap-2 relative">
-          {/* Quick Search Button */}
+        {/* Right Actions: Ultra-Clean Search & Language (Adapts to page background) */}
+        <div className="flex items-center gap-2 sm:gap-2.5 relative shrink-0">
+          {/* Quick Search Link */}
           <button
             onClick={() => setSearchModalOpen(true)}
-            className="p-2 rounded-xl bg-white hover:bg-[#F2F8F4] text-[#123826] border border-[#CCE0D0] transition-colors cursor-pointer shadow-xs hidden sm:flex items-center gap-1.5 text-xs font-semibold"
-            title="Search Mandi Rates"
+            className={`text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 notranslate py-1.5 px-3 rounded-full ${
+              isHero 
+                ? 'text-white/90 hover:text-white hover:bg-white/15' 
+                : 'text-[#153424] bg-white/80 border border-[#E6E1D7] shadow-2xs hover:bg-white hover:border-[#2E7D32]/50 hover:text-[#2E7D32]'
+            }`}
+            translate="no"
+            title={SEARCH_LABELS[language] || 'Search'}
           >
-            <Search className="w-3.5 h-3.5 text-[#2E7D32]" />
-            <span className="hidden md:inline">Search</span>
+            <Search className={`w-3.5 h-3.5 ${isHero ? 'text-white/80' : 'text-[#2E7D32]'}`} />
+            <span className="hidden sm:inline notranslate" translate="no">
+              {SEARCH_LABELS[language] || 'Search'}
+            </span>
           </button>
 
-          {/* Notifications Bell with unread counter (AgridFlow style) */}
-          <div className="relative">
+          {/* Language Switcher — Sleek Text Dropdown */}
+          <div ref={langDropdownRef} className="relative notranslate" translate="no">
             <button
-              onClick={() => setNotificationsOpen(!notificationsOpen)}
-              className="relative p-2 rounded-xl bg-white hover:bg-[#F2F8F4] text-[#123826] border border-[#CCE0D0] transition-colors cursor-pointer shadow-xs"
-              title="Mandi Live Broadcast Alerts"
-              aria-label="Mandi Notifications"
+              type="button"
+              className={`flex items-center text-xs font-semibold gap-1.5 notranslate cursor-pointer select-none transition-all py-1.5 px-3 rounded-full ${
+                isHero
+                  ? 'text-white/90 hover:text-white hover:bg-white/15'
+                  : 'text-[#153424] bg-white/80 border border-[#E6E1D7] shadow-2xs hover:bg-white hover:border-[#2E7D32]/50 hover:text-[#2E7D32]'
+              }`}
+              translate="no"
+              onClick={() => setLangDropdownOpen(v => !v)}
+              role="combobox"
+              aria-haspopup="listbox"
+              aria-expanded={langDropdownOpen}
+              aria-label="Select language"
             >
-              <Bell className="w-4 h-4 text-[#123826]" />
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#E8A238] text-[#123826] text-[10px] font-black rounded-full flex items-center justify-center shadow-xs">
-                3
+              <Globe className={`w-3.5 h-3.5 shrink-0 ${isHero ? 'text-white/80' : 'text-[#2E7D32]'}`} />
+              <span className="notranslate whitespace-nowrap">
+                {LANGUAGES.find(l => l.code === language)?.label ?? 'English'} ({LANGUAGES.find(l => l.code === language)?.name ?? 'EN'})
               </span>
+              <ChevronDown className={`w-3 h-3 transition-transform shrink-0 ${langDropdownOpen ? 'rotate-180' : ''} ${isHero ? 'text-white/80' : 'text-[#153424]/70'}`} />
             </button>
 
-            {/* Notification Dropdown */}
-            {notificationsOpen && (
-              <div className="absolute right-0 mt-2 w-80 sm:w-88 bg-white rounded-2xl shadow-xl border border-[#D5E7D8] p-3 z-50 animate-in fade-in zoom-in-95 duration-150">
-                <div className="flex items-center justify-between pb-2 border-b border-[#E2ECE3]">
-                  <span className="text-xs font-bold text-[#123826] uppercase tracking-wider">
-                    APMC Live Feeds
-                  </span>
-                  <span className="text-[10px] text-[#2E7D32] font-semibold bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100 flex items-center gap-1">
-                    <CheckCircle2 className="w-3 h-3" /> Real-Time
-                  </span>
-                </div>
-
-                <div className="py-2 space-y-2">
-                  <div 
-                    onClick={() => { handleNavClick('dashboard'); setNotificationsOpen(false); }}
-                    className="p-2.5 rounded-xl bg-[#F7FBF8] hover:bg-[#EBF5ED] transition-colors cursor-pointer border border-[#E2ECE3]"
+            {langDropdownOpen && (
+              <div
+                className="absolute right-0 top-full mt-2 w-48 bg-white rounded-2xl border border-[#E6E1D7] shadow-xl z-50 py-1.5 max-h-72 overflow-y-auto notranslate"
+                translate="no"
+                role="listbox"
+              >
+                {LANGUAGES.map(lang => (
+                  <button
+                    key={lang.code}
+                    role="option"
+                    aria-selected={language === lang.code}
+                    onClick={() => { onLanguageChange(lang.code); setLangDropdownOpen(false); }}
+                    className={`w-full text-left px-3.5 py-2 text-xs font-semibold transition-colors cursor-pointer notranslate ${
+                      language === lang.code
+                        ? 'bg-[#EBF5ED] text-[#123826] font-bold'
+                        : 'text-stone-700 hover:bg-[#F4F8F5]'
+                    }`}
+                    translate="no"
                   >
-                    <div className="flex justify-between items-center text-xs font-bold text-[#123826]">
-                      <span>🌽 Davanagere Mandi</span>
-                      <span className="text-emerald-700 font-mono">+4.2%</span>
-                    </div>
-                    <p className="text-[11px] text-stone-600 mt-0.5">Maize rate firm at ₹2,150/q with 3,400 bags arrived today.</p>
-                  </div>
-
-                  <div 
-                    onClick={() => { handleNavClick('dashboard'); setNotificationsOpen(false); }}
-                    className="p-2.5 rounded-xl bg-[#F7FBF8] hover:bg-[#EBF5ED] transition-colors cursor-pointer border border-[#E2ECE3]"
-                  >
-                    <div className="flex justify-between items-center text-xs font-bold text-[#123826]">
-                      <span>🍅 Kolar APMC</span>
-                      <span className="text-emerald-700 font-mono">+2.6%</span>
-                    </div>
-                    <p className="text-[11px] text-stone-600 mt-0.5">Tomato modal auction ₹1,850/q. High grade arrivals fetching ₹2,100.</p>
-                  </div>
-
-                  <div 
-                    onClick={() => { handleNavClick('dashboard'); setNotificationsOpen(false); }}
-                    className="p-2.5 rounded-xl bg-[#F7FBF8] hover:bg-[#EBF5ED] transition-colors cursor-pointer border border-[#E2ECE3]"
-                  >
-                    <div className="flex justify-between items-center text-xs font-bold text-[#123826]">
-                      <span>🧅 Lasalgaon Mandi</span>
-                      <span className="text-emerald-700 font-mono">+1.9%</span>
-                    </div>
-                    <p className="text-[11px] text-stone-600 mt-0.5">Onion trading stable at ₹1,650/q. Export inquiries active.</p>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => { handleNavClick('dashboard'); setNotificationsOpen(false); }}
-                  className="w-full py-2 rounded-xl bg-[#123826] text-white text-xs font-bold flex items-center justify-center gap-1.5 hover:bg-[#1a4a34] transition-colors cursor-pointer"
-                >
-                  <span>Open Full Dashboard Terminal</span>
-                  <ArrowRight className="w-3 h-3 text-[#E8A238]" />
-                </button>
+                    {lang.label} <span className="text-stone-400 font-normal">({lang.name})</span>
+                  </button>
+                ))}
               </div>
             )}
           </div>
 
-          {/* Language Switcher */}
-          <div className="hidden sm:flex items-center bg-white p-0.5 rounded-xl border border-[#CCE0D0] shadow-xs">
-            <Globe className="w-3.5 h-3.5 ml-2 mr-1 text-stone-500" />
-            <button
-              onClick={() => onLanguageChange('en')}
-              className={`px-2 py-1 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
-                language === 'en' 
-                  ? 'bg-[#123826] text-white shadow-xs font-bold' 
-                  : 'text-stone-600 hover:text-stone-900'
-              }`}
-            >
-              EN
-            </button>
-            <button
-              onClick={() => onLanguageChange('hi')}
-              className={`px-2 py-1 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
-                language === 'hi' 
-                  ? 'bg-[#123826] text-white shadow-xs font-bold' 
-                  : 'text-stone-600 hover:text-stone-900'
-              }`}
-            >
-              हिन्दी
-            </button>
-            <button
-              onClick={() => onLanguageChange('kn')}
-              className={`px-2 py-1 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
-                language === 'kn' 
-                  ? 'bg-[#123826] text-white shadow-xs font-bold' 
-                  : 'text-stone-600 hover:text-stone-900'
-              }`}
-            >
-              ಕನ್ನಡ
-            </button>
-          </div>
-
-          {/* Settings Button */}
-          {onOpenSettings && (
-            <button
-              onClick={onOpenSettings}
-              className="p-2 rounded-xl bg-white hover:bg-[#F2F8F4] text-stone-700 border border-[#CCE0D0] transition-all cursor-pointer shadow-xs hidden sm:flex items-center justify-center"
-              title="Preferences & Data Sync"
-              aria-label="Settings"
-            >
-              <Settings className="w-4 h-4 text-[#123826]" />
-            </button>
-          )}
-
           {/* Mobile Menu Toggle Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden p-2 rounded-xl border border-[#CCE0D0] bg-white text-[#123826] hover:bg-[#F2F8F4] transition-colors cursor-pointer"
+            className={`lg:hidden p-1.5 rounded-full transition-colors cursor-pointer ${
+              isHero ? 'text-white hover:bg-white/10' : 'text-[#153424] hover:bg-black/5'
+            }`}
             aria-label="Toggle Navigation Menu"
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -308,66 +321,62 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
-        <div className="lg:hidden border-t border-[#E2ECE3] bg-white px-4 py-4 space-y-3 shadow-lg animate-in slide-in-from-top duration-200">
-          <div className="grid grid-cols-2 gap-2">
-            {[...primaryNavItems, ...secondaryNavItems].map((item) => (
-              <button
-                key={item.id}
-                onClick={() => handleNavClick(item.id)}
-                className={`w-full p-2.5 rounded-xl text-xs font-bold text-left transition-all cursor-pointer flex items-center justify-between ${
-                  currentPage === item.id
-                    ? 'bg-[#123826] text-white shadow-xs'
-                    : 'bg-[#F4F8F5] text-stone-700 hover:bg-[#E2ECE3]'
-                }`}
-              >
-                <div className="flex items-center gap-2">
-                  {item.icon && <span>{item.icon}</span>}
+        <div className="lg:hidden border-t border-stone-200 bg-white px-4 py-4 space-y-3 shadow-lg animate-slide-down">
+          <div className="grid grid-cols-2 gap-2 notranslate" translate="no">
+            {[...primaryNavItems, ...secondaryNavItems].map((item) => {
+              const Icon = item.icon;
+              const isActive = currentPage === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => handleNavClick(item.id)}
+                  className={`w-full p-2.5 rounded-xl text-xs font-bold text-left transition-all duration-200 cursor-pointer flex items-center gap-2 ${
+                    isActive
+                      ? 'bg-[#153424] text-white shadow-xs'
+                      : 'bg-stone-50 text-stone-700 hover:bg-stone-100 border border-stone-200'
+                  }`}
+                >
+                  <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-stone-500'}`} />
                   <span>{item.label}</span>
-                </div>
-                {item.badge && (
-                  <span className={`text-[9px] px-1.5 py-0.2 rounded-full uppercase tracking-wider font-extrabold ${
-                    currentPage === item.id ? 'bg-[#E8A238] text-[#123826]' : 'bg-[#EBF5ED] text-[#2E7D32]'
-                  }`}>
-                    {item.badge}
-                  </span>
-                )}
-              </button>
-            ))}
+                </button>
+              );
+            })}
           </div>
 
           {/* Mobile Language Switcher */}
-          <div className="flex items-center justify-between p-2 rounded-xl bg-[#F4F8F5] border border-[#E2ECE3]">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-[#123826]">
-              <Globe className="w-3.5 h-3.5 text-stone-500" />
-              <span>Language:</span>
+          <div className="p-2.5 rounded-xl bg-stone-50 border border-stone-200 notranslate" translate="no">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-[#123826] mb-2">
+              <Globe className="w-3.5 h-3.5 text-[#2E7D32]" />
+              <span>Language</span>
             </div>
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => onLanguageChange('en')}
-                className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all ${
-                  language === 'en' ? 'bg-[#123826] text-white' : 'text-stone-600'
-                }`}
-              >
-                EN
-              </button>
-              <button
-                onClick={() => onLanguageChange('hi')}
-                className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all ${
-                  language === 'hi' ? 'bg-[#123826] text-white' : 'text-stone-600'
-                }`}
-              >
-                हिन्दी
-              </button>
-              <button
-                onClick={() => onLanguageChange('kn')}
-                className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all ${
-                  language === 'kn' ? 'bg-[#123826] text-white' : 'text-stone-600'
-                }`}
-              >
-                ಕನ್ನಡ
-              </button>
+            <div className="grid grid-cols-2 gap-1.5">
+              {LANGUAGES.map(lang => (
+                <button
+                  key={lang.code}
+                  onClick={() => { onLanguageChange(lang.code); setMobileMenuOpen(false); }}
+                  className={`text-left px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer notranslate ${
+                    language === lang.code
+                      ? 'bg-[#123826] text-white'
+                      : 'bg-white text-stone-700 border border-[#E2ECE3] hover:bg-[#EBF5ED]'
+                  }`}
+                  translate="no"
+                >
+                  {lang.label} <span className={language === lang.code ? 'text-emerald-300' : 'text-stone-400'}>({lang.name})</span>
+                </button>
+              ))}
             </div>
           </div>
+
+          {/* Mobile Settings Button */}
+          {onOpenSettings && (
+            <button
+              onClick={() => { onOpenSettings(); setMobileMenuOpen(false); }}
+              className="w-full p-2.5 rounded-xl bg-stone-50 hover:bg-stone-100 border border-stone-200 text-xs font-bold text-[#153424] flex items-center justify-center gap-2 cursor-pointer transition-colors"
+            >
+              <Settings className="w-4 h-4 text-[#153424]" />
+              <span>Preferences & Data Sync</span>
+            </button>
+          )}
         </div>
       )}
 
@@ -394,7 +403,9 @@ export const Header: React.FC<HeaderProps> = ({
                   if (e.key === 'Enter') {
                     e.preventDefault();
                     if (headerSearchQuery.trim()) {
-                      if (onSearchAndNavigate) onSearchAndNavigate(headerSearchQuery.trim(), undefined);
+                      const resolved = resolveCropFromQuery(headerSearchQuery.trim());
+                      const targetCrop = resolved ? resolved.name : headerSearchQuery.trim();
+                      if (onSearchAndNavigate) onSearchAndNavigate(targetCrop, undefined);
                       else handleNavClick('dashboard');
                       setSearchModalOpen(false);
                       setHeaderSearchQuery('');
@@ -422,14 +433,15 @@ export const Header: React.FC<HeaderProps> = ({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {[
-                  { name: 'Tomato', icon: '🍅', tag: 'Hybrid / Local', mandi: 'Ballari, Kolar' },
-                  { name: 'Onion', icon: '🧅', tag: 'Nashik Red', mandi: 'Lasalgaon, Hubballi' },
-                  { name: 'Maize', icon: '🌽', tag: 'Hybrid Yellow', mandi: 'Davanagere, Bellary' },
-                  { name: 'Green Chilli', icon: '🌶️', tag: 'G-4 Hot', mandi: 'Guntur, Ballari' },
-                  { name: 'Potato', icon: '🥔', tag: 'Kufri Jyoti', mandi: 'Hassan, Agra' },
-                  { name: 'Cotton', icon: '☁️', tag: 'DCH-32', mandi: 'Hubballi, Raichur' },
-                  { name: 'Paddy / Rice', icon: '🍚', tag: 'Sona Masoori', mandi: 'Sindhanur, Davanagere' },
-                  { name: 'Soybean', icon: '🌱', tag: 'JS-335', mandi: 'Latur, Indore' }
+                  { name: 'Groundnut', tag: 'Kadlekayi / ಕಡಲೆಕಾಯಿ', mandi: 'Ballari, Kolar, Hospet' },
+                  { name: 'Tomato', tag: 'Hybrid / Local', mandi: 'Ballari, Kolar' },
+                  { name: 'Onion', tag: 'Nashik Red', mandi: 'Lasalgaon, Hubballi' },
+                  { name: 'Maize', tag: 'Hybrid Yellow', mandi: 'Davanagere, Bellary' },
+                  { name: 'Green Chilli', tag: 'G-4 Hot', mandi: 'Guntur, Ballari' },
+                  { name: 'Potato', tag: 'Kufri Jyoti', mandi: 'Hassan, Agra' },
+                  { name: 'Cotton', tag: 'DCH-32', mandi: 'Hubballi, Raichur' },
+                  { name: 'Paddy / Rice', tag: 'Sona Masoori', mandi: 'Sindhanur, Davanagere' },
+                  { name: 'Soybean', tag: 'JS-335', mandi: 'Latur, Indore' }
                 ]
                   .filter(item => 
                     !headerSearchQuery || 
@@ -449,7 +461,6 @@ export const Header: React.FC<HeaderProps> = ({
                       className="p-2.5 rounded-xl bg-[#F7FBF8] hover:bg-[#EBF5ED] border border-[#E2ECE3] hover:border-[#2E7D32] transition-colors cursor-pointer flex items-center justify-between"
                     >
                       <div className="flex items-center gap-2.5">
-                        <span className="text-xl">{item.icon}</span>
                         <div>
                           <strong className="text-xs text-[#123826] block">{item.name}</strong>
                           <span className="text-[10px] text-stone-500">{item.tag}</span>
@@ -467,7 +478,10 @@ export const Header: React.FC<HeaderProps> = ({
               <span>Press <kbd className="font-mono bg-stone-100 px-1.5 py-0.5 rounded border border-stone-300">Enter</kbd> to search terminal</span>
               <button
                 onClick={() => {
-                  if (onSearchAndNavigate) onSearchAndNavigate(headerSearchQuery || 'Tomato', undefined);
+                  const query = headerSearchQuery || 'Tomato';
+                  const resolved = resolveCropFromQuery(query);
+                  const targetCrop = resolved ? resolved.name : query;
+                  if (onSearchAndNavigate) onSearchAndNavigate(targetCrop, undefined);
                   else handleNavClick('dashboard');
                   setSearchModalOpen(false);
                   setHeaderSearchQuery('');

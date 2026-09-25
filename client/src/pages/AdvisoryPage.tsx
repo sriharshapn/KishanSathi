@@ -714,7 +714,7 @@ export const AdvisoryPage: React.FC<AdvisoryPageProps> = ({ language, onNavigate
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {result.crop_recommendations.map((rec, idx) => (
+              {result.crop_recommendations.map((rec: any, idx: number) => (
                 <div 
                   key={idx} 
                   className="bg-white rounded-2xl border border-[#CCE0D0] p-5 shadow-xs hover:shadow-md hover:border-[#2E7D32] transition-all flex flex-col justify-between"
@@ -807,7 +807,7 @@ export const AdvisoryPage: React.FC<AdvisoryPageProps> = ({ language, onNavigate
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                {result.farming_calendar.map((item, idx) => (
+                {result.farming_calendar.map((item: any, idx: number) => (
                   <div key={idx} className="p-3.5 rounded-xl bg-[#F7FBF8] border border-[#E2ECE3] space-y-1.5">
                     <div className="flex items-center justify-between">
                       <span className="text-base">{item.icon || '🌱'}</span>

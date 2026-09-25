@@ -25,15 +25,15 @@
   --color-harvest-600: #D97706;
   --color-harvest-50: #FEF8ED;
 
-  --color-cream-bg: #FBFDF9;
+  --color-cream-bg: #F6F4EE;
   --color-cream-card: #FFFFFF;
-  --color-cream-border: #E2ECE3;
+  --color-cream-border: #E6E1D7;
 }
 
 @layer base {
   body {
-    background-color: #FBFDF9;
-    color: #162E21;
+    background-color: #F0EDE6;
+    color: #153424;
     font-family: var(--font-sans);
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
@@ -44,52 +44,110 @@
   }
 }
 
-/* AgriMate Card & Container System */
+/* Seamless Google Website Auto-Translator Integration - Complete Banner Suppression */
+.goog-te-banner-frame,
+.goog-te-banner-frame.skiptranslate,
+iframe.goog-te-banner-frame,
+iframe.skiptranslate,
+iframe[class*="goog"],
+iframe[class*="VIpgJd"],
+iframe[id*=":1.container"],
+iframe[id*=":2.container"],
+.VIpgJd-ZVi9od-OR9Pa-bKo6Fe,
+.VIpgJd-ZVi9od-aZ2wEe-wOHMy,
+.VIpgJd-ZVi9od-xl07Ob-OEVmcd,
+#goog-gt-tt,
+#goog-gt-vt,
+.goog-tooltip,
+.goog-te-balloon-frame {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  width: 0 !important;
+  opacity: 0 !important;
+  max-height: 0 !important;
+  pointer-events: none !important;
+  border: none !important;
+}
+
+html, body {
+  top: 0px !important;
+  position: static !important;
+  margin-top: 0px !important;
+  padding-top: 0px !important;
+}
+
+.goog-text-highlight {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+#google_translate_element {
+  display: none !important;
+}
+
+/* AgriMate Glassmorphism Card System */
+.glass-card,
 .agrimate-card,
-.verda-card {
-  background: #FFFFFF;
-  border: 1px solid #E2ECE3;
-  box-shadow: 0 4px 20px -2px rgba(18, 56, 38, 0.05), 0 2px 6px -1px rgba(18, 56, 38, 0.03);
+.verda-card,
+.glass-panel {
+  background: rgba(255, 255, 255, 0.76) !important;
+  backdrop-filter: blur(14px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(160%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.85) !important;
+  box-shadow: 0 8px 32px 0 rgba(21, 52, 36, 0.04), 0 2px 8px 0 rgba(21, 52, 36, 0.02), inset 0 1px 1px 0 rgba(255, 255, 255, 0.95) !important;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+.glass-card:hover,
 .agrimate-card:hover,
-.verda-card:hover {
-  border-color: #C3D9C6;
-  box-shadow: 0 12px 30px -4px rgba(18, 56, 38, 0.08), 0 4px 10px -2px rgba(18, 56, 38, 0.04);
+.verda-card:hover,
+.glass-panel:hover {
+  background: rgba(255, 255, 255, 0.90) !important;
+  border-color: rgba(46, 125, 50, 0.38) !important;
+  box-shadow: 0 14px 40px -4px rgba(21, 52, 36, 0.08), 0 4px 12px 0 rgba(21, 52, 36, 0.03), inset 0 1px 1px 0 rgba(255, 255, 255, 1) !important;
 }
 
+.glass-card-elevated,
 .agrimate-card-elevated,
-.verda-card-elevated {
-  background: #FFFFFF;
-  border: 1px solid #D1E3D4;
-  box-shadow: 0 16px 36px -6px rgba(18, 56, 38, 0.09), 0 6px 16px -2px rgba(18, 56, 38, 0.05);
+.verda-card-elevated,
+.glass-panel-elevated {
+  background: rgba(255, 255, 255, 0.84) !important;
+  backdrop-filter: blur(18px) saturate(170%) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(170%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.92) !important;
+  box-shadow: 0 16px 44px -6px rgba(21, 52, 36, 0.09), inset 0 1px 1px 0 rgba(255, 255, 255, 1) !important;
+}
+
+.glass-card-subtle {
+  background: rgba(255, 255, 255, 0.58) !important;
+  backdrop-filter: blur(10px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(140%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.8) !important;
+  box-shadow: 0 4px 16px 0 rgba(21, 52, 36, 0.03), inset 0 1px 1px 0 rgba(255, 255, 255, 0.9) !important;
+  transition: all 0.2s ease;
+}
+
+.glass-card-subtle:hover {
+  background: rgba(255, 255, 255, 0.82) !important;
+  border-color: rgba(46, 125, 50, 0.3) !important;
 }
 
 .agrimate-card-sage,
 .verda-card-sage {
-  background: #F4F8F5;
-  border: 1px solid #E0ECE2;
+  background: rgba(236, 232, 222, 0.75) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(224, 219, 208, 0.8) !important;
 }
 
 .agrimate-badge,
 .verda-badge {
-  background: #EBF5ED;
-  color: #123826;
-  border: 1px solid #D5E7D8;
-}
-
-/* Backward compatibility classes mapped to AgriMate light styling */
-.glass-panel {
-  background: #FFFFFF;
-  border: 1px solid #E2ECE3;
-  box-shadow: 0 6px 24px -2px rgba(18, 56, 38, 0.06);
-}
-
-.glass-panel-elevated {
-  background: #FFFFFF;
-  border: 1px solid #CCE0D0;
-  box-shadow: 0 14px 35px -4px rgba(18, 56, 38, 0.09);
+  background: rgba(234, 239, 233, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #153424;
+  border: 1px solid #D6DFD4;
 }
 
 .glow-mint {
@@ -230,3 +288,160 @@
     box-shadow: none !important;
   }
 }
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* Smooth Slide-Moving Animations (Ref: Pinterest 7yRLlPCqL) */
+@keyframes slideTrack {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.animate-slide-infinite {
+  display: flex;
+  width: max-content;
+  animation: slideTrack 35s linear infinite;
+  will-change: transform;
+}
+
+.animate-slide-infinite:hover {
+  animation-play-state: paused;
+}
+
+/* Horizontal slide scroll container */
+.slide-scroll-snap {
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+.slide-scroll-item {
+  scroll-snap-align: start;
+}
+
+/* Directional Slide Keyframes */
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideRightFade {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideLeftFade {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideScaleFade {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Slide Utility Classes */
+.animate-slide-up {
+  animation: slideUpFade 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-slide-down {
+  animation: slideDownFade 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-slide-right {
+  animation: slideRightFade 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-slide-left {
+  animation: slideLeftFade 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-slide-scale {
+  animation: slideScaleFade 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Stagger Utilities for Lists, Grids, and Card Sequences */
+.stagger-1 { animation-delay: 40ms; }
+.stagger-2 { animation-delay: 80ms; }
+.stagger-3 { animation-delay: 120ms; }
+.stagger-4 { animation-delay: 160ms; }
+.stagger-5 { animation-delay: 200ms; }
+.stagger-6 { animation-delay: 240ms; }
+.stagger-7 { animation-delay: 280ms; }
+.stagger-8 { animation-delay: 320ms; }
+
+/* Interactive Hover Slide Micro-Interactions */
+.hover-slide-up {
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s ease;
+}
+.hover-slide-up:hover {
+  transform: translateY(-4px);
+}
+
+.hover-slide-right {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.hover-slide-right:hover {
+  transform: translateX(4px);
+}
+
+.hover-slide-scale {
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s ease;
+}
+.hover-slide-scale:hover {
+  transform: translateY(-2px) scale(1.015);
+}
+
+.slide-indicator {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+

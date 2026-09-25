@@ -4,8 +4,11 @@ import {
   Cpu, 
   Database, 
   ArrowRight,
-  CheckCircle2,
-  Users
+  Users,
+  Sprout,
+  Scale,
+  Truck,
+  ShieldCheck
 } from 'lucide-react';
 
 interface AboutPageProps {
@@ -19,17 +22,17 @@ export const AboutPage: React.FC<AboutPageProps> = ({
   return (
     <div className="space-y-16 sm:space-y-20 pb-16">
       {/* Editorial Page Header */}
-      <section className="bg-[#F4F8F5] border-b border-[#E2ECE3] py-12 sm:py-16">
+      <section className="bg-[#ECE8DE]/60 border-b border-[#E6E1D7] py-12 sm:py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="max-w-3xl space-y-4">
-            <span className="text-xs font-bold uppercase tracking-widest text-[#2E7D32] bg-white px-3 py-1 rounded-full border border-[#CCE0D0]">
+            <span className="text-xs font-bold uppercase tracking-widest text-[#2E7D32] bg-white px-3 py-1 rounded-full border border-[#E6E1D7]">
               About AgriMate Platform
             </span>
-            <h1 className="text-3xl sm:text-5xl font-black text-[#123826] font-['Syne',sans-serif] tracking-tight">
+            <h1 className="text-3xl sm:text-5xl font-black text-[#153424] font-['Syne',sans-serif] tracking-tight">
               Restoring Fair Value to the Hands that Feed the Nation
             </h1>
             <p className="text-stone-600 text-base sm:text-lg leading-relaxed font-['Outfit',sans-serif]">
-              AgriMate bridges the generational gap between the farmer's soil and terminal APMC markets. By coupling agronomic stewardship with algorithmic price transparency, we ensure growers capture their rightful margin.
+              AgriMate bridges the gap between the farmer's soil and terminal APMC markets. By coupling agronomic stewardship with price transparency, we ensure growers capture their rightful margin.
             </p>
           </div>
         </div>
@@ -38,36 +41,36 @@ export const AboutPage: React.FC<AboutPageProps> = ({
       {/* The Agrarian Mission */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-          <div className="lg:col-span-6 space-y-5">
-            <span className="text-xs font-bold text-[#2E7D32] uppercase tracking-wider">The Market Asymmetry Problem</span>
-            <h2 className="text-2xl sm:text-3xl font-black text-[#123826] font-['Syne',sans-serif]">
-              Why Farmers Lose 20% to 35% of Their Value Before Reaching the Mandi
+          <div className="lg:col-span-6 space-y-4">
+            <span className="text-xs font-mono font-bold text-[#2E7D32] uppercase tracking-wider">The Market Asymmetry Problem</span>
+            <h2 className="text-2xl sm:text-3xl font-black text-[#153424] font-['Syne',sans-serif]">
+              Eliminating Price Leakage Before the Mandi Gate
             </h2>
-            <p className="text-stone-600 text-sm sm:text-base leading-relaxed">
-              Historically, smallholder farmers operate under profound information asymmetry. Local middlemen quote prices arbitrarily, transport operators inflate freight during harvest peaks, and unverified weighbridges lead to unaccounted deductions.
+            <p className="text-stone-600 text-sm leading-relaxed">
+              Smallholder farmers often face arbitrary trader quotes, inflated harvest-peak freight, and undocumented yard deductions.
             </p>
-            <p className="text-stone-600 text-sm sm:text-base leading-relaxed">
-              AgriMate was conceived to systematically eliminate these leakage points. By democratizing real-time Agmarknet auction data, standardizing statutory gate passes, and simulating net returns in-hand, farmers enter APMC yards equipped with official market intelligence.
+            <p className="text-stone-600 text-sm leading-relaxed">
+              AgriMate connects farm-gate decisions directly with official Agmarknet arrivals, vehicle-matched transport math, and standardized gate receipts.
             </p>
             
-            <div className="grid grid-cols-2 gap-4 pt-2">
-              <div className="p-4 rounded-xl bg-white border border-[#E2ECE3] shadow-xs">
-                <p className="text-2xl font-black text-[#123826] font-mono">+19.4%</p>
-                <p className="text-xs font-medium text-stone-600 mt-1">Average net return improvement for participating growers</p>
+            <div className="grid grid-cols-2 gap-3 pt-1">
+              <div className="p-3.5 rounded-xl glass-card-subtle border border-white/80 shadow-xs">
+                <p className="text-xl font-black text-[#153424] font-mono">+19.4%</p>
+                <p className="text-xs text-stone-600 mt-0.5">Average net return improvement</p>
               </div>
-              <div className="p-4 rounded-xl bg-white border border-[#E2ECE3] shadow-xs">
-                <p className="text-2xl font-black text-[#2E7D32] font-mono">0%</p>
-                <p className="text-xs font-medium text-stone-600 mt-1">Tolerance for speculative or fabricated market rates</p>
+              <div className="p-3.5 rounded-xl glass-card-subtle border border-white/80 shadow-xs">
+                <p className="text-xl font-black text-[#2E7D32] font-mono">100%</p>
+                <p className="text-xs text-stone-600 mt-0.5">Verified Agmarknet prices</p>
               </div>
             </div>
           </div>
 
           <div className="lg:col-span-6">
-            <div className="rounded-3xl overflow-hidden border-4 border-white shadow-xl bg-stone-100">
+            <div className="rounded-2xl overflow-hidden border border-white/80 shadow-lg bg-stone-100">
               <img 
-                src="/agro_terminal_hero.jpg" 
-                alt="AgriMate Agronomy in Action" 
-                className="w-full h-80 sm:h-96 object-cover"
+                src="/mandi_gate_trade.jpg" 
+                alt="APMC Mandi Weighbridge Gate Settlement" 
+                className="w-full h-72 sm:h-80 object-cover"
               />
             </div>
           </div>
@@ -75,103 +78,63 @@ export const AboutPage: React.FC<AboutPageProps> = ({
       </section>
 
       {/* The 4 Architectural Pillars */}
-      <section className="bg-[#FAFBF9] py-16 border-y border-[#E2ECE3]">
+      <section className="bg-[#ECE8DE]/40 py-12 sm:py-16 border-y border-[#E6E1D7]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="text-center max-w-2xl mx-auto mb-12 space-y-2">
-            <span className="text-xs font-bold uppercase tracking-widest text-[#2E7D32] bg-[#EBF5ED] px-3 py-1 rounded-full border border-[#CCE0D0]">
+          <div className="text-center max-w-xl mx-auto mb-10 space-y-1.5">
+            <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#2E7D32] bg-[#EAEFE9] px-3 py-1 rounded-full border border-[#D6DFD4]">
               Operational Framework
             </span>
-            <h2 className="text-3xl font-black text-[#123826] font-['Syne',sans-serif]">
-              Our Four Pillars of Agricultural Equity
+            <h2 className="text-2xl sm:text-3xl font-black text-[#153424] font-['Syne',sans-serif]">
+              Four Pillars of Fair Settlement
             </h2>
-            <p className="text-stone-600 text-sm">
-              How AgriMate ensures systematic protection across the harvest lifecycle.
+            <p className="text-stone-600 text-xs sm:text-sm">
+              Standardized protection from soil preparation to gate liquidation.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {/* Pillar 1 */}
-            <div className="bg-white p-7 rounded-2xl border border-[#E2ECE3] shadow-xs space-y-4">
-              <div className="w-12 h-12 rounded-xl bg-[#EBF5ED] text-[#2E7D32] flex items-center justify-center text-2xl">
-                🌱
+            <div className="glass-card p-5 rounded-2xl border border-white/80 shadow-xs space-y-2.5 hover-slide-up">
+              <div className="w-10 h-10 rounded-xl bg-[#EAEFE9] text-[#2E7D32] flex items-center justify-center">
+                <Sprout className="w-5 h-5" />
               </div>
-              <h3 className="text-xl font-bold text-[#123826]">1. Soil & Crop Stewardship</h3>
-              <p className="text-stone-600 text-sm leading-relaxed">
-                Healthy soil produces dense, high-grade produce that commands premium modal auctions. We train farmers in regenerative cropping, optimal moisture regimes, and reduced chemical pesticide runoff, improving produce shelf life by up to 48 hours in transit.
+              <h3 className="text-base font-bold text-[#153424]">Soil Stewardship</h3>
+              <p className="text-stone-600 text-xs leading-relaxed">
+                Pre-harvest moisture indexing and regenerative cropping to ensure durable shelf life during transit.
               </p>
-              <ul className="text-xs text-stone-600 space-y-1.5 pt-2">
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[#2E7D32]" />
-                  Soil organic carbon testing & bio-fertilizer schedules
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[#2E7D32]" />
-                  Pre-harvest moisture indexing to avoid post-harvest shrinkage
-                </li>
-              </ul>
             </div>
 
             {/* Pillar 2 */}
-            <div className="bg-white p-7 rounded-2xl border border-[#E2ECE3] shadow-xs space-y-4">
-              <div className="w-12 h-12 rounded-xl bg-[#FFF8E7] text-[#E8A238] flex items-center justify-center text-2xl">
-                ⚖️
+            <div className="glass-card p-5 rounded-2xl border border-white/80 shadow-xs space-y-2.5 hover-slide-up">
+              <div className="w-10 h-10 rounded-xl bg-[#FFF8E7] text-[#E8A238] flex items-center justify-center">
+                <Scale className="w-5 h-5" />
               </div>
-              <h3 className="text-xl font-bold text-[#123826]">2. Guaranteed Price Transparency</h3>
-              <p className="text-stone-600 text-sm leading-relaxed">
-                We ingest authentic arrival and price records straight from APMC market secretaries under the Agmarknet network. Our terminal calculates true modal rates, minimum and maximum spreads, and arrival velocity so growers negotiate with factual parity.
+              <h3 className="text-base font-bold text-[#153424]">Price Transparency</h3>
+              <p className="text-stone-600 text-xs leading-relaxed">
+                Direct APMC modal bids, spread analysis, and daily arrival statistics with zero algorithmic hallucination.
               </p>
-              <ul className="text-xs text-stone-600 space-y-1.5 pt-2">
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[#2E7D32]" />
-                  Zero synthetic or predicted prices—strictly reported bids
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[#2E7D32]" />
-                  Full historical 7, 15, and 30-day price trend analysis
-                </li>
-              </ul>
             </div>
 
             {/* Pillar 3 */}
-            <div className="bg-white p-7 rounded-2xl border border-[#E2ECE3] shadow-xs space-y-4">
-              <div className="w-12 h-12 rounded-xl bg-[#EBF5ED] text-[#2E7D32] flex items-center justify-center text-2xl">
-                🚛
+            <div className="glass-card p-5 rounded-2xl border border-white/80 shadow-xs space-y-2.5 hover-slide-up">
+              <div className="w-10 h-10 rounded-xl bg-[#EAEFE9] text-[#2E7D32] flex items-center justify-center">
+                <Truck className="w-5 h-5" />
               </div>
-              <h3 className="text-xl font-bold text-[#123826]">3. Algorithmic Freight Optimization</h3>
-              <p className="text-stone-600 text-sm leading-relaxed">
-                A higher price at a distant mandi is useless if excessive haulage erodes the differential. Our net-return calculator models vehicle fuel consumption, road tolls, and loading costs to tell the farmer whether travelling an extra 60 km is mathematically profitable.
+              <h3 className="text-base font-bold text-[#153424]">Freight Math</h3>
+              <p className="text-stone-600 text-xs leading-relaxed">
+                Vehicle-matched haulage calculation across Tata Ace to 6-Wheelers to verify distance economics.
               </p>
-              <ul className="text-xs text-stone-600 space-y-1.5 pt-2">
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[#2E7D32]" />
-                  Vehicle matching (Tata Ace, 407, 6-Wheeler, Tractor)
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[#2E7D32]" />
-                  Accurate km radius calculation from village coordinates
-                </li>
-              </ul>
             </div>
 
             {/* Pillar 4 */}
-            <div className="bg-white p-7 rounded-2xl border border-[#E2ECE3] shadow-xs space-y-4">
-              <div className="w-12 h-12 rounded-xl bg-[#FFF8E7] text-[#E8A238] flex items-center justify-center text-2xl">
-                🤝
+            <div className="glass-card p-5 rounded-2xl border border-white/80 shadow-xs space-y-2.5 hover-slide-up">
+              <div className="w-10 h-10 rounded-xl bg-[#FFF8E7] text-[#E8A238] flex items-center justify-center">
+                <ShieldCheck className="w-5 h-5" />
               </div>
-              <h3 className="text-xl font-bold text-[#123826]">4. Fair Remuneration & Settlement</h3>
-              <p className="text-stone-600 text-sm leading-relaxed">
-                Under the APMC Act 2026, buyers and commission agents cannot levy unauthorized deductions for grading, unloading, or payment delays. Our digital gate slip and 11-step protocol empower farmers to enforce certified weighment and immediate settlement.
+              <h3 className="text-base font-bold text-[#153424]">Fair Settlement</h3>
+              <p className="text-stone-600 text-xs leading-relaxed">
+                Digital entry slips and statutory APMC Act weighbridge validation preventing unauthorized deductions.
               </p>
-              <ul className="text-xs text-stone-600 space-y-1.5 pt-2">
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[#2E7D32]" />
-                  Statutory APMC dispute arbitration guidelines
-                </li>
-                <li className="flex items-center gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[#2E7D32]" />
-                  Printable legal gate slips with unique consignment tracking
-                </li>
-              </ul>
             </div>
           </div>
         </div>
@@ -180,10 +143,10 @@ export const AboutPage: React.FC<AboutPageProps> = ({
       {/* Technological Edge */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="text-center max-w-2xl mx-auto mb-12 space-y-2">
-          <span className="text-xs font-bold uppercase tracking-widest text-[#2E7D32] bg-[#EBF5ED] px-3 py-1 rounded-full border border-[#CCE0D0]">
+          <span className="text-xs font-bold uppercase tracking-widest text-[#2E7D32] bg-[#EAEFE9] px-3 py-1 rounded-full border border-[#D6DFD4]">
             System Architecture
           </span>
-          <h2 className="text-3xl font-black text-[#123826] font-['Syne',sans-serif]">
+          <h2 className="text-3xl font-black text-[#153424] font-['Syne',sans-serif]">
             Engineered for Rural Resiliency
           </h2>
           <p className="text-stone-600 text-sm">
@@ -192,31 +155,31 @@ export const AboutPage: React.FC<AboutPageProps> = ({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white p-6 rounded-2xl border border-[#E2ECE3] space-y-3">
-            <div className="w-10 h-10 rounded-lg bg-[#EBF5ED] text-[#2E7D32] flex items-center justify-center">
+          <div className="glass-card p-6 rounded-2xl border border-white/80 shadow-xs space-y-3 hover-slide-up">
+            <div className="w-10 h-10 rounded-lg bg-[#EAEFE9] text-[#2E7D32] flex items-center justify-center">
               <Database className="w-5 h-5" />
             </div>
-            <h3 className="text-lg font-bold text-[#123826]">SQLite Edge Storage</h3>
+            <h3 className="text-lg font-bold text-[#153424]">SQLite Edge Storage</h3>
             <p className="text-stone-600 text-xs sm:text-sm leading-relaxed">
               When farmers lose 4G connectivity at remote farm gates, AgriMate automatically switches to its local-first SQLite cache. You never lose access to previously verified mandi rates.
             </p>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl border border-[#E2ECE3] space-y-3">
+          <div className="glass-card p-6 rounded-2xl border border-white/80 shadow-xs space-y-3 hover-slide-up">
             <div className="w-10 h-10 rounded-lg bg-[#FFF8E7] text-[#E8A238] flex items-center justify-center">
               <Cpu className="w-5 h-5" />
             </div>
-            <h3 className="text-lg font-bold text-[#123826]">Strict Agmarknet Grounding</h3>
+            <h3 className="text-lg font-bold text-[#153424]">Strict Agmarknet Grounding</h3>
             <p className="text-stone-600 text-xs sm:text-sm leading-relaxed">
               Our market intelligence engine evaluates only verifiable APMC arrivals. We enforce zero synthetic hallucinations, ensuring that every rupee quoted reflects a real market transaction.
             </p>
           </div>
 
-          <div className="bg-white p-6 rounded-2xl border border-[#E2ECE3] space-y-3">
-            <div className="w-10 h-10 rounded-lg bg-[#EBF5ED] text-[#2E7D32] flex items-center justify-center">
+          <div className="glass-card p-6 rounded-2xl border border-white/80 shadow-xs space-y-3 hover-slide-up">
+            <div className="w-10 h-10 rounded-lg bg-[#EAEFE9] text-[#2E7D32] flex items-center justify-center">
               <Users className="w-5 h-5" />
             </div>
-            <h3 className="text-lg font-bold text-[#123826]">Trilingual Natural Voice</h3>
+            <h3 className="text-lg font-bold text-[#153424]">Trilingual Natural Voice</h3>
             <p className="text-stone-600 text-xs sm:text-sm leading-relaxed">
               Farmers can query the terminal using voice in English, Hindi, or Kannada. The system parses produce quantities, units (kg, quintals, tonnes), and locations using native phonetic parsing.
             </p>
@@ -226,7 +189,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
 
       {/* CTA Section */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="bg-[#123826] text-white p-8 sm:p-12 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
+        <div className="bg-[#153424] text-white p-8 sm:p-12 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl border border-[#1f4a34]">
           <div className="space-y-2 max-w-xl">
             <h3 className="text-2xl sm:text-3xl font-black font-['Syne',sans-serif]">
               Put AgriMate Intelligence to Work on Your Harvest
@@ -237,7 +200,7 @@ export const AboutPage: React.FC<AboutPageProps> = ({
           </div>
           <button
             onClick={() => onNavigate('dashboard')}
-            className="px-6 py-3.5 rounded-xl bg-[#E8A238] hover:bg-[#d4912e] text-[#123826] font-black text-sm flex items-center gap-2 transition-all cursor-pointer shrink-0"
+            className="px-6 py-3.5 rounded-xl bg-[#E8A238] hover:bg-[#d4912e] text-[#153424] font-black text-sm flex items-center gap-2 transition-all cursor-pointer shrink-0 shadow-sm"
           >
             <span>Open Interactive Dashboard</span>
             <ArrowRight className="w-4 h-4" />

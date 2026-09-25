@@ -1,4 +1,4 @@
-export type Language = 'en' | 'hi' | 'kn';
+export type Language = 'en' | 'hi' | 'kn' | 'te' | 'ta' | 'mr' | 'bn' | 'gu' | 'pa' | 'ml';
 
 export type CropUnit = 'kg' | 'quintal' | 'tonne';
 
@@ -130,7 +130,9 @@ export interface SyncStatusData {
     timestamp: string;
     status: string;
   };
+  today_active_quotes?: number;
   total_verified_records: number;
+  api_connected?: boolean;
 }
 
 export interface UserPreferences {
@@ -140,7 +142,88 @@ export interface UserPreferences {
   preferred_units: CropUnit;
 }
 
-export type NavigationPage = 'home' | 'dashboard' | 'about' | 'services' | 'crops' | 'dispatch' | 'contact' | 'advisory' | 'diagnose' | 'satellite' | 'gov' | 'weather';
+export interface WeatherCurrent {
+  temperature: number;
+  apparent_temperature: number;
+  condition: string;
+  icon: string;
+  temp_max: number;
+  temp_min: number;
+  humidity: number;
+  dew_point: number;
+  pressure: number;
+  pressure_trend: string;
+  visibility_km: number;
+  visibility_status: string;
+  wind_speed: number;
+  wind_direction: number;
+  wind_direction_text: string;
+  wind_gust: number;
+  wind_force: string;
+  uv_index: number;
+  uv_status: string;
+  aqi: number;
+  aqi_status: string;
+  sunrise: string;
+  sunset: string;
+  sun_hours: string;
+  updated_at: string;
+}
+
+export interface WeatherDayForecast {
+  date: string;
+  day_name: string;
+  temp_max: number;
+  temp_min: number;
+  precip_prob: number;
+  weather_code?: number;
+  condition: string;
+  icon: string;
+}
+
+export interface WeatherHourlyItem {
+  time_label: string;
+  temp: number;
+  precip_prob: number;
+}
+
+export interface WeatherAgriAdvisory {
+  spraying?: string;
+  irrigation?: string;
+  harvesting?: string;
+  spraying_window?: string;
+  heat_stress_risk?: string;
+  fungal_risk?: string;
+  irrigation_need?: string;
+  [key: string]: any;
+}
+
+export interface WeatherData {
+  summary: string;
+  rainfall: string;
+  source: string;
+  is_live: boolean;
+  coords: { lat: number; lon: number };
+  location_name: string;
+  current: WeatherCurrent;
+  forecast_7day: WeatherDayForecast[];
+  hourly_trend: WeatherHourlyItem[];
+  agri_advisory: WeatherAgriAdvisory;
+}
+
+export type NavigationPage = 
+  | 'home' 
+  | 'dashboard' 
+  | 'about' 
+  | 'services' 
+  | 'crops' 
+  | 'dispatch' 
+  | 'contact' 
+  | 'weather' 
+  | 'advisory' 
+  | 'diagnose' 
+  | 'satellite' 
+  | 'gov';
 
 // ── Crop Advisory ──────────────────────────────────
 export interface CropRecommendation {
@@ -211,70 +294,3 @@ export interface NDVIResult {
   cloud_coverage_pct: number;
   timeseries: NDVITimeseriesItem[];
 }
-
-// ── Live Microclimate Weather ─────────────────────
-export interface WeatherCurrent {
-  temperature: number;
-  apparent_temperature: number;
-  condition: string;
-  icon: string;
-  temp_max: number;
-  temp_min: number;
-  humidity: number;
-  dew_point: number;
-  pressure: number;
-  pressure_trend: string;
-  wind_speed: number;
-  wind_gust: number;
-  wind_direction: number;
-  wind_cardinal: string;
-  wind_force: string;
-  visibility_km: number;
-  visibility_status: string;
-  aqi: number;
-  aqi_status: string;
-  uv_index: number;
-  uv_status: string;
-  sunrise: string;
-  sunset: string;
-  sun_hours: string;
-  updated_at: string;
-}
-
-export interface WeatherDayForecast {
-  date: string;
-  day_name: string;
-  temp_max: number;
-  temp_min: number;
-  precip_prob: number;
-  weather_code: number;
-  condition: string;
-  icon: string;
-}
-
-export interface WeatherHourlyItem {
-  time_label: string;
-  temp: number;
-  precip_prob: number;
-}
-
-export interface WeatherAgriAdvisory {
-  spraying: string;
-  irrigation: string;
-  harvesting: string;
-}
-
-export interface WeatherData {
-  summary: string;
-  rainfall: string;
-  source: string;
-  is_live: boolean;
-  coords: { lat: number; lon: number };
-  location_name: string;
-  current: WeatherCurrent;
-  forecast_7day: WeatherDayForecast[];
-  hourly_trend: WeatherHourlyItem[];
-  agri_advisory: WeatherAgriAdvisory;
-}
-
-

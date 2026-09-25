@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import type { Language, CropUnit, Commodity } from '../types';
 import { TRANSLATIONS } from '../i18n/translations';
-import { Search, MapPin, Navigation, Scale, SlidersHorizontal, Sparkles } from 'lucide-react';
+import { Search, MapPin, Navigation, Scale, SlidersHorizontal } from 'lucide-react';
+import { COMPREHENSIVE_CROPS, resolveCropFromQuery } from '../data/cropDictionary';
 
 interface SearchFormProps {
   language: Language;
@@ -63,6 +64,41 @@ export const SearchForm: React.FC<SearchFormProps> = ({
     normalizedInTonnes = numQty / 10;
   }
 
+const KNOWN_DISTRICTS = [
+  { name: 'Bengaluru, Karnataka', lat: 12.9716, lon: 77.5946 },
+  { name: 'Ballari, Karnataka', lat: 15.1394, lon: 76.9214 },
+  { name: 'Kolar, Karnataka', lat: 13.1367, lon: 78.1291 },
+  { name: 'Chikkaballapur, Karnataka', lat: 13.4355, lon: 77.7315 },
+  { name: 'Mysuru, Karnataka', lat: 12.2958, lon: 76.6394 },
+  { name: 'Belagavi, Karnataka', lat: 15.8497, lon: 74.4977 },
+  { name: 'Davanagere, Karnataka', lat: 14.4644, lon: 75.9218 },
+  { name: 'Hubballi, Karnataka', lat: 15.3647, lon: 75.1240 },
+  { name: 'Hassan, Karnataka', lat: 13.0033, lon: 76.1004 },
+  { name: 'Shivamogga, Karnataka', lat: 13.9299, lon: 75.5681 },
+  { name: 'Pune, Maharashtra', lat: 18.5204, lon: 73.8567 },
+  { name: 'Nashik, Maharashtra', lat: 19.9975, lon: 73.7898 },
+  { name: 'Guntur, Andhra Pradesh', lat: 16.3067, lon: 80.4365 },
+  { name: 'Kurnool, Andhra Pradesh', lat: 15.8281, lon: 78.0373 },
+  { name: 'Hyderabad, Telangana', lat: 17.3850, lon: 78.4867 },
+  { name: 'Azadpur, Delhi', lat: 28.7041, lon: 77.1025 },
+  { name: 'Ludhiana, Punjab', lat: 30.9010, lon: 75.8573 },
+  { name: 'Agra, Uttar Pradesh', lat: 27.1767, lon: 78.0081 },
+  { name: 'Indore, Madhya Pradesh', lat: 22.7196, lon: 75.8577 }
+];
+
+function getNearestDistrictName(lat: number, lon: number): string {
+  let closest = KNOWN_DISTRICTS[0].name;
+  let minDist = Infinity;
+  for (const d of KNOWN_DISTRICTS) {
+    const dist = Math.hypot(lat - d.lat, lon - d.lon);
+    if (dist < minDist) {
+      minDist = dist;
+      closest = d.name;
+    }
+  }
+  return closest;
+}
+
   const handleGpsClick = () => {
     if (!navigator.geolocation) {
       alert("Geolocation is not supported by your browser.");
@@ -78,7 +114,9 @@ export const SearchForm: React.FC<SearchFormProps> = ({
         setGpsCoords(coords);
         setGpsActive(true);
         setLocating(false);
-        onLocationChange(`GPS (${coords.lat.toFixed(3)}, ${coords.lon.toFixed(3)})`);
+        // Map raw GPS coordinates to the human-readable district/city name
+        const resolvedPlace = getNearestDistrictName(coords.lat, coords.lon);
+        onLocationChange(resolvedPlace);
       },
       (error) => {
         setLocating(false);
@@ -91,20 +129,26 @@ export const SearchForm: React.FC<SearchFormProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (selectedCrop) {
+      const resolved = resolveCropFromQuery(selectedCrop);
+      if (resolved && resolved.name.toLowerCase() !== selectedCrop.toLowerCase()) {
+        onCropChange(resolved.name);
+      }
+    }
     onSearch(gpsCoords);
   };
 
   return (
-    <div className="verda-card rounded-3xl overflow-hidden border border-[#E2ECE3] shadow-sm">
+    <div className="glass-card rounded-3xl overflow-hidden border border-white/85 shadow-sm">
       {/* Visual Subheader */}
-      <div className="bg-[#F4F8F5] border-b border-[#E2ECE3] px-6 py-4 flex items-center justify-between">
+      <div className="bg-white/40 border-b border-white/60 px-6 py-4 flex items-center justify-between backdrop-blur-xs">
         <h2 className="text-base sm:text-lg font-bold text-[#123826] flex items-center gap-2 font-['Syne',sans-serif]">
           <SlidersHorizontal className="w-5 h-5 text-[#2E7D32]" />
           <span>{t.searchTabForm}</span>
         </h2>
         <div className="flex items-center gap-2">
           <span className="text-[11px] font-medium uppercase tracking-wider text-[#123826] bg-[#EBF5ED] border border-[#CCE0D0] px-3 py-1 rounded-full">
-            Official Agmarknet Rates
+            Official Agmarknet Rates • Pan-India Search
           </span>
         </div>
       </div>
@@ -112,46 +156,118 @@ export const SearchForm: React.FC<SearchFormProps> = ({
       <form onSubmit={handleSubmit} className="p-6 sm:p-8 space-y-6">
         {/* Commodity Selector Matrix */}
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-2.5">
+          <label htmlFor="cropInput" className="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-2">
             {t.cropLabel} <span className="text-red-500">*</span>
           </label>
 
-          {/* Quick select pills */}
-          <div className="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-9 gap-2 mb-3">
-            {commodities.map((item) => {
-              const isSelected = item.name.toLowerCase() === selectedCrop.toLowerCase();
-              const localName = language === 'hi' ? item.localNames.hi : (language === 'kn' ? item.localNames.kn : item.name);
-
-              return (
+          {/* Pan-India Universal Crop Input Bar */}
+          <div className="relative mb-3">
+            <div className="flex items-center rounded-2xl overflow-hidden border border-white/80 bg-white/70 backdrop-blur-xs focus-within:border-[#2E7D32] focus-within:ring-2 focus-within:ring-[#2E7D32]/20 shadow-xs transition-all">
+              <div className="pl-4 pr-2 text-[#2E7D32]">
+                <Search className="w-4 h-4" />
+              </div>
+              <input
+                type="text"
+                id="cropInput"
+                list="panIndiaCropsList"
+                value={selectedCrop}
+                onChange={(e) => onCropChange(e.target.value)}
+                placeholder="Type or select any crop e.g. Groundnut, Tomato, Ginger, Garlic..."
+                className="w-full py-3 pr-3 text-sm bg-transparent text-stone-900 font-bold focus:outline-none placeholder:text-stone-400 placeholder:font-normal"
+              />
+              {selectedCrop && (
                 <button
-                  key={item.commodity_id}
                   type="button"
-                  onClick={() => {
-                    onCropChange(item.name);
-                    if (item.varieties && item.varieties.length > 0) {
-                      onVarietyChange(item.varieties[0]);
-                    }
-                  }}
-                  className={`flex flex-col items-center justify-center p-2.5 rounded-2xl border transition-all cursor-pointer ${
-                    isSelected 
-                      ? 'bg-[#EBF5ED] border-[#2E7D32] text-[#123826] font-bold shadow-xs scale-102 ring-1 ring-[#2E7D32]' 
-                      : 'bg-white border-[#E2ECE3] text-stone-700 hover:border-[#2E7D32] hover:bg-[#F7FAF8]'
-                  }`}
-                  aria-pressed={isSelected}
+                  onClick={() => onCropChange('')}
+                  className="mr-3 text-xs text-stone-400 hover:text-stone-700 bg-stone-100 hover:bg-stone-200 px-2.5 py-1 rounded-full cursor-pointer transition-colors"
                 >
-                  <span className="text-2xl mb-1 filter drop-shadow-xs">{item.icon}</span>
-                  <span className="text-xs font-bold leading-tight truncate w-full text-center">
-                    {localName}
-                  </span>
-                  {language !== 'en' && (
-                    <span className="text-[10px] text-stone-400 truncate w-full text-center font-mono">
-                      {item.name}
-                    </span>
-                  )}
+                  Clear
                 </button>
-              );
-            })}
+              )}
+            </div>
+            <datalist id="panIndiaCropsList">
+              {/* Popular crops with English, Kannada & Hindi */}
+              {COMPREHENSIVE_CROPS.map(c => (
+                <React.Fragment key={c.name}>
+                  <option value={`${c.name} (${c.primaryAlias} / ${c.kannada} / ${c.hindi})`} />
+                  <option value={c.primaryAlias} />
+                  <option value={c.name} />
+                  <option value={c.kannada} />
+                  <option value={c.hindi} />
+                </React.Fragment>
+              ))}
+              {/* Cereals & Millets */}
+              <option value="Rice" /><option value="Paddy" /><option value="Wheat" />
+              <option value="Maize" /><option value="Sorghum" /><option value="Jowar" />
+              <option value="Bajra" /><option value="Ragi" /><option value="Finger Millet" />
+              <option value="Barley" /><option value="Oats" /><option value="Small Millet" />
+              <option value="Kodo Millet" /><option value="Foxtail Millet" /><option value="Proso Millet" />
+              <option value="Barnyard Millet" />
+              {/* Pulses */}
+              <option value="Tur" /><option value="Arhar" /><option value="Pigeon Pea" />
+              <option value="Gram" /><option value="Chickpea" /><option value="Bengal Gram" />
+              <option value="Moong" /><option value="Green Gram" /><option value="Urad" />
+              <option value="Black Gram" /><option value="Lentil" /><option value="Masoor" />
+              <option value="Peas" /><option value="Rajma" /><option value="Kidney Beans" />
+              <option value="Moth Bean" /><option value="Horse Gram" /><option value="Cowpea" />
+              <option value="Cluster Bean" /><option value="Guar" />
+              {/* Oilseeds */}
+              <option value="Groundnut" /><option value="Soybean" /><option value="Mustard" />
+              <option value="Rapeseed" /><option value="Sunflower" /><option value="Sesame" />
+              <option value="Til" /><option value="Linseed" /><option value="Castor" />
+              <option value="Safflower" /><option value="Nigerseed" /><option value="Coconut" />
+              <option value="Copra" />
+              {/* Cash Crops */}
+              <option value="Cotton" /><option value="Sugarcane" /><option value="Jute" />
+              <option value="Tobacco" /><option value="Rubber" /><option value="Tea" />
+              <option value="Coffee" /><option value="Cardamom" /><option value="Arecanut" />
+              {/* Vegetables */}
+              <option value="Tomato" /><option value="Onion" /><option value="Potato" />
+              <option value="Brinjal" /><option value="Chilli" /><option value="Capsicum" />
+              <option value="Cabbage" /><option value="Cauliflower" /><option value="Bitter Gourd" />
+              <option value="Bottle Gourd" /><option value="Ridge Gourd" /><option value="Snake Gourd" />
+              <option value="Pumpkin" /><option value="Ash Gourd" /><option value="Cucumber" />
+              <option value="Okra" /><option value="Bhindi" /><option value="Lady Finger" />
+              <option value="Spinach" /><option value="Fenugreek" /><option value="Methi" />
+              <option value="Coriander" /><option value="Dill" /><option value="Curry Leaves" />
+              <option value="Amaranth" /><option value="Drumstick" /><option value="Moringa" />
+              <option value="French Beans" /><option value="Cluster Beans" /><option value="Guar Beans" />
+              <option value="Flat Beans" /><option value="Sword Beans" />
+              <option value="Carrot" /><option value="Radish" /><option value="Turnip" />
+              <option value="Beetroot" /><option value="Sweet Potato" /><option value="Yam" />
+              <option value="Colocasia" /><option value="Arbi" /><option value="Garlic" />
+              <option value="Ginger" /><option value="Turmeric" /><option value="Mushroom" />
+              <option value="Green Peas" /><option value="Elephant Foot Yam" />
+              <option value="Ash Plantain" /><option value="Raw Banana" />
+              {/* Fruits */}
+              <option value="Mango" /><option value="Banana" /><option value="Apple" />
+              <option value="Grapes" /><option value="Orange" /><option value="Mosambi" />
+              <option value="Lemon" /><option value="Lime" /><option value="Guava" />
+              <option value="Papaya" /><option value="Pomegranate" /><option value="Watermelon" />
+              <option value="Muskmelon" /><option value="Pineapple" /><option value="Sapota" />
+              <option value="Chikoo" /><option value="Custard Apple" /><option value="Jackfruit" />
+              <option value="Litchi" /><option value="Pear" /><option value="Plum" />
+              <option value="Peach" /><option value="Apricot" /><option value="Cherry" />
+              <option value="Strawberry" /><option value="Amla" /><option value="Ber" />
+              <option value="Date Palm" /><option value="Avocado" /><option value="Dragon Fruit" />
+              <option value="Kiwi" /><option value="Fig" /><option value="Tamarind" />
+              {/* Spices */}
+              <option value="Cumin" /><option value="Jeera" /><option value="Fennel" />
+              <option value="Saunf" /><option value="Coriander Seeds" /><option value="Pepper" />
+              <option value="Black Pepper" /><option value="Cloves" /><option value="Nutmeg" />
+              <option value="Mace" /><option value="Cinnamon" /><option value="Star Anise" />
+              <option value="Bay Leaf" /><option value="Ajwain" /><option value="Carom Seeds" />
+              <option value="Fenugreek Seeds" /><option value="Asafoetida" /><option value="Hing" />
+              <option value="Vanilla" /><option value="Saffron" />
+              {/* Flowers */}
+              <option value="Marigold" /><option value="Rose" /><option value="Jasmine" />
+              <option value="Lotus" /><option value="Chrysanthemum" /><option value="Tuberose" />
+              {/* Plantation */}
+              <option value="Cashew" /><option value="Banana Flower" /><option value="Bamboo" />
+              <option value="Oil Palm" />
+            </datalist>
           </div>
+
 
           {/* Variety Selector */}
           {activeCommodity && activeCommodity.varieties && activeCommodity.varieties.length > 0 && (
@@ -205,7 +321,7 @@ export const SearchForm: React.FC<SearchFormProps> = ({
                 setGpsActive(false);
               }}
               placeholder={t.locationPlaceholder}
-              className="w-full px-4 py-3 text-sm bg-white border border-[#CCE0D0] rounded-2xl text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[#2E7D32] focus:ring-1 focus:ring-[#2E7D32] transition-all font-medium shadow-xs"
+              className="w-full px-4 py-3 text-sm bg-white/70 backdrop-blur-xs border border-white/80 rounded-2xl text-stone-900 placeholder:text-stone-400 focus:outline-none focus:border-[#2E7D32] focus:ring-1 focus:ring-[#2E7D32] transition-all font-medium shadow-xs"
             />
             <p className="text-[11px] text-stone-500 mt-1">
               Popular APMCs: Ballari, Kolar, Bangalore, Belagavi, Mysuru, Nashik, Pune, Guntur, Agra...
@@ -218,7 +334,7 @@ export const SearchForm: React.FC<SearchFormProps> = ({
               <Scale className="w-3.5 h-3.5 text-[#2E7D32]" />
               <span className="text-stone-800">{t.quantityLabel}</span>
             </label>
-            <div className="flex rounded-2xl overflow-hidden border border-[#CCE0D0] bg-white focus-within:border-[#2E7D32] focus-within:ring-1 focus-within:ring-[#2E7D32] transition-all shadow-xs">
+            <div className="flex rounded-2xl overflow-hidden border border-white/80 bg-white/70 backdrop-blur-xs focus-within:border-[#2E7D32] focus-within:ring-1 focus-within:ring-[#2E7D32] transition-all shadow-xs">
               <input
                 type="number"
                 min="0.1"
@@ -281,35 +397,6 @@ export const SearchForm: React.FC<SearchFormProps> = ({
           </button>
         </div>
 
-        {/* Quick Presets */}
-        <div className="pt-3 border-t border-[#E2ECE3] flex flex-wrap items-center gap-2 text-xs">
-          <span className="text-stone-500 font-medium flex items-center gap-1">
-            <Sparkles className="w-3 h-3 text-[#2E7D32]" />
-            Quick Presets:
-          </span>
-          {[
-            { label: "🍅 Tomato 500kg (Ballari)", crop: "Tomato", loc: "Ballari, Karnataka", qty: 500, u: "kg" as CropUnit },
-            { label: "🧅 Onion 15q (Nashik)", crop: "Onion", loc: "Nashik, Maharashtra", qty: 15, u: "quintal" as CropUnit },
-            { label: "🥔 Potato 20q (Agra)", crop: "Potato", loc: "Agra, Uttar Pradesh", qty: 20, u: "quintal" as CropUnit },
-            { label: "🌶️ Chilli 5q (Guntur)", crop: "Chilli", loc: "Guntur, Andhra Pradesh", qty: 5, u: "quintal" as CropUnit },
-            { label: "🌾 Paddy 30q (Karnal)", crop: "Paddy", loc: "Karnal, Haryana", qty: 30, u: "quintal" as CropUnit }
-          ].map((item, idx) => (
-            <button
-              key={idx}
-              type="button"
-              onClick={() => {
-                onCropChange(item.crop);
-                onLocationChange(item.loc);
-                onQuantityChange(item.qty);
-                onUnitChange(item.u);
-                setTimeout(() => onSearch(), 50);
-              }}
-              className="bg-[#F4F8F5] hover:bg-[#EBF5ED] text-stone-700 hover:text-[#123826] px-3 py-1 rounded-xl border border-[#CCE0D0] transition-all cursor-pointer text-[11px] font-medium"
-            >
-              {item.label}
-            </button>
-          ))}
-        </div>
       </form>
     </div>
   );

@@ -9,7 +9,7 @@ import type {
   PriceTrend,
   NavigationPage
 } from './types';
-import { TRANSLATIONS } from './i18n/translations';
+
 import { Header } from './components/Header';
 import { OfflineBanner } from './components/OfflineBanner';
 import { ExplainModal } from './components/ExplainModal';
@@ -31,11 +31,25 @@ import {
   saveSearchResultToCache, 
   getCachedSearchResult 
 } from './utils/storage';
-import { BookOpen, CheckCircle2, ShieldCheck } from 'lucide-react';
+import { setSiteLanguage, clearAllTranslateCookies } from './utils/translator';
+import { apiUrl } from './utils/api';
+import { CheckCircle2, ShieldCheck, MessageSquare, BookOpen } from 'lucide-react';
+import { TRANSLATIONS } from './i18n/translations';
 
 export const App: React.FC = () => {
   // English is ALWAYS default on initial load / refresh per user instruction
   const [language, setLanguage] = useState<Language>('en');
+
+  // Purge any stale Google Translate cookies on initial mount to guarantee pure English
+  useEffect(() => {
+    clearAllTranslateCookies();
+  }, []);
+
+  const handleLanguageChange = (newLang: Language) => {
+    setLanguage(newLang);
+    setSiteLanguage(newLang);
+  };
+
   const [currentPage, setCurrentPage] = useState<NavigationPage>('home');
   const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine);
   const [activeTab, setActiveTab] = useState<'form' | 'nlp'>('form');
@@ -46,7 +60,7 @@ export const App: React.FC = () => {
   // Search form state
   const [crop, setCrop] = useState<string>('Tomato');
   const [variety, setVariety] = useState<string>('Hybrid');
-  const [location, setLocation] = useState<string>('Ballari');
+  const [location, setLocation] = useState<string>('Bengaluru');
   const [quantity, setQuantity] = useState<number>(500);
   const [unit, setUnit] = useState<CropUnit>('kg');
 
@@ -67,41 +81,66 @@ export const App: React.FC = () => {
 
   const t = TRANSLATIONS[language];
 
-  // Initialize page routing from pathname
+  // Initialize page routing from hash and pathname
   useEffect(() => {
-    const getPageFromPath = (path: string): NavigationPage => {
-      const clean = path.replace(/^\//, '').toLowerCase();
-      if (clean === 'dashboard') return 'dashboard';
-      if (clean === 'advisory') return 'advisory';
-      if (clean === 'diagnose') return 'diagnose';
-      if (clean === 'satellite') return 'satellite';
-      if (clean === 'gov') return 'gov';
-      if (clean === 'about') return 'about';
-      if (clean === 'services') return 'services';
-      if (clean === 'crops') return 'crops';
-      if (clean === 'dispatch') return 'dispatch';
-      if (clean === 'contact') return 'contact';
+    const validPages: NavigationPage[] = [
+      'home', 'dashboard', 'about', 'services', 'crops', 'dispatch', 'contact',
+      'weather', 'advisory', 'diagnose', 'satellite', 'gov'
+    ];
+
+    const getPageFromLocation = (): NavigationPage => {
+      // 1. Check hash first (e.g. #/dashboard, #dashboard)
+      const hashClean = (window.location.hash || '').replace(/^#\/?/, '').split('?')[0].toLowerCase();
+      if (validPages.includes(hashClean as NavigationPage)) {
+        return hashClean as NavigationPage;
+      }
+      // 2. Check pathname (e.g. /dashboard or /dashboard.html)
+      const pathClean = window.location.pathname.replace(/^\//, '').replace(/\.html$/, '').toLowerCase();
+      if (validPages.includes(pathClean as NavigationPage)) {
+        return pathClean as NavigationPage;
+      }
       return 'home';
     };
 
-    setCurrentPage(getPageFromPath(window.location.pathname));
+    setCurrentPage(getPageFromLocation());
 
-    const handlePopState = () => {
-      setCurrentPage(getPageFromPath(window.location.pathname));
+    const handleLocationChange = () => {
+      setCurrentPage(getPageFromLocation());
     };
 
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
+    window.addEventListener('popstate', handleLocationChange);
+    window.addEventListener('hashchange', handleLocationChange);
+    return () => {
+      window.removeEventListener('popstate', handleLocationChange);
+      window.removeEventListener('hashchange', handleLocationChange);
+    };
   }, []);
 
   const navigateTo = (page: NavigationPage) => {
     setCurrentPage(page);
-    const targetPath = page === 'home' ? '/' : `/${page}`;
-    if (window.location.pathname !== targetPath) {
-      window.history.pushState({}, '', targetPath);
-    }
+    // Hash routing guarantees reloadable URLs without server routing errors
+    window.location.hash = page === 'home' ? '' : `/${page}`;
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  // Re-apply site-wide dynamic translation whenever the page route changes
+  useEffect(() => {
+    if (language !== 'en') {
+      const timer = setTimeout(() => {
+        setSiteLanguage(language);
+      }, 100);
+      return () => clearTimeout(timer);
+    } else {
+      try {
+        const hostname = window.location.hostname;
+        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=${hostname};`;
+        document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.${hostname};`;
+      } catch {
+        // silent
+      }
+    }
+  }, [currentPage, language]);
 
   // Online / Offline listeners
   useEffect(() => {
@@ -120,7 +159,7 @@ export const App: React.FC = () => {
   // Fetch sync status on mount
   const fetchSyncStatus = async () => {
     try {
-      const res = await fetch('/api/sync/status');
+      const res = await fetch(apiUrl('/sync/status'));
       const data = await res.json();
       if (data.success) {
         setSyncStatus(data);
@@ -136,7 +175,7 @@ export const App: React.FC = () => {
     // Fetch user preferences (location and unit only; language remains 'en' on fresh load)
     async function loadPreferences() {
       try {
-        const res = await fetch('/api/preferences');
+        const res = await fetch(apiUrl('/preferences'));
         const data = await res.json();
         if (data.success && data.preferences) {
           if (data.preferences.location) setLocation(data.preferences.location);
@@ -158,7 +197,7 @@ export const App: React.FC = () => {
     const marketId = selectedMarket.market_id;
     async function loadMarketTrend() {
       try {
-        const res = await fetch(`/api/trends?crop=${encodeURIComponent(crop)}&market_id=${encodeURIComponent(marketId)}&days=7`);
+        const res = await fetch(apiUrl(`/trends?crop=${encodeURIComponent(crop)}&market_id=${encodeURIComponent(marketId)}&days=7`));
         const data = await res.json();
         if (data.success && data.has_data) {
           setActiveTrend(data);
@@ -176,10 +215,10 @@ export const App: React.FC = () => {
   const handleTriggerSync = async () => {
     setIsSyncing(true);
     try {
-      const res = await fetch('/api/sync', { method: 'POST' });
+      const res = await fetch(apiUrl('/sync'), { method: 'POST' });
       const data = await res.json();
       if (data.success) {
-        setSyncToast(`⚡ Successfully synced ${data.records_synced} APMC records into SQLite & Cloud DB!`);
+        setSyncToast(`Successfully synced ${data.records_synced} APMC records into SQLite & Cloud DB!`);
         setTimeout(() => setSyncToast(null), 4500);
         await fetchSyncStatus();
         await handleSearch();
@@ -195,7 +234,7 @@ export const App: React.FC = () => {
   useEffect(() => {
     async function loadCrops() {
       try {
-        const res = await fetch('/api/crops');
+        const res = await fetch(apiUrl('/crops'));
         const data = await res.json();
         if (data.success && data.commodities) {
           setCommodities(data.commodities);
@@ -220,7 +259,8 @@ export const App: React.FC = () => {
       crop: targetCrop,
       location,
       quantity: quantity.toString(),
-      unit
+      unit,
+      pan_india: 'true'
     });
 
     if (gpsCoords) {
@@ -242,7 +282,7 @@ export const App: React.FC = () => {
         }
       }
 
-      const res = await fetch(`/api/markets?${queryParams.toString()}`);
+      const res = await fetch(apiUrl(`/markets?${queryParams.toString()}`));
       const data: SearchResult = await res.json();
 
       setSearchResult(data);
@@ -309,11 +349,25 @@ export const App: React.FC = () => {
     (unit === 'kg' ? quantity / 100 : (unit === 'tonne' ? quantity * 10 : quantity));
 
   return (
-    <div className="min-h-screen bg-[#FBFDF9] text-[#162E21] flex flex-col font-['Plus_Jakarta_Sans',sans-serif]">
+    <div 
+      className="min-h-screen text-[#153424] flex flex-col font-['Plus_Jakarta_Sans',sans-serif] relative" 
+      style={{ background: '#F0EDE6' }}
+    >
+      {/* Global fixed farmland background — subtle on all pages */}
+      <div
+        className="fixed inset-0 bg-cover bg-center bg-no-repeat pointer-events-none"
+        style={{
+          backgroundImage: `url('https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=1800&q=80&auto=format&fit=crop')`,
+          opacity: 0.07,
+          zIndex: 0,
+        }}
+        aria-hidden="true"
+      />
+
       {/* Editorial Header with multi-page navigation, language switch & sync */}
       <Header
         language={language}
-        onLanguageChange={setLanguage}
+        onLanguageChange={handleLanguageChange}
         isOnline={isOnline}
         syncStatus={syncStatus}
         onTriggerSync={handleTriggerSync}
@@ -326,7 +380,7 @@ export const App: React.FC = () => {
 
       {/* Live Sync Notification Toast */}
       {syncToast && (
-        <div className="bg-[#123826] text-white font-semibold text-xs sm:text-sm px-4 py-2.5 text-center flex items-center justify-center gap-2 shadow-sm animate-in fade-in font-mono">
+        <div className="bg-[#153424] text-white font-semibold text-xs sm:text-sm px-4 py-2.5 text-center flex items-center justify-center gap-2 shadow-sm animate-in fade-in font-mono">
           <CheckCircle2 className="w-4 h-4 text-[#4CAF50] shrink-0" />
           <span>{syncToast}</span>
         </div>
@@ -340,8 +394,8 @@ export const App: React.FC = () => {
         onRefresh={() => handleSearch()}
       />
 
-      {/* Main Page Content Router */}
-      <main className="flex-1 w-full">
+      {/* Main Page Content Router with Smooth Slide Transition */}
+      <main key={currentPage} className="relative z-10 flex-1 w-full animate-slide-up">
         {currentPage === 'home' && (
           <HomePage
             language={language}
@@ -353,7 +407,7 @@ export const App: React.FC = () => {
         )}
 
         {currentPage === 'dashboard' && (
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
             <DashboardPage
               language={language}
               activeTab={activeTab}
@@ -431,6 +485,7 @@ export const App: React.FC = () => {
           <ServicesPage
             language={language}
             onNavigate={navigateTo}
+            onOpenTerminologyGuide={(term) => setExplanationTerm(term || 'modal_price')}
           />
         )}
 
@@ -463,10 +518,10 @@ export const App: React.FC = () => {
         <button
           type="button"
           onClick={() => setExplanationTerm('modal_price')}
-          className="bg-[#123826] hover:bg-[#1B4D35] text-white font-bold px-4 py-2.5 rounded-full shadow-lg border border-[#3FA744]/40 flex items-center gap-2 transition-all hover:scale-105 cursor-pointer text-xs sm:text-sm"
+          className="bg-[#153424] hover:bg-[#1f4a34] text-white font-bold px-4 py-2.5 rounded-full shadow-lg border border-[#3FA744]/40 flex items-center gap-2 transition-all hover:scale-105 cursor-pointer text-xs sm:text-sm"
         >
           <BookOpen className="w-4 h-4 text-[#A5D6A7]" />
-          <span>{t.educationalModalTitle}</span>
+          <span>{t?.educationalModalTitle || 'Market Terminology Guide'}</span>
         </button>
       </div>
 
@@ -475,7 +530,7 @@ export const App: React.FC = () => {
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
         currentLanguage={language}
-        onLanguageChange={setLanguage}
+        onLanguageChange={handleLanguageChange}
         currentLocation={location}
         onLocationChange={setLocation}
         currentUnit={unit}
@@ -506,16 +561,16 @@ export const App: React.FC = () => {
       />
 
       {/* Rich Multi-Column VerdaAgro Forest Green Footer */}
-      <footer className="bg-[#123826] text-stone-300 text-xs py-14 border-t border-[#1B4D35] mt-auto print:hidden">
+      <footer className="relative z-10 bg-[#153424] text-stone-300 text-xs py-14 border-t border-[#1f4a34] mt-auto print:hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 pb-10 border-b border-[#1B4D35]">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 pb-10 border-b border-[#1f4a34]">
             
             {/* Column 1: Brand & Identity */}
             <div className="lg:col-span-2 space-y-3">
-              <div className="flex items-center gap-2.5">
-                <span className="text-2xl">🌾</span>
-                <span className="font-black text-white text-xl font-['Syne',sans-serif]">AgriMate</span>
-                <span className="text-[10px] uppercase font-mono font-bold tracking-wider px-2 py-0.5 rounded-full bg-[#1B4D35] text-[#A5D6A7] border border-[#2E7D32]">
+              <div className="flex items-center gap-2.5 notranslate select-none" translate="no">
+                <span className="text-2xl notranslate select-none" translate="no">🌾</span>
+                <span className="font-black text-white text-xl font-['Syne',sans-serif] notranslate" translate="no">AgriMate</span>
+                <span className="text-[10px] uppercase font-mono font-bold tracking-wider px-2 py-0.5 rounded-full bg-[#1f4a34] text-[#A5D6A7] border border-[#2E7D32]">
                   Official Platform
                 </span>
               </div>
@@ -538,6 +593,7 @@ export const App: React.FC = () => {
               <ul className="space-y-1.5 text-xs text-emerald-100/70">
                 <li><button onClick={() => navigateTo('home')} className="hover:text-white transition-colors cursor-pointer">Home</button></li>
                 <li><button onClick={() => navigateTo('dashboard')} className="hover:text-white transition-colors cursor-pointer">Terminal Dashboard</button></li>
+                <li><button onClick={() => navigateTo('weather')} className="hover:text-white transition-colors cursor-pointer text-[#A5D6A7]">🌤️ Weather Radar</button></li>
                 <li><button onClick={() => navigateTo('advisory')} className="hover:text-white transition-colors cursor-pointer text-[#A5D6A7]">🌱 AI Crop Advisory</button></li>
                 <li><button onClick={() => navigateTo('diagnose')} className="hover:text-white transition-colors cursor-pointer text-[#A5D6A7]">🔬 Disease Diagnosis</button></li>
                 <li><button onClick={() => navigateTo('satellite')} className="hover:text-white transition-colors cursor-pointer text-[#A5D6A7]">🛰️ Field NDVI Map</button></li>
@@ -564,8 +620,8 @@ export const App: React.FC = () => {
               </ul>
             </div>
 
-            {/* Column 4: Support & Community */}
-            <div className="space-y-2.5">
+            {/* Column 4: Farmer Helpline & Community */}
+            <div className="space-y-2.5 shrink-0">
               <h4 className="text-white font-bold text-xs uppercase tracking-wider">Farmer Helpline & Community</h4>
               <div className="space-y-2 text-xs text-emerald-100/70">
                 <a 
@@ -574,15 +630,16 @@ export const App: React.FC = () => {
                     e.preventDefault();
                     alert('AgriMate Farmers Community WhatsApp Group link will be active shortly.');
                   }}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#25D366] text-white font-bold text-xs hover:bg-[#20ba59] transition-colors shadow-xs cursor-pointer"
+                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#25D366] text-white font-bold text-xs hover:bg-[#20ba59] transition-colors shadow-xs cursor-pointer"
                 >
-                  <span>💬 Join Farmer WhatsApp Group</span>
+                  <MessageSquare className="w-3.5 h-3.5" />
+                  <span>Join Farmer WhatsApp Group</span>
                 </a>
                 <p className="font-mono text-sm font-bold text-[#E8A238] pt-1">Kisan Helpline: 1800-180-1551</p>
                 <p className="text-[11px]">Toll-free 24x7 Ministry of Agriculture & Farmers Welfare</p>
                 <div className="pt-1">
                   <span className="block text-[10px] text-emerald-300 uppercase font-bold">Language Standard:</span>
-                  <p className="text-[11px]">English (Default) • हिन्दी • ಕನ್ನಡ</p>
+                  <p className="text-[11px]">English (Default) • 10 Indian Languages</p>
                 </div>
               </div>
             </div>

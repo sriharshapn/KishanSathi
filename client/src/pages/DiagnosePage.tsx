@@ -935,7 +935,7 @@ export const DiagnosePage: React.FC<DiagnosePageProps> = ({ language, onNavigate
           </div>
 
           {/* Primary Diagnoses Cards */}
-          {result.diagnoses.map((diag, idx) => (
+          {result.diagnoses.map((diag: any, idx: number) => (
             <div key={idx} className="bg-white rounded-3xl border border-[#CCE0D0] p-6 shadow-xs space-y-6">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-[#E2ECE3] gap-2">
                 <div>
@@ -978,7 +978,7 @@ export const DiagnosePage: React.FC<DiagnosePageProps> = ({ language, onNavigate
                     </h4>
                   </div>
                   <ul className="space-y-2">
-                    {diag.organic_treatment.map((step, i) => (
+                    {diag.organic_treatment.map((step: any, i: number) => (
                       <li key={i} className="text-xs text-stone-700 flex items-start gap-2">
                         <CheckCircle2 className="w-3.5 h-3.5 text-[#2E7D32] shrink-0 mt-0.5" />
                         <span>{step}</span>
@@ -1019,7 +1019,7 @@ export const DiagnosePage: React.FC<DiagnosePageProps> = ({ language, onNavigate
                     Long-Term Preventive Farm Hygiene
                   </h5>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {diag.prevention.map((tip, i) => (
+                    {diag.prevention.map((tip: any, i: number) => (
                       <div key={i} className="p-2.5 rounded-xl bg-stone-50 text-stone-700 text-xs border border-stone-200">
                         • {tip}
                       </div>

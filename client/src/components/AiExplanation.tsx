@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import type { MarketItem, PriceTrend, Language, AiExplanationData } from '../types';
 import { TRANSLATIONS } from '../i18n/translations';
 import { Sparkles, Bot, ShieldCheck, Volume2, VolumeX, Share2, Check, Copy } from 'lucide-react';
+import { apiUrl } from '../utils/api';
 
 interface AiExplanationProps {
   market: MarketItem;
@@ -27,7 +28,7 @@ export const AiExplanation: React.FC<AiExplanationProps> = ({
     async function fetchExplanation() {
       setLoading(true);
       try {
-        const res = await fetch('/api/explain', {
+        const res = await fetch(apiUrl('/explain'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -78,13 +79,19 @@ export const AiExplanation: React.FC<AiExplanationProps> = ({
     const fullText = `${explanation.title}. ${explanation.summary} ${explanation.priceDetails} ${explanation.trendExplanation} ${explanation.advice}`;
     const utterance = new SpeechSynthesisUtterance(fullText);
 
-    if (language === 'hi') {
-      utterance.lang = 'hi-IN';
-    } else if (language === 'kn') {
-      utterance.lang = 'kn-IN';
-    } else {
-      utterance.lang = 'en-IN';
-    }
+    const langCodeMap: Record<Language, string> = {
+      en: 'en-IN',
+      hi: 'hi-IN',
+      kn: 'kn-IN',
+      te: 'te-IN',
+      ta: 'ta-IN',
+      mr: 'mr-IN',
+      bn: 'bn-IN',
+      gu: 'gu-IN',
+      pa: 'pa-IN',
+      ml: 'ml-IN'
+    };
+    utterance.lang = langCodeMap[language] || 'en-IN';
     utterance.rate = 0.92;
 
     utterance.onstart = () => setIsSpeaking(true);
@@ -104,9 +111,35 @@ export const AiExplanation: React.FC<AiExplanationProps> = ({
 
   const handleShareWhatsApp = () => {
     if (!explanation) return;
-    const text = `🌾 *${explanation.title}*\n\n${explanation.summary}\n\n${explanation.priceDetails}\n${explanation.trendExplanation}\n\n💡 *Farmer Tip:* ${explanation.advice}\n\n_Source: ${market.source}_\n_Verified by AgriMate Market Intelligence_`;
+    const text = `*${explanation.title}*\n\n${explanation.summary}\n\n${explanation.priceDetails}\n${explanation.trendExplanation}\n\n*Farmer Tip:* ${explanation.advice}\n\n_Source: ${market.source}_\n_Verified by AgriMate Market Intelligence_`;
     const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
     window.open(url, '_blank');
+  };
+
+  const languageDisplayNames: Record<Language, string> = {
+    en: "English",
+    hi: "हिन्दी",
+    kn: "ಕನ್ನಡ",
+    te: "తెలుగు",
+    ta: "தமிழ்",
+    mr: "मराठी",
+    bn: "বাংলা",
+    gu: "ગુજરાતી",
+    pa: "ਪੰਜਾਬੀ",
+    ml: "മലയാളം"
+  };
+
+  const listenButtonLabels: Record<Language, string> = {
+    en: "Listen Voice",
+    hi: "आवाज़ में सुनें",
+    kn: "ಧ್ವನಿ ಕೇಳಿ",
+    te: "వాయిస్ వినండి",
+    ta: "குரல் கேளுங்கள்",
+    mr: "आवाज ऐका",
+    bn: "ভয়েস শুনুন",
+    gu: "અવાજ સાંભળો",
+    pa: "ਆਵਾਜ਼ ਸੁਣੋ",
+    ml: "ശബ്ദം കേൾക്കൂ"
   };
 
   if (loading) {
@@ -115,7 +148,7 @@ export const AiExplanation: React.FC<AiExplanationProps> = ({
         <div className="flex items-center gap-3">
           <div className="w-5 h-5 border-2 border-[#2E7D32] border-t-transparent rounded-full animate-spin" />
           <span className="text-sm font-medium text-[#123826]">
-            Generating market analysis in {language === 'hi' ? 'हिन्दी' : (language === 'kn' ? 'ಕನ್ನಡ' : 'English')}...
+            Generating market analysis in {languageDisplayNames[language]}...
           </span>
         </div>
       </div>
@@ -157,10 +190,10 @@ export const AiExplanation: React.FC<AiExplanationProps> = ({
                 ? 'bg-amber-500 text-white animate-bounce shadow-md' 
                 : 'bg-[#2E7D32] hover:bg-[#1B5E20] text-white shadow-sm hover:shadow-md'
             }`}
-            title={isSpeaking ? "Stop Voice Narration" : "Listen in Selected Language"}
+            title={isSpeaking ? "Stop Voice Narration" : `Listen in ${languageDisplayNames[language]}`}
           >
             {isSpeaking ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-            <span>{isSpeaking ? "Speaking..." : (language === 'kn' ? "ಧ್ವನಿ ಕೇಳಿ" : (language === 'hi' ? "आवाज़ में सुनें" : "Listen Voice"))}</span>
+            <span>{isSpeaking ? "Speaking..." : listenButtonLabels[language]}</span>
           </button>
 
           {/* Copy Button */}
@@ -195,14 +228,14 @@ export const AiExplanation: React.FC<AiExplanationProps> = ({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-mono text-xs">
-          <div className="bg-white p-4.5 rounded-2xl border border-[#E2ECE3]">
+          <div className="glass-card-subtle p-4.5 rounded-2xl border border-white/80">
             <div className="text-[10px] uppercase tracking-wider text-amber-800 font-bold mb-1.5">
               Price Range & Arrival Volume
             </div>
             <p className="text-stone-700 leading-normal">{explanation.priceDetails}</p>
           </div>
 
-          <div className="bg-white p-4.5 rounded-2xl border border-[#E2ECE3]">
+          <div className="glass-card-subtle p-4.5 rounded-2xl border border-white/80">
             <div className="text-[10px] uppercase tracking-wider text-[#123826] font-bold mb-1.5">
               Historical Trend Insight
             </div>
@@ -211,12 +244,12 @@ export const AiExplanation: React.FC<AiExplanationProps> = ({
         </div>
 
         {explanation.estimatedValueNote && (
-          <div className="bg-amber-50 p-4 rounded-2xl border border-amber-200 text-xs font-mono text-amber-900">
+          <div className="glass-card-subtle p-4 rounded-2xl border border-amber-200/80 bg-amber-50/40 text-xs font-mono text-amber-900">
             <strong className="text-amber-800">Produce Estimate Note:</strong> {explanation.estimatedValueNote}
           </div>
         )}
 
-        <div className="bg-[#EBF5ED] p-5 rounded-2xl border border-[#A5D6A7] flex items-start gap-3.5 shadow-inner">
+        <div className="glass-card-subtle p-5 rounded-2xl border border-[#2E7D32]/25 flex items-start gap-3.5">
           <div className="p-2 bg-[#2E7D32] text-white rounded-xl shrink-0 mt-0.5">
             <Bot className="w-5 h-5" />
           </div>

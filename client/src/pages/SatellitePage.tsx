@@ -809,7 +809,7 @@ export const SatellitePage: React.FC<SatellitePageProps> = ({ onNavigate }) => {
               {/* Area fill */}
               <polygon
                 points={
-                  ndviData.timeseries.map((pt, i) => {
+                  ndviData.timeseries.map((pt: any, i: number) => {
                     const x = (i / (ndviData.timeseries.length - 1)) * 600;
                     const y = 140 - (pt.ndvi * 120);
                     return `${x},${y}`;
@@ -821,7 +821,7 @@ export const SatellitePage: React.FC<SatellitePageProps> = ({ onNavigate }) => {
 
               {/* Line graph */}
               <polyline
-                points={ndviData.timeseries.map((pt, i) => {
+                points={ndviData.timeseries.map((pt: any, i: number) => {
                   const x = (i / (ndviData.timeseries.length - 1)) * 600;
                   const y = 140 - (pt.ndvi * 120);
                   return `${x},${y}`;
@@ -832,7 +832,7 @@ export const SatellitePage: React.FC<SatellitePageProps> = ({ onNavigate }) => {
               />
 
               {/* Data points */}
-              {ndviData.timeseries.map((pt, i) => {
+              {ndviData.timeseries.map((pt: any, i: number) => {
                 if (i % 5 === 0 || i === ndviData.timeseries.length - 1) {
                   const x = (i / (ndviData.timeseries.length - 1)) * 600;
                   const y = 140 - (pt.ndvi * 120);
