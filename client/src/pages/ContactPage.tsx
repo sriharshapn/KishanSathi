@@ -4,7 +4,6 @@ import {
   PhoneCall, 
   MapPin, 
   Clock, 
-  HelpCircle, 
   Send, 
   CheckCircle2, 
   ChevronDown, 
@@ -24,69 +23,69 @@ interface FAQItem {
 
 const FAQ_LIST: FAQItem[] = [
   {
-    q: "What is a Modal Price, and how does it differ from Min and Max prices?",
-    a: "The modal price is the most frequently occurring auction rate at which the majority of produce volume is sold on a given trading day. The minimum and maximum prices represent the lowest outlier (often damaged or poor grade lot) and the absolute highest bid (premium export grade). The modal price is the safest metric for estimating expected income."
+    q: "How does AgriMate generate personalised AI crop advisories?",
+    a: "AgriMate's advisory engine (powered by fine-tuned Gemini 2.0 Flash) synthesises multiple real-time inputs: Sentinel-2 satellite soil moisture & NDVI, IMD 7-day NWP weather forecasts, State Soil Health Card NPK levels, and prevailing e-NAM/Agmarknet market price signals to generate 3–5 optimal crop recommendations with regenerative scores (A–F)."
   },
   {
-    q: "Can commission agents deduct unauthorized fees or trade discounts?",
-    a: "No. Under the Agricultural Produce Marketing (Regulation) Act and APMC statutory guidelines, buyers pay the market cess. Commission agents are strictly barred from deducting unauthorized 'dharma' cuts, excessive unloading charges, or cash discount fees from the farmer's gross auction price."
+    q: "How does the Sentinel-2 satellite NDVI and irrigation model work?",
+    a: "The Satellite Intelligence Module processes multispectral imagery at ≤10m resolution every 5 days. It calculates vegetative canopy density (NDVI) and soil moisture indices. Combined with local evapotranspiration rates, it delivers precise daily irrigation schedules in millimeters to prevent crop water stress."
   },
   {
-    q: "How does the Haulage & Net Return simulator calculate transport costs?",
-    a: "The simulator evaluates standard per-kilometer commercial freight rates across vehicle classes (Tata Ace, 407 Pickup, 6-Wheeler, Tractor Trolley) plus fuel indexing and loading/unloading (hamali) charges. This prevents farmers from driving to a distant mandi only to lose the price advantage in fuel."
+    q: "How does photo disease diagnosis work, and what treatments are provided?",
+    a: "Farmers upload or take a clear photo of the infected leaf or plant. Our vision pathology model identifies the disease or pest with high confidence in seconds. It provides a dual treatment prescription: certified organic bio-remedies (e.g. neem extract, Trichoderma) and statutory chemical treatments with exact dilution dosages and pre-harvest intervals (PHI)."
   },
   {
-    q: "What should I do if the APMC weighbridge weight differs from my farm count?",
-    a: "Immediately show your Digital Mandi Gate Pass to the APMC Market Secretary or weighment supervisor before the lot is unloaded. Under APMC statutory rules, the farmer has the right to demand a re-tare calibration test on an alternative certified electronic weighbridge."
+    q: "Can I access advisories without an internet connection or on a basic feature phone?",
+    a: "Yes. Under PRD feature F-ADV-04, farmers can dial the toll-free Kisan Call Centre shortcode 1800-180-1551. After selecting their language (Hindi, Tamil, Kannada, etc.), the system delivers a 90-second voice advisory directly over standard cellular telephony."
   },
   {
-    q: "Why does AgriMate guarantee 0% AI price hallucinations?",
-    a: "Unlike speculative consumer chatbots, our terminal queries raw Agmarknet government auction records directly from our local-first database. If an APMC mandi has not reported transactions today, the system alerts you rather than fabricating imaginary prices."
+    q: "Is my farm data private and compliant with the DPDP Act 2023?",
+    a: "Strictly yes. AgriMate operates on a federated digital public good architecture. Farmer Personally Identifiable Information (PII) is encrypted at rest and in transit, and never leaves the state data centre boundary without explicit opt-in consent. Zero farmer data is sold to private brokers."
   }
 ];
 
-const APMC_OFFICES = [
+const KVK_CENTRES = [
   {
-    name: "Ballari APMC Yard",
-    location: "Millerpet, Ballari, Karnataka - 583101",
-    phone: "08392-250122",
-    crops: "Tomato, Chilli, Cotton, Maize",
-    hours: "06:00 AM - 02:00 PM"
+    name: "ICAR - Krishi Vigyan Kendra, Ballari",
+    location: "Hagari Agricultural Research Station, Ballari, Karnataka - 583106",
+    phone: "08392-286060",
+    speciality: "Dryland Horticulture, Cotton, Tomato Pathology",
+    hours: "09:00 AM - 05:00 PM"
   },
   {
-    name: "Kolar APMC Sub-Yard",
-    location: "Bangalore-Chennai NH 75, Kolar, Karnataka - 563101",
-    phone: "08152-222340",
-    crops: "Tomato, Capsicum, Mango",
-    hours: "05:00 AM - 01:00 PM"
+    name: "ICAR - Krishi Vigyan Kendra, Kolar",
+    location: "Tamaka, Kolar, Karnataka - 563103",
+    phone: "08152-243122",
+    speciality: "Vegetable Precision Farming, Soil Health Testing",
+    hours: "09:00 AM - 05:00 PM"
   },
   {
-    name: "Lasalgaon APMC Yard",
-    location: "Station Road, Lasalgaon, Nashik, Maharashtra - 422306",
-    phone: "02550-266023",
-    crops: "Onion, Pomegranate, Grapes",
-    hours: "08:00 AM - 04:00 PM"
+    name: "ICAR - KVK Nashik (YCMOU)",
+    location: "Dnyangangotri, Near Gangapur Dam, Nashik, Maharashtra - 422222",
+    phone: "0253-2230717",
+    speciality: "Onion Storage, Grapes, Integrated Pest Management",
+    hours: "09:30 AM - 05:30 PM"
   },
   {
-    name: "Hubballi Main APMC",
-    location: "Amaragol, Hubballi, Karnataka - 580025",
-    phone: "0836-2222144",
-    crops: "Cotton, Groundnut, Onion, Chilli",
-    hours: "07:00 AM - 03:00 PM"
+    name: "ICAR - Central Rice Research Institute KVK",
+    location: "Santhapur, Cuttack, Odisha - 753006",
+    phone: "0671-2367777",
+    speciality: "Paddy Blast Surveillance, Water Salinity Management",
+    hours: "09:00 AM - 05:00 PM"
   },
   {
-    name: "Azadpur Terminal Mandi",
-    location: "New Subzi Mandi, Azadpur, Delhi - 110033",
-    phone: "011-27691880",
-    crops: "All Fruit & Vegetable Consignments",
-    hours: "04:00 AM - 12:00 PM"
+    name: "ICAR - KVK Ludhiana (PAU)",
+    location: "Punjab Agricultural University Campus, Ludhiana, Punjab - 141004",
+    phone: "0161-2401960",
+    speciality: "Wheat Stripe Rust Alerts, Laser Land Leveling",
+    hours: "09:00 AM - 05:00 PM"
   },
   {
-    name: "Vashi APMC Complex",
-    location: "Turbhe, Navi Mumbai, Maharashtra - 400705",
-    phone: "022-27883200",
-    crops: "Grains, Spices, Perishables",
-    hours: "06:00 AM - 02:00 PM"
+    name: "Tamil Nadu Agricultural University KVK",
+    location: "Needamangalam, Thiruvarur / Thanjavur Delta, Tamil Nadu - 614404",
+    phone: "04367-260666",
+    speciality: "Cauvery Delta Agro-Advisories, Soil Carbon Index",
+    hours: "09:00 AM - 05:00 PM"
   }
 ];
 
@@ -96,8 +95,8 @@ export const ContactPage: React.FC<ContactPageProps> = () => {
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
-    mandi: 'Ballari APMC',
-    category: 'Price Discrepancy',
+    centre: 'ICAR - Krishi Vigyan Kendra, Ballari',
+    category: 'Crop Advisory Query',
     message: ''
   });
 
@@ -106,252 +105,266 @@ export const ContactPage: React.FC<ContactPageProps> = () => {
     setSubmitted(true);
     setTimeout(() => {
       setSubmitted(false);
-      setFormData({ name: '', phone: '', mandi: 'Ballari APMC', category: 'Price Discrepancy', message: '' });
+      setFormData({
+        name: '',
+        phone: '',
+        centre: 'ICAR - Krishi Vigyan Kendra, Ballari',
+        category: 'Crop Advisory Query',
+        message: ''
+      });
     }, 4000);
   };
 
   return (
-    <div className="space-y-16 sm:space-y-20 pb-16">
-      {/* Contact Page Header */}
+    <div className="space-y-16 sm:space-y-20 pb-16 font-['Plus_Jakarta_Sans',sans-serif]">
+      {/* Header Banner */}
       <section className="bg-[#ECE8DE]/60 border-b border-[#E6E1D7] py-12 sm:py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="max-w-3xl space-y-4">
             <span className="text-xs font-bold uppercase tracking-widest text-[#2E7D32] bg-white px-3 py-1 rounded-full border border-[#E6E1D7]">
-              Grower Support & APMC Helpdesk
+              Krishi Vigyan Kendra & Grower Support
             </span>
             <h1 className="text-3xl sm:text-5xl font-black text-[#153424] font-['Syne',sans-serif] tracking-tight">
-              We Are Here for Every Farmer in the Field
+              Direct Access to Agricultural Science
             </h1>
             <p className="text-stone-600 text-base sm:text-lg leading-relaxed font-['Outfit',sans-serif]">
-              Need assistance with an APMC auction dispute, tare weighing grievance, or market inquiry? Connect with our dedicated grower desks across Karnataka, Maharashtra, and Andhra Pradesh.
+              Connect directly with verified ICAR Krishi Vigyan Kendras, regional extension agronomists, or dial the 24x7 toll-free Kisan Call Centre for immediate vernacular advice.
             </p>
           </div>
         </div>
       </section>
 
-      {/* Emergency Helpline Banner */}
+      {/* Emergency & Toll-Free Highlights */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="bg-[#153424] text-white p-8 sm:p-10 rounded-3xl shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 border border-[#1f4a34]">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-xs font-bold text-[#E8A238] uppercase tracking-wider">
-              <PhoneCall className="w-4 h-4 animate-bounce" />
-              <span>National Kisan Call Centre • Toll-Free 24x7</span>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="p-6 rounded-3xl bg-[#153424] text-white space-y-3 shadow-md border border-[#1f4a34]">
+            <div className="w-12 h-12 rounded-2xl bg-[#E8A238] text-[#153424] flex items-center justify-center font-bold">
+              <PhoneCall className="w-6 h-6" />
             </div>
-            <h2 className="text-3xl sm:text-4xl font-black font-['Syne',sans-serif]">
-              1800-180-1551
-            </h2>
-            <p className="text-stone-300 text-xs sm:text-sm">
-              Ministry of Agriculture & Farmers Welfare • Trilingual voice assistance available in 22 languages.
+            <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#A5D6A7]">Toll-Free 24x7 Helpline</span>
+            <h3 className="text-2xl font-black font-['Syne',sans-serif] text-white">1800-180-1551</h3>
+            <p className="text-emerald-100/70 text-xs leading-relaxed font-['Outfit',sans-serif]">
+              Ministry of Agriculture & Farmers Welfare Kisan Call Centre. Instant voice connection to agricultural graduates in your regional language.
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-3">
-            <a
-              href="tel:18001801551"
-              className="px-6 py-3 rounded-xl bg-[#E8A238] hover:bg-[#d4912e] text-[#153424] font-black text-sm transition-all shadow-md"
-            >
-              Call Helpline Now
-            </a>
-            <a
-              href="#whatsapp-group"
-              onClick={(e) => {
-                e.preventDefault();
-                alert('AgriMate Farmers Community WhatsApp Group link will be active shortly.');
-              }}
-              className="px-5 py-3 rounded-xl bg-[#25D366] hover:bg-[#20ba59] text-white font-bold text-sm shadow-md transition-all flex items-center gap-2 cursor-pointer"
-            >
-              <MessageSquare className="w-4 h-4 text-white" />
-              <span>Join Farmer WhatsApp Group</span>
-            </a>
+
+          <div className="p-6 rounded-3xl bg-white text-[#153424] space-y-3 shadow-xs border border-[#E6E1D7]">
+            <div className="w-12 h-12 rounded-2xl bg-[#25D366] text-white flex items-center justify-center font-bold">
+              <MessageSquare className="w-6 h-6" />
+            </div>
+            <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#2E7D32]">Farmer WhatsApp Helpdesk</span>
+            <h3 className="text-xl font-black font-['Syne',sans-serif]">WhatsApp Advisory</h3>
+            <p className="text-stone-600 text-xs leading-relaxed font-['Outfit',sans-serif]">
+              Send high-resolution plant disease photos, receive instant treatment PDFs, and subscribe to weekly district crop advisories.
+            </p>
+          </div>
+
+          <div className="p-6 rounded-3xl bg-white text-[#153424] space-y-3 shadow-xs border border-[#E6E1D7]">
+            <div className="w-12 h-12 rounded-2xl bg-[#EAEFE9] text-[#2E7D32] flex items-center justify-center font-bold">
+              <Clock className="w-6 h-6" />
+            </div>
+            <span className="text-xs font-mono font-bold uppercase tracking-wider text-stone-500">Service Reliability</span>
+            <h3 className="text-xl font-black font-['Syne',sans-serif]">99.9% Core Uptime</h3>
+            <p className="text-stone-600 text-xs leading-relaxed font-['Outfit',sans-serif]">
+              Built on local-first SQLite WAL architecture and Google Cloud for uninterrupted field operation during peak Kharif and Rabi cycles.
+            </p>
           </div>
         </div>
       </section>
 
-      {/* APMC Field Offices Directory */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="text-center max-w-2xl mx-auto mb-10 space-y-2">
-          <span className="text-xs font-bold uppercase tracking-widest text-[#2E7D32] bg-[#EAEFE9] px-3 py-1 rounded-full border border-[#D6DFD4]">
-            Regional Verification Network
-          </span>
-          <h2 className="text-2xl sm:text-3xl font-black text-[#153424] font-['Syne',sans-serif]">
-            APMC Mandi Yard Field Stations
-          </h2>
-          <p className="text-stone-600 text-sm">
-            Direct contact coordinates for on-site APMC market secretaries and weighbridge superintendents.
-          </p>
+      {/* Directory of KVK Centres */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <div>
+            <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#2E7D32] block mb-1">
+              Field Science Infrastructure
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-black text-[#153424] font-['Syne',sans-serif]">
+              Krishi Vigyan Kendra (KVK) Partner Centres
+            </h2>
+          </div>
+          <span className="text-xs text-stone-500 font-mono">Government Extension Network</span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {APMC_OFFICES.map((office, idx) => (
-            <div key={idx} className="glass-card p-6 rounded-2xl border border-white/80 shadow-xs space-y-3 hover:border-[#2E7D32]/40 transition-all">
-              <div className="flex items-center justify-between">
-                <h3 className="font-bold text-[#153424] text-base">{office.name}</h3>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EAEFE9] text-[#2E7D32]">
-                  Active Yard
-                </span>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {KVK_CENTRES.map((c) => (
+            <div key={c.name} className="p-5 rounded-2xl bg-white border border-[#E6E1D7] shadow-xs space-y-3 hover:border-[#2E7D32] transition-colors">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="text-sm font-black text-[#153424] font-['Syne',sans-serif]">{c.name}</h3>
+                  <div className="flex items-center gap-1 text-[11px] text-stone-500 mt-1">
+                    <MapPin className="w-3.5 h-3.5 text-[#2E7D32] shrink-0" />
+                    <span>{c.location}</span>
+                  </div>
+                </div>
               </div>
 
-              <div className="space-y-1.5 text-xs text-stone-600">
-                <p className="flex items-start gap-2">
-                  <MapPin className="w-3.5 h-3.5 text-stone-400 shrink-0 mt-0.5" />
-                  <span>{office.location}</span>
-                </p>
-                <p className="flex items-center gap-2">
-                  <PhoneCall className="w-3.5 h-3.5 text-stone-400 shrink-0" />
-                  <span className="font-mono font-medium">{office.phone}</span>
-                </p>
-                <p className="flex items-center gap-2">
-                  <Clock className="w-3.5 h-3.5 text-stone-400 shrink-0" />
-                  <span>Auction Hours: {office.hours}</span>
-                </p>
-              </div>
-
-              <div className="pt-2 border-t border-stone-200/60 text-[11px] text-stone-600">
-                <span className="font-medium text-stone-700">Primary Commodities:</span> {office.crops}
+              <div className="pt-2 border-t border-[#ECE8DE] space-y-1.5 text-xs">
+                <div className="flex justify-between">
+                  <span className="text-stone-500">KVK Telephone:</span>
+                  <strong className="text-[#153424] font-mono">{c.phone}</strong>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-stone-500">Agro-Speciality:</span>
+                  <span className="text-[#2E7D32] font-semibold truncate max-w-[180px]">{c.speciality}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-stone-500">Office Timings:</span>
+                  <span className="text-stone-600 font-mono">{c.hours}</span>
+                </div>
               </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Inquiry Form & FAQ Grid */}
+      {/* Frequently Asked Questions */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-          
-          {/* FAQ Accordion */}
-          <div className="lg:col-span-7 space-y-4">
-            <div className="space-y-1 mb-4">
-              <span className="text-xs font-bold uppercase tracking-wider text-[#2E7D32]">Knowledge Base</span>
-              <h3 className="text-2xl font-black text-[#153424] font-['Syne',sans-serif]">
-                Frequently Asked Agronomic Questions
-              </h3>
-            </div>
+        <div className="bg-[#FAF8F5] p-8 sm:p-12 rounded-3xl border border-[#E6E1D7] space-y-8">
+          <div className="text-center max-w-xl mx-auto space-y-2">
+            <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#2E7D32]">
+              Knowledge Base
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-black text-[#153424] font-['Syne',sans-serif]">
+              AgriMate Architecture FAQs
+            </h2>
+            <p className="text-stone-600 text-xs sm:text-sm">
+              Answers grounded in the AgriMate Product Requirements Document (PRD).
+            </p>
+          </div>
 
-            <div className="space-y-3">
-              {FAQ_LIST.map((item, i) => (
+          <div className="max-w-3xl mx-auto space-y-3">
+            {FAQ_LIST.map((item, idx) => {
+              const isOpen = openFaq === idx;
+              return (
                 <div 
-                  key={i} 
-                  className="glass-card rounded-2xl border border-white/80 overflow-hidden transition-all shadow-xs"
+                  key={idx} 
+                  className="rounded-2xl border border-[#E6E1D7] bg-white overflow-hidden shadow-2xs transition-all"
                 >
                   <button
-                    onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                    className="w-full p-4 text-left flex items-center justify-between gap-4 font-bold text-[#153424] text-sm cursor-pointer hover:bg-white/40 transition-colors"
+                    type="button"
+                    onClick={() => setOpenFaq(isOpen ? null : idx)}
+                    className="w-full p-4 sm:p-5 text-left flex items-center justify-between gap-4 cursor-pointer"
                   >
-                    <span>{item.q}</span>
-                    {openFaq === i ? (
-                      <ChevronUp className="w-4 h-4 text-[#2E7D32] shrink-0" />
-                    ) : (
-                      <ChevronDown className="w-4 h-4 text-stone-400 shrink-0" />
-                    )}
+                    <span className="text-sm font-bold text-[#153424] font-['Outfit',sans-serif]">
+                      {item.q}
+                    </span>
+                    <span className="text-stone-400 shrink-0">
+                      {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                    </span>
                   </button>
-                  {openFaq === i && (
-                    <div className="px-4 pb-4 text-xs text-stone-600 leading-relaxed border-t border-white/60 pt-3 bg-white/30 backdrop-blur-xs">
+
+                  {isOpen && (
+                    <div className="px-4 pb-5 sm:px-5 sm:pb-6 text-xs sm:text-sm text-stone-600 leading-relaxed border-t border-[#F0EDE6] pt-3 animate-in fade-in">
                       {item.a}
                     </div>
                   )}
                 </div>
-              ))}
-            </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Direct Escalation Form */}
+      <section className="max-w-3xl mx-auto px-4 sm:px-6">
+        <div className="bg-white p-8 sm:p-10 rounded-3xl border border-[#E6E1D7] shadow-sm space-y-6">
+          <div>
+            <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#2E7D32] block mb-1">
+              Escalate to Agronomist
+            </span>
+            <h3 className="text-xl sm:text-2xl font-black text-[#153424] font-['Syne',sans-serif]">
+              Submit Query to Regional KVK Extension Desk
+            </h3>
+            <p className="text-stone-600 text-xs leading-relaxed">
+              If an advisory requires custom validation or field inspection, our KVK agronomists respond within 24 hours.
+            </p>
           </div>
 
-          {/* Grievance & Support Form */}
-          <div className="lg:col-span-5 glass-card p-6 sm:p-8 rounded-3xl border border-white/85 shadow-sm space-y-5">
-            <div className="space-y-1">
-              <h3 className="text-lg font-bold text-[#153424] flex items-center gap-2">
-                <HelpCircle className="w-5 h-5 text-[#2E7D32]" />
-                <span>Submit Grievance / Query</span>
-              </h3>
-              <p className="text-xs text-stone-500">
-                Directly submitted to our APMC dispute arbitration liaison.
+          {submitted ? (
+            <div className="p-6 rounded-2xl bg-[#EBF5ED] border border-[#CCE0D0] text-[#123826] text-center space-y-2 animate-in fade-in">
+              <CheckCircle2 className="w-8 h-8 mx-auto text-[#2E7D32]" />
+              <h4 className="text-base font-bold">Query Logged Successfully</h4>
+              <p className="text-xs text-stone-600">
+                Ticket reference has been created. A certified agronomist from your selected KVK centre will contact you.
               </p>
             </div>
-
-            {submitted ? (
-              <div className="p-6 rounded-2xl bg-[#EAEFE9] border border-[#D6DFD4] text-center space-y-2">
-                <CheckCircle2 className="w-10 h-10 text-[#2E7D32] mx-auto" />
-                <h4 className="font-bold text-[#153424]">Grievance Registered Successfully</h4>
-                <p className="text-xs text-stone-600">
-                  Ticket generated. A field officer will contact your mobile within 2 business hours.
-                </p>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-3.5">
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-[11px] font-semibold text-stone-600 block mb-1">Your Full Name</label>
+                  <label className="text-xs font-bold text-stone-700 block mb-1.5">Farmer Name</label>
                   <input
                     type="text"
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#E6E1D7] focus:border-[#2E7D32] outline-none bg-white text-[#153424]"
                     placeholder="e.g. Ramesh Patil"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-[#CCE0D0] bg-[#F7FBF8] text-xs font-semibold text-[#153424] focus:outline-none focus:border-[#2E7D32]"
                   />
                 </div>
-
                 <div>
-                  <label className="text-[11px] font-semibold text-stone-600 block mb-1">Mobile Number</label>
+                  <label className="text-xs font-bold text-stone-700 block mb-1.5">Mobile Number</label>
                   <input
                     type="tel"
                     required
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#E6E1D7] focus:border-[#2E7D32] outline-none bg-white text-[#153424]"
                     placeholder="e.g. 9845012345"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-[#CCE0D0] bg-[#F7FBF8] text-xs font-semibold text-[#153424] focus:outline-none focus:border-[#2E7D32]"
                   />
                 </div>
+              </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-[11px] font-semibold text-stone-600 block mb-1">Target Mandi</label>
-                    <select
-                      value={formData.mandi}
-                      onChange={(e) => setFormData({ ...formData, mandi: e.target.value })}
-                      className="w-full px-2 py-2 text-xs rounded-xl border border-[#E6E1D7] focus:border-[#2E7D32] outline-none bg-white text-[#153424]"
-                    >
-                      <option value="Ballari APMC">Ballari APMC</option>
-                      <option value="Kolar APMC">Kolar APMC</option>
-                      <option value="Lasalgaon APMC">Lasalgaon APMC</option>
-                      <option value="Hubballi APMC">Hubballi APMC</option>
-                      <option value="Azadpur Mandi">Azadpur Mandi</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="text-[11px] font-semibold text-stone-600 block mb-1">Inquiry Category</label>
-                    <select
-                      value={formData.category}
-                      onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                      className="w-full px-2 py-2 text-xs rounded-xl border border-[#E6E1D7] focus:border-[#2E7D32] outline-none bg-white text-[#153424]"
-                    >
-                      <option value="Price Discrepancy">Price Discrepancy</option>
-                      <option value="Weighment Dispute">Weighment Dispute</option>
-                      <option value="Gate Pass Issue">Gate Pass Issue</option>
-                      <option value="General Query">General Query</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="text-[11px] font-semibold text-stone-600 block mb-1">Details / Grievance Message</label>
-                  <textarea
-                    rows={3}
-                    required
-                    value={formData.message}
-                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                    className="w-full px-3 py-2 text-xs rounded-xl border border-[#E6E1D7] focus:border-[#2E7D32] outline-none bg-white text-[#153424]"
-                    placeholder="Explain the dispute, commission agent name, or auction yard discrepancy..."
-                  ></textarea>
-                </div>
-
-                <button
-                  type="submit"
-                  className="w-full py-2.5 rounded-xl bg-[#153424] hover:bg-[#2E7D32] text-white font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs"
+              <div>
+                <label className="text-xs font-bold text-stone-700 block mb-1.5">Select KVK Research Centre</label>
+                <select
+                  value={formData.centre}
+                  onChange={(e) => setFormData({ ...formData, centre: e.target.value })}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#CCE0D0] bg-[#F7FBF8] text-xs font-semibold text-[#153424] focus:outline-none focus:border-[#2E7D32]"
                 >
-                  <Send className="w-3.5 h-3.5" />
-                  <span>Transmit to APMC Field Desk</span>
-                </button>
-              </form>
-            )}
-          </div>
+                  {KVK_CENTRES.map((c) => (
+                    <option key={c.name} value={c.name}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-stone-700 block mb-1.5">Issue Category</label>
+                <select
+                  value={formData.category}
+                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#CCE0D0] bg-[#F7FBF8] text-xs font-semibold text-[#153424] focus:outline-none focus:border-[#2E7D32]"
+                >
+                  <option value="Crop Advisory Query">Crop Advisory & Sowing Query</option>
+                  <option value="Disease / Pest Escalation">Disease / Pest Escalation</option>
+                  <option value="Satellite NDVI Discrepancy">Satellite NDVI / Moisture Query</option>
+                  <option value="Soil Health Card Integration">Soil Health Card Integration</option>
+                  <option value="Kisan Call Centre IVR">Kisan Call Centre IVR Audio</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-stone-700 block mb-1.5">Detailed Description</label>
+                <textarea
+                  rows={3}
+                  required
+                  value={formData.message}
+                  onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                  placeholder="Describe your crop, acreage, and specific symptoms or questions..."
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#CCE0D0] bg-[#F7FBF8] text-xs font-semibold text-[#153424] focus:outline-none focus:border-[#2E7D32]"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-3 rounded-xl bg-[#153424] hover:bg-[#2E7D32] text-white font-bold text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+              >
+                <Send className="w-4 h-4 text-[#A5D6A7]" />
+                <span>Submit Query to Agronomist</span>
+              </button>
+            </form>
+          )}
         </div>
       </section>
     </div>

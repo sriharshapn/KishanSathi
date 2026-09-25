@@ -15,7 +15,6 @@ import {
   Info,
   Sparkles,
   Sprout,
-  Truck,
   Headphones
 } from 'lucide-react';
 
@@ -88,21 +87,18 @@ export const Header: React.FC<HeaderProps> = ({
   }, [langDropdownOpen, moreMenuOpen]);
 
   const primaryNavItems: { id: NavigationPage; label: string; icon: React.ComponentType<{ className?: string }>; badge?: string }[] = [
-    { id: 'home', label: t.navHome, icon: Compass },
-    { id: 'dashboard', label: t.navDashboard, icon: LayoutDashboard },
-    { id: 'weather', label: t.navWeather || 'Weather', icon: Sparkles, badge: 'Live' },
-    { id: 'advisory', label: t.navAdvisory || 'AI Advisory', icon: Sprout, badge: 'AI' },
-    { id: 'crops', label: t.navCrops, icon: Sprout },
-    { id: 'dispatch', label: t.navDispatch, icon: Truck },
+    { id: 'home', label: t.navHome || 'Home', icon: Compass },
+    { id: 'satellite', label: 'Satellite NDVI', icon: Compass, badge: 'Pillar 1' },
+    { id: 'advisory', label: t.navAdvisory || 'AI Advisory', icon: Sprout, badge: 'Pillar 2' },
+    { id: 'diagnose', label: t.navDiagnose || 'Disease Scan', icon: Info, badge: 'Pillar 3' },
+    { id: 'gov', label: t.navGov || 'Gov Network', icon: LayoutDashboard, badge: 'Pillar 4' },
   ];
 
   const secondaryNavItems: { id: NavigationPage; label: string; icon: React.ComponentType<{ className?: string }>; desc: string }[] = [
-    { id: 'diagnose', label: t.navDiagnose || 'Disease Scan', icon: Info, desc: 'Vision AI plant pathogen scanner' },
-    { id: 'satellite', label: t.navSatellite || 'Field NDVI', icon: Compass, desc: '10m Sentinel-2 vegetative canopy index' },
-    { id: 'gov', label: t.navGov || 'Gov. Network', icon: LayoutDashboard, desc: 'Digital Public Good telemetry & states' },
-    { id: 'services', label: t.navServices, icon: Sparkles, desc: 'Farm calculators & interactive tools' },
-    { id: 'about', label: t.navAbout, icon: Info, desc: 'Platform principles & data integrity rules' },
-    { id: 'contact', label: t.navContact, icon: Headphones, desc: 'Kisan helpline & APMC directory' },
+    { id: 'weather', label: 'Weather & Climate', icon: Sparkles, desc: 'High-resolution agro-meteorological NWP forecast' },
+    { id: 'dashboard', label: 'e-NAM / Mandi Prices', icon: LayoutDashboard, desc: 'Official Agmarknet price feeds & market signals' },
+    { id: 'about', label: t.navAbout || 'About Platform', icon: Info, desc: 'Digital Public Good architecture & DPDP compliance' },
+    { id: 'contact', label: t.navContact || 'Kisan Support', icon: Headphones, desc: '24x7 Kisan Call Centre (1800-180-1551) & KVKs' },
   ];
 
   const isSecondaryActive = secondaryNavItems.some(item => item.id === currentPage);

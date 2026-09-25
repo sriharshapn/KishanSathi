@@ -213,17 +213,14 @@ export interface WeatherData {
 
 export type NavigationPage = 
   | 'home' 
-  | 'dashboard' 
-  | 'about' 
-  | 'services' 
-  | 'crops' 
-  | 'dispatch' 
-  | 'contact' 
-  | 'weather' 
+  | 'satellite' 
   | 'advisory' 
   | 'diagnose' 
-  | 'satellite' 
-  | 'gov';
+  | 'gov' 
+  | 'weather' 
+  | 'dashboard' 
+  | 'about' 
+  | 'contact';
 
 // ── Crop Advisory ──────────────────────────────────
 export interface CropRecommendation {

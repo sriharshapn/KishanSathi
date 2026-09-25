@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowUpRight, TrendingUp, ShieldCheck, Truck, BookOpen } from 'lucide-react';
+import { ArrowUpRight, Satellite, Sparkles, Scan, Share2 } from 'lucide-react';
 import type { NavigationPage } from '../types';
 
 interface ContinentalMosaicProps {
@@ -19,43 +19,41 @@ export const ContinentalMosaic: React.FC<ContinentalMosaicProps> = ({
             <div className="flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-[#2E7D32]"></span>
               <span className="text-[11px] font-mono uppercase font-bold tracking-widest text-[#2E7D32]">
-                Agricultural Operations & Intelligence
+                AgriMate Core Product Pillars
               </span>
             </div>
             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#153424] tracking-tight font-['Syne',sans-serif]">
-              Cultivating Integrity Across the Agro Supply Chain
+              Precision Agriculture & Public Digital Goods
             </h2>
           </div>
         </div>
 
-        {/* Asymmetrical 4-Card Photographic Mosaic Grid — Real Unsplash Photos, Vivid Natural Color & Lighter Green Scrim */}
+        {/* Asymmetrical 4-Card Photographic Mosaic Grid — The 4 PRD Pillars */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-          {/* Card 1: Wholesale Auction Terminal (Span 7 cols) */}
+          {/* Pillar 1: Satellite Intelligence & Sentinel-2 NDVI (Span 7 cols) */}
           <div
-            onClick={() => onNavigate('dashboard')}
+            onClick={() => onNavigate('satellite')}
             className="lg:col-span-7 group relative rounded-3xl overflow-hidden min-h-[360px] sm:min-h-[400px] border border-[#CCE0D0] cursor-pointer shadow-md hover:shadow-2xl transition-all duration-500 bg-[#163D28] flex flex-col justify-between p-6 sm:p-8"
           >
-            {/* Real Photo: Authentic Indian APMC Mandi Wholesale Auction Yard */}
             <div 
               className="absolute inset-0 bg-cover bg-center transition-transform duration-700 ease-out group-hover:scale-105 opacity-85"
               style={{ backgroundImage: `url('/mandi_auction_yard.jpg')` }}
             />
-            {/* Lighter Green Scrim Overlay */}
             <div 
               className="absolute inset-0"
               style={{
-                background: 'linear-gradient(to top, rgba(12, 38, 24, 0.88) 0%, rgba(18, 54, 34, 0.45) 55%, rgba(12, 38, 24, 0.20) 100%)'
+                background: 'linear-gradient(to top, rgba(12, 38, 24, 0.90) 0%, rgba(18, 54, 34, 0.50) 55%, rgba(12, 38, 24, 0.25) 100%)'
               }}
             />
 
             {/* Top Row: Tag & Live Indicator */}
             <div className="relative z-10 flex items-center justify-between">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-[10px] font-mono font-bold tracking-wider text-[#FCD34D] uppercase">
-                <TrendingUp className="w-3 h-3 text-[#FCD34D]" />
-                Auction Terminal
+                <Satellite className="w-3 h-3 text-[#FCD34D]" />
+                Pillar 1: Satellite Intelligence
               </span>
               <span className="text-[11px] font-mono text-emerald-200 bg-emerald-900/70 px-2.5 py-0.5 rounded-full border border-emerald-400/30">
-                124 APMC Mandis Live
+                Sentinel-2 ≤10m Multispectral
               </span>
             </div>
 
@@ -63,10 +61,10 @@ export const ContinentalMosaic: React.FC<ContinentalMosaicProps> = ({
             <div className="relative z-10 pt-16 flex items-end justify-between gap-4">
               <div className="space-y-2 max-w-md">
                 <h3 className="text-xl sm:text-2xl font-black text-white font-['Syne',sans-serif] tracking-tight group-hover:text-emerald-200 transition-colors">
-                  Wholesale Auction Terminal & Price Depth
+                  Field NDVI & Crop Vigor Heatmap
                 </h3>
                 <p className="text-stone-200 text-xs sm:text-sm font-['Outfit',sans-serif] leading-relaxed line-clamp-2">
-                  Inspect real-time modal bids, modal price spreads, arrivals, and 7-day price movements across verified APMC yards.
+                  Plot GPS field polygons for instantaneous 10m-resolution NDVI, EVI indices, soil moisture anomalies, and irrigation schedules.
                 </p>
               </div>
 
@@ -76,41 +74,39 @@ export const ContinentalMosaic: React.FC<ContinentalMosaicProps> = ({
             </div>
           </div>
 
-          {/* Card 2: Statutory Compliance & Farmer Rights (Span 5 cols) */}
+          {/* Pillar 2: AI Crop Advisory Engine (Span 5 cols) */}
           <div
-            onClick={() => onNavigate('services')}
+            onClick={() => onNavigate('advisory')}
             className="lg:col-span-5 group relative rounded-3xl overflow-hidden min-h-[360px] sm:min-h-[400px] border border-[#CCE0D0] cursor-pointer shadow-md hover:shadow-2xl transition-all duration-500 bg-[#163D28] flex flex-col justify-between p-6 sm:p-8"
           >
-            {/* Real Photo: Authentic Indian Farmer in Crop Field */}
             <div 
               className="absolute inset-0 bg-cover bg-center transition-transform duration-700 ease-out group-hover:scale-105 opacity-85"
               style={{ backgroundImage: `url('/farmer_field.jpg')` }}
             />
-            {/* Lighter Green Scrim Overlay */}
             <div 
               className="absolute inset-0"
               style={{
-                background: 'linear-gradient(to top, rgba(12, 38, 24, 0.88) 0%, rgba(18, 54, 34, 0.45) 55%, rgba(12, 38, 24, 0.20) 100%)'
+                background: 'linear-gradient(to top, rgba(12, 38, 24, 0.90) 0%, rgba(18, 54, 34, 0.50) 55%, rgba(12, 38, 24, 0.25) 100%)'
               }}
             />
 
             <div className="relative z-10 flex items-center justify-between">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-[10px] font-mono font-bold tracking-wider text-[#FCD34D] uppercase">
-                <ShieldCheck className="w-3 h-3 text-[#FCD34D]" />
-                Statutory Rights
+                <Sparkles className="w-3 h-3 text-[#FCD34D]" />
+                Pillar 2: AI Advisory
               </span>
               <span className="text-[11px] font-mono text-amber-200 bg-amber-900/70 px-2.5 py-0.5 rounded-full border border-amber-400/30">
-                ₹0 Hidden Cess
+                Gemini 2.0 Flash
               </span>
             </div>
 
             <div className="relative z-10 pt-16 flex items-end justify-between gap-4">
               <div className="space-y-2">
                 <h3 className="text-xl sm:text-2xl font-black text-white font-['Syne',sans-serif] tracking-tight group-hover:text-amber-200 transition-colors">
-                  Grower Protection & Legal Transparency
+                  Personalised Agro-Advisory Engine
                 </h3>
                 <p className="text-stone-200 text-xs sm:text-sm font-['Outfit',sans-serif] leading-relaxed line-clamp-2">
-                  Statutory 11-point seller checklist, regulated weighing oversight, and 24/7 legal grievance contacts.
+                  Hyper-local guidance based on soil NPK, climate zone, sowing calendar, and regenerative farming (Score A–F).
                 </p>
               </div>
 
@@ -120,41 +116,39 @@ export const ContinentalMosaic: React.FC<ContinentalMosaicProps> = ({
             </div>
           </div>
 
-          {/* Card 3: Logistics & Dispatch Desk (Span 5 cols) */}
+          {/* Pillar 3: Crop Disease Diagnostics (Span 5 cols) */}
           <div
-            onClick={() => onNavigate('dispatch')}
+            onClick={() => onNavigate('diagnose')}
             className="lg:col-span-5 group relative rounded-3xl overflow-hidden min-h-[340px] sm:min-h-[380px] border border-[#CCE0D0] cursor-pointer shadow-md hover:shadow-2xl transition-all duration-500 bg-[#163D28] flex flex-col justify-between p-6 sm:p-8"
           >
-            {/* Real Photo: Authentic Indian Mandi Produce Logistics & Transport */}
             <div 
               className="absolute inset-0 bg-cover bg-center transition-transform duration-700 ease-out group-hover:scale-105 opacity-85"
               style={{ backgroundImage: `url('/logistics_truck.jpg')` }}
             />
-            {/* Lighter Green Scrim Overlay */}
             <div 
               className="absolute inset-0"
               style={{
-                background: 'linear-gradient(to top, rgba(12, 38, 24, 0.88) 0%, rgba(18, 54, 34, 0.45) 55%, rgba(12, 38, 24, 0.20) 100%)'
+                background: 'linear-gradient(to top, rgba(12, 38, 24, 0.90) 0%, rgba(18, 54, 34, 0.50) 55%, rgba(12, 38, 24, 0.25) 100%)'
               }}
             />
 
             <div className="relative z-10 flex items-center justify-between">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-[10px] font-mono font-bold tracking-wider text-[#FCD34D] uppercase">
-                <Truck className="w-3 h-3 text-[#FCD34D]" />
-                Logistics & Gate Pass
+                <Scan className="w-3 h-3 text-[#FCD34D]" />
+                Pillar 3: Plant Pathology
               </span>
               <span className="text-[11px] font-mono text-emerald-200 bg-emerald-900/70 px-2.5 py-0.5 rounded-full border border-emerald-400/30">
-                Digital Pass Ready
+                Vision AI Diagnostics
               </span>
             </div>
 
             <div className="relative z-10 pt-16 flex items-end justify-between gap-4">
               <div className="space-y-2">
                 <h3 className="text-xl sm:text-2xl font-black text-white font-['Syne',sans-serif] tracking-tight group-hover:text-emerald-200 transition-colors">
-                  Pre-Dispatch Gate Vouchers & Freight
+                  Instant Crop Disease Diagnosis
                 </h3>
                 <p className="text-stone-200 text-xs sm:text-sm font-['Outfit',sans-serif] leading-relaxed line-clamp-2">
-                  Generate official printable APMC vouchers, compute truck freight deductions, and access weighment terminals.
+                  Upload leaf symptoms for instant pathogen identification, confidence scores, dual organic/chemical prescriptions, and dosage rates.
                 </p>
               </div>
 
@@ -164,41 +158,39 @@ export const ContinentalMosaic: React.FC<ContinentalMosaicProps> = ({
             </div>
           </div>
 
-          {/* Card 4: Crop Directory & Agronomy (Span 7 cols) */}
+          {/* Pillar 4: Inter-State Gov Network & DPG (Span 7 cols) */}
           <div
-            onClick={() => onNavigate('crops')}
+            onClick={() => onNavigate('gov')}
             className="lg:col-span-7 group relative rounded-3xl overflow-hidden min-h-[340px] sm:min-h-[380px] border border-[#CCE0D0] cursor-pointer shadow-md hover:shadow-2xl transition-all duration-500 bg-[#163D28] flex flex-col justify-between p-6 sm:p-8"
           >
-            {/* Real Photo: Authentic Indian Agricultural Cold Storage & Commodity Grading Facility */}
             <div 
               className="absolute inset-0 bg-cover bg-center transition-transform duration-700 ease-out group-hover:scale-105 opacity-85"
               style={{ backgroundImage: `url('/cold_storage.jpg')` }}
             />
-            {/* Lighter Green Scrim Overlay */}
             <div 
               className="absolute inset-0"
               style={{
-                background: 'linear-gradient(to top, rgba(12, 38, 24, 0.88) 0%, rgba(18, 54, 34, 0.45) 55%, rgba(12, 38, 24, 0.20) 100%)'
+                background: 'linear-gradient(to top, rgba(12, 38, 24, 0.90) 0%, rgba(18, 54, 34, 0.50) 55%, rgba(12, 38, 24, 0.25) 100%)'
               }}
             />
 
             <div className="relative z-10 flex items-center justify-between">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-[10px] font-mono font-bold tracking-wider text-[#FCD34D] uppercase">
-                <BookOpen className="w-3 h-3 text-[#FCD34D]" />
-                Commodity Standards
+                <Share2 className="w-3 h-3 text-[#FCD34D]" />
+                Pillar 4: Interoperability Layer
               </span>
               <span className="text-[11px] font-mono text-emerald-200 bg-emerald-900/70 px-2.5 py-0.5 rounded-full border border-emerald-400/30">
-                104 Indian Crops in DB
+                FIWARE NGSI-LD & India Stack
               </span>
             </div>
 
             <div className="relative z-10 pt-16 flex items-end justify-between gap-4">
               <div className="space-y-2 max-w-md">
                 <h3 className="text-xl sm:text-2xl font-black text-white font-['Syne',sans-serif] tracking-tight group-hover:text-emerald-200 transition-colors">
-                  Pan-India Agricultural Crop Directory
+                  Inter-State Gov Exchange & Policy Portal
                 </h3>
                 <p className="text-stone-200 text-xs sm:text-sm font-['Outfit',sans-serif] leading-relaxed line-clamp-2">
-                  Standardized moisture criteria, peak harvest windows, and modal price benchmarks across 104 verified crops in database.
+                  Unified open data exchange across state agriculture departments, ICAR KVK nodes, and standard FIWARE NGSI-LD endpoints.
                 </p>
               </div>
 
@@ -213,5 +205,4 @@ export const ContinentalMosaic: React.FC<ContinentalMosaicProps> = ({
     </section>
   );
 };
-
 export default ContinentalMosaic;

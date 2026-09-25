@@ -13,14 +13,10 @@ import type {
 import { Header } from './components/Header';
 import { OfflineBanner } from './components/OfflineBanner';
 import { ExplainModal } from './components/ExplainModal';
-import { MandiSlipModal } from './components/MandiSlipModal';
 import { SettingsModal } from './components/SettingsModal';
 import { HomePage } from './pages/HomePage';
 import { DashboardPage } from './pages/DashboardPage';
 import { AboutPage } from './pages/AboutPage';
-import { ServicesPage } from './pages/ServicesPage';
-import { CropsPage } from './pages/CropsPage';
-import { DispatchPage } from './pages/DispatchPage';
 import { ContactPage } from './pages/ContactPage';
 import { AdvisoryPage } from './pages/AdvisoryPage';
 import { DiagnosePage } from './pages/DiagnosePage';
@@ -33,8 +29,7 @@ import {
 } from './utils/storage';
 import { setSiteLanguage, clearAllTranslateCookies } from './utils/translator';
 import { apiUrl } from './utils/api';
-import { CheckCircle2, ShieldCheck, MessageSquare, BookOpen } from 'lucide-react';
-import { TRANSLATIONS } from './i18n/translations';
+import { CheckCircle2, ShieldCheck, MessageSquare } from 'lucide-react';
 
 export const App: React.FC = () => {
   // English is ALWAYS default on initial load / refresh per user instruction
@@ -71,7 +66,6 @@ export const App: React.FC = () => {
   const [activeTrend, setActiveTrend] = useState<PriceTrend | null>(null);
   const [cachedAt, setCachedAt] = useState<string | undefined>();
   const [explanationTerm, setExplanationTerm] = useState<string | null>(null);
-  const [isSlipModalOpen, setIsSlipModalOpen] = useState<boolean>(false);
 
   // Production Sync & Settings state
   const [syncStatus, setSyncStatus] = useState<SyncStatusData | null>(null);
@@ -79,22 +73,20 @@ export const App: React.FC = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const [syncToast, setSyncToast] = useState<string | null>(null);
 
-  const t = TRANSLATIONS[language];
-
   // Initialize page routing from hash and pathname
   useEffect(() => {
     const validPages: NavigationPage[] = [
-      'home', 'dashboard', 'about', 'services', 'crops', 'dispatch', 'contact',
-      'weather', 'advisory', 'diagnose', 'satellite', 'gov'
+      'home', 'satellite', 'advisory', 'diagnose', 'gov',
+      'weather', 'dashboard', 'about', 'contact'
     ];
 
     const getPageFromLocation = (): NavigationPage => {
-      // 1. Check hash first (e.g. #/dashboard, #dashboard)
+      // 1. Check hash first (e.g. #/satellite, #advisory)
       const hashClean = (window.location.hash || '').replace(/^#\/?/, '').split('?')[0].toLowerCase();
       if (validPages.includes(hashClean as NavigationPage)) {
         return hashClean as NavigationPage;
       }
-      // 2. Check pathname (e.g. /dashboard or /dashboard.html)
+      // 2. Check pathname (e.g. /satellite or /satellite.html)
       const pathClean = window.location.pathname.replace(/^\//, '').replace(/\.html$/, '').toLowerCase();
       if (validPages.includes(pathClean as NavigationPage)) {
         return pathClean as NavigationPage;
@@ -118,7 +110,6 @@ export const App: React.FC = () => {
 
   const navigateTo = (page: NavigationPage) => {
     setCurrentPage(page);
-    // Hash routing guarantees reloadable URLs without server routing errors
     window.location.hash = page === 'home' ? '' : `/${page}`;
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -345,9 +336,6 @@ export const App: React.FC = () => {
     }, 50);
   };
 
-  const quantityQuintals = searchResult?.normalized_quantity?.in_quintals || 
-    (unit === 'kg' ? quantity / 100 : (unit === 'tonne' ? quantity * 10 : quantity));
-
   return (
     <div 
       className="min-h-screen text-[#153424] flex flex-col font-['Plus_Jakarta_Sans',sans-serif] relative" 
@@ -364,7 +352,7 @@ export const App: React.FC = () => {
         aria-hidden="true"
       />
 
-      {/* Editorial Header with multi-page navigation, language switch & sync */}
+      {/* Editorial Header with 4 PRD Pillars, multi-page navigation, language switch & sync */}
       <Header
         language={language}
         onLanguageChange={handleLanguageChange}
@@ -406,6 +394,41 @@ export const App: React.FC = () => {
           />
         )}
 
+        {currentPage === 'satellite' && (
+          <SatellitePage
+            language={language}
+            onNavigate={navigateTo}
+          />
+        )}
+
+        {currentPage === 'advisory' && (
+          <AdvisoryPage
+            language={language}
+            onNavigate={navigateTo}
+          />
+        )}
+
+        {currentPage === 'diagnose' && (
+          <DiagnosePage
+            language={language}
+            onNavigate={navigateTo}
+          />
+        )}
+
+        {currentPage === 'gov' && (
+          <GovDashboardPage
+            language={language}
+            onNavigate={navigateTo}
+          />
+        )}
+
+        {currentPage === 'weather' && (
+          <WeatherDashboardPage
+            language={language}
+            onNavigate={navigateTo}
+          />
+        )}
+
         {currentPage === 'dashboard' && (
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
             <DashboardPage
@@ -430,8 +453,6 @@ export const App: React.FC = () => {
               activeTrend={activeTrend}
               explanationTerm={explanationTerm}
               setExplanationTerm={setExplanationTerm}
-              isSlipModalOpen={isSlipModalOpen}
-              setIsSlipModalOpen={setIsSlipModalOpen}
               handleSearch={handleSearch}
               handleNlpResult={handleNlpResult}
               onNavigate={navigateTo}
@@ -439,67 +460,8 @@ export const App: React.FC = () => {
           </div>
         )}
 
-        {currentPage === 'weather' && (
-          <WeatherDashboardPage
-            language={language}
-            onNavigate={navigateTo}
-          />
-        )}
-
-        {currentPage === 'advisory' && (
-          <AdvisoryPage
-            language={language}
-            onNavigate={navigateTo}
-          />
-        )}
-
-        {currentPage === 'diagnose' && (
-          <DiagnosePage
-            language={language}
-            onNavigate={navigateTo}
-          />
-        )}
-
-        {currentPage === 'satellite' && (
-          <SatellitePage
-            language={language}
-            onNavigate={navigateTo}
-          />
-        )}
-
-        {currentPage === 'gov' && (
-          <GovDashboardPage
-            language={language}
-            onNavigate={navigateTo}
-          />
-        )}
-
         {currentPage === 'about' && (
           <AboutPage
-            language={language}
-            onNavigate={navigateTo}
-          />
-        )}
-
-        {currentPage === 'services' && (
-          <ServicesPage
-            language={language}
-            onNavigate={navigateTo}
-            onOpenTerminologyGuide={(term) => setExplanationTerm(term || 'modal_price')}
-          />
-        )}
-
-        {currentPage === 'crops' && (
-          <CropsPage
-            language={language}
-            onNavigate={navigateTo}
-            onSelectCropAndNavigate={handleSelectCropAndNavigate}
-            commodities={commodities}
-          />
-        )}
-
-        {currentPage === 'dispatch' && (
-          <DispatchPage
             language={language}
             onNavigate={navigateTo}
           />
@@ -512,18 +474,6 @@ export const App: React.FC = () => {
           />
         )}
       </main>
-
-      {/* Floating Educational Terminology Guide Button */}
-      <div className="fixed bottom-5 right-5 z-40 print:hidden">
-        <button
-          type="button"
-          onClick={() => setExplanationTerm('modal_price')}
-          className="bg-[#153424] hover:bg-[#1f4a34] text-white font-bold px-4 py-2.5 rounded-full shadow-lg border border-[#3FA744]/40 flex items-center gap-2 transition-all hover:scale-105 cursor-pointer text-xs sm:text-sm"
-        >
-          <BookOpen className="w-4 h-4 text-[#A5D6A7]" />
-          <span>{t?.educationalModalTitle || 'Market Terminology Guide'}</span>
-        </button>
-      </div>
 
       {/* Farmer Preferences & Profile Modal */}
       <SettingsModal
@@ -540,19 +490,6 @@ export const App: React.FC = () => {
         isSyncing={isSyncing}
       />
 
-      {/* Printable Mandi Dispatch Slip Modal */}
-      {selectedMarket && (
-        <MandiSlipModal
-          isOpen={isSlipModalOpen}
-          onClose={() => setIsSlipModalOpen(false)}
-          market={selectedMarket}
-          crop={crop}
-          quantityQuintals={quantityQuintals}
-          grossValue={Math.round(quantityQuintals * selectedMarket.modal_price)}
-          language={language}
-        />
-      )}
-
       {/* Educational Term Modal */}
       <ExplainModal
         term={explanationTerm}
@@ -560,69 +497,64 @@ export const App: React.FC = () => {
         onClose={() => setExplanationTerm(null)}
       />
 
-      {/* Rich Multi-Column VerdaAgro Forest Green Footer */}
+      {/* Rich Multi-Column VerdaAgro Forest Green Footer — Grounded in PRD */}
       <footer className="relative z-10 bg-[#153424] text-stone-300 text-xs py-14 border-t border-[#1f4a34] mt-auto print:hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 pb-10 border-b border-[#1f4a34]">
             
-            {/* Column 1: Brand & Identity */}
+            {/* Column 1: Brand & DPG Identity */}
             <div className="lg:col-span-2 space-y-3">
               <div className="flex items-center gap-2.5 notranslate select-none" translate="no">
                 <span className="text-2xl notranslate select-none" translate="no">🌾</span>
                 <span className="font-black text-white text-xl font-['Syne',sans-serif] notranslate" translate="no">AgriMate</span>
                 <span className="text-[10px] uppercase font-mono font-bold tracking-wider px-2 py-0.5 rounded-full bg-[#1f4a34] text-[#A5D6A7] border border-[#2E7D32]">
-                  Official Platform
+                  Digital Public Good
                 </span>
               </div>
               <p className="text-emerald-100/70 text-xs sm:text-sm leading-relaxed max-w-sm font-['Outfit',sans-serif]">
-                Cultivating tomorrow with integrity and intelligence. Providing 15,000+ growers across Karnataka, Maharashtra, Delhi, and Andhra Pradesh with verified APMC wholesale auction rates, freight simulators, and statutory gate passes.
+                India's Interoperable Digital Agriculture Network. Delivering real-time, hyper-localised agro-advisories to small & marginal farmers by fusing Sentinel-2 satellite imagery, soil health data, climate forecasting, and Gemini 2.0 Flash.
               </p>
               <div className="pt-2 flex items-center gap-3 text-xs text-emerald-200/80">
                 <span className="flex items-center gap-1">
                   <ShieldCheck className="w-3.5 h-3.5 text-[#A5D6A7]" />
-                  APMC Act 2026 Compliant
+                  DPDP Act 2023 Compliant
                 </span>
                 <span>•</span>
-                <span>Agmarknet Verified</span>
+                <span>MeitY DPG Guidelines</span>
+                <span>•</span>
+                <span>India Stack</span>
               </div>
             </div>
 
-            {/* Column 2: Navigation Links */}
+            {/* Column 2: 4 Core PRD Pillars */}
             <div className="space-y-2.5">
-              <h4 className="text-white font-bold text-xs uppercase tracking-wider">Navigation</h4>
+              <h4 className="text-white font-bold text-xs uppercase tracking-wider">Product Pillars</h4>
               <ul className="space-y-1.5 text-xs text-emerald-100/70">
-                <li><button onClick={() => navigateTo('home')} className="hover:text-white transition-colors cursor-pointer">Home</button></li>
-                <li><button onClick={() => navigateTo('dashboard')} className="hover:text-white transition-colors cursor-pointer">Terminal Dashboard</button></li>
-                <li><button onClick={() => navigateTo('weather')} className="hover:text-white transition-colors cursor-pointer text-[#A5D6A7]">🌤️ Weather Radar</button></li>
+                <li><button onClick={() => navigateTo('satellite')} className="hover:text-white transition-colors cursor-pointer text-[#A5D6A7]">🛰️ Satellite Intelligence</button></li>
                 <li><button onClick={() => navigateTo('advisory')} className="hover:text-white transition-colors cursor-pointer text-[#A5D6A7]">🌱 AI Crop Advisory</button></li>
-                <li><button onClick={() => navigateTo('diagnose')} className="hover:text-white transition-colors cursor-pointer text-[#A5D6A7]">🔬 Disease Diagnosis</button></li>
-                <li><button onClick={() => navigateTo('satellite')} className="hover:text-white transition-colors cursor-pointer text-[#A5D6A7]">🛰️ Field NDVI Map</button></li>
-                <li><button onClick={() => navigateTo('gov')} className="hover:text-white transition-colors cursor-pointer text-[#A5D6A7]">🏛️ Inter-State Gov Network</button></li>
-                <li><button onClick={() => navigateTo('about')} className="hover:text-white transition-colors cursor-pointer">About Our Ecosystem</button></li>
-                <li><button onClick={() => navigateTo('services')} className="hover:text-white transition-colors cursor-pointer">Core Services</button></li>
-                <li><button onClick={() => navigateTo('crops')} className="hover:text-white transition-colors cursor-pointer">Crop Directory</button></li>
-                <li><button onClick={() => navigateTo('dispatch')} className="hover:text-white transition-colors cursor-pointer">Dispatch Desk</button></li>
-                <li><button onClick={() => navigateTo('contact')} className="hover:text-white transition-colors cursor-pointer">Grower Support</button></li>
+                <li><button onClick={() => navigateTo('diagnose')} className="hover:text-white transition-colors cursor-pointer text-[#A5D6A7]">🔬 Disease Diagnostics</button></li>
+                <li><button onClick={() => navigateTo('gov')} className="hover:text-white transition-colors cursor-pointer text-[#A5D6A7]">🔗 Interop & Gov Network</button></li>
+                <li><button onClick={() => navigateTo('weather')} className="hover:text-white transition-colors cursor-pointer">🌤️ Weather & Climate NWP</button></li>
+                <li><button onClick={() => navigateTo('dashboard')} className="hover:text-white transition-colors cursor-pointer">📊 e-NAM / Mandi Prices</button></li>
               </ul>
             </div>
 
-            {/* Column 3: Agricultural Portfolio */}
+            {/* Column 3: Agricultural Intelligence */}
             <div className="space-y-2.5">
-              <h4 className="text-white font-bold text-xs uppercase tracking-wider">Commodities</h4>
+              <h4 className="text-white font-bold text-xs uppercase tracking-wider">Capabilities</h4>
               <ul className="space-y-1.5 text-xs text-emerald-100/70">
-                <li><button onClick={() => handleSelectCropAndNavigate('Tomato')} className="hover:text-white transition-colors cursor-pointer">Tomato (Hybrid / Local)</button></li>
-                <li><button onClick={() => handleSelectCropAndNavigate('Onion')} className="hover:text-white transition-colors cursor-pointer">Onion (Nashik Red)</button></li>
-                <li><button onClick={() => handleSelectCropAndNavigate('Potato')} className="hover:text-white transition-colors cursor-pointer">Potato (Kufri Jyoti)</button></li>
-                <li><button onClick={() => handleSelectCropAndNavigate('Green Chilli')} className="hover:text-white transition-colors cursor-pointer">Green Chilli (G-4)</button></li>
-                <li><button onClick={() => handleSelectCropAndNavigate('Cotton')} className="hover:text-white transition-colors cursor-pointer">Cotton (DCH-32)</button></li>
-                <li><button onClick={() => handleSelectCropAndNavigate('Soybean')} className="hover:text-white transition-colors cursor-pointer">Soybean (JS-335)</button></li>
-                <li><button onClick={() => handleSelectCropAndNavigate('Maize')} className="hover:text-white transition-colors cursor-pointer">Maize & Grains</button></li>
+                <li><span className="block text-emerald-200/90 font-medium">Sentinel-2 10m NDVI & EVI</span></li>
+                <li><span className="block text-emerald-200/90 font-medium">Regenerative Crop Planning (A-F)</span></li>
+                <li><span className="block text-emerald-200/90 font-medium">Vision Pathogen Identification</span></li>
+                <li><span className="block text-emerald-200/90 font-medium">Dual Organic / Chemical Rx</span></li>
+                <li><span className="block text-emerald-200/90 font-medium">FIWARE NGSI-LD Standards</span></li>
+                <li><span className="block text-emerald-200/90 font-medium">State Data Federation</span></li>
               </ul>
             </div>
 
             {/* Column 4: Farmer Helpline & Community */}
             <div className="space-y-2.5 shrink-0">
-              <h4 className="text-white font-bold text-xs uppercase tracking-wider">Farmer Helpline & Community</h4>
+              <h4 className="text-white font-bold text-xs uppercase tracking-wider">Farmer Helpline & IVR</h4>
               <div className="space-y-2 text-xs text-emerald-100/70">
                 <a 
                   href="#whatsapp-group" 
@@ -636,10 +568,10 @@ export const App: React.FC = () => {
                   <span>Join Farmer WhatsApp Group</span>
                 </a>
                 <p className="font-mono text-sm font-bold text-[#E8A238] pt-1">Kisan Helpline: 1800-180-1551</p>
-                <p className="text-[11px]">Toll-free 24x7 Ministry of Agriculture & Farmers Welfare</p>
+                <p className="text-[11px]">Toll-free 24x7 Ministry of Agriculture & Farmers Welfare (IVR Voice Advisory)</p>
                 <div className="pt-1">
-                  <span className="block text-[10px] text-emerald-300 uppercase font-bold">Language Standard:</span>
-                  <p className="text-[11px]">English (Default) • 10 Indian Languages</p>
+                  <span className="block text-[10px] text-emerald-300 uppercase font-bold">Supported Languages:</span>
+                  <p className="text-[11px]">English (Default) • 10 Indian Regional Languages</p>
                 </div>
               </div>
             </div>
@@ -648,14 +580,14 @@ export const App: React.FC = () => {
           {/* Bottom Legal & Attribution Strip */}
           <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-emerald-200/60">
             <div>
-              © 2026 AgriMate. Built for Indian Agriculture. All data grounded in official APMC Agmarknet reporting.
+              © 2026 AgriMate. Interoperable Digital Agriculture Network for India. Published under Apache 2.0 Open Source License.
             </div>
             <div className="flex items-center gap-4">
-              <span>0% AI Hallucination Guarantee</span>
+              <span>Zero Hallucination Guarantee</span>
               <span>•</span>
               <span>SQLite Edge Resilient</span>
               <span>•</span>
-              <span>APMC Act 2026</span>
+              <span>DPDP Act 2023 Compliant</span>
             </div>
           </div>
         </div>

@@ -12,16 +12,14 @@ import { TRANSLATIONS } from '../i18n/translations';
 import { SearchForm } from '../components/SearchForm';
 import { NaturalQuery } from '../components/NaturalQuery';
 import { MarketComparison } from '../components/MarketComparison';
-import { ValueCalculator } from '../components/ValueCalculator';
 import { PriceTrendChart } from '../components/PriceTrendChart';
 import { AiExplanation } from '../components/AiExplanation';
-import { SellingChecklist } from '../components/SellingChecklist';
 import { apiUrl } from '../utils/api';
 import { 
   ShieldCheck, 
   Sparkles,
   AlertCircle, 
-  FileText,
+  Satellite,
   ThermometerSnowflake,
   Droplets,
   Wind,
@@ -56,8 +54,6 @@ interface DashboardPageProps {
   activeTrend: PriceTrend | null;
   explanationTerm: string | null;
   setExplanationTerm: (t: string | null) => void;
-  isSlipModalOpen: boolean;
-  setIsSlipModalOpen: (o: boolean) => void;
   handleSearch: (coords?: { lat: number; lon: number }) => Promise<void>;
   handleNlpResult: (parsed: { crop: string; location: string; quantity: number; unit: CropUnit }) => void;
   onNavigate: (page: NavigationPage) => void;
@@ -84,7 +80,6 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   setSelectedMarket,
   activeTrend,
   setExplanationTerm,
-  setIsSlipModalOpen,
   handleSearch,
   handleNlpResult,
   onNavigate
@@ -256,17 +251,18 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
             {/* Quick Action Navigation Strip */}
             <div className="flex flex-wrap items-center gap-3 pt-1">
               <button
-                onClick={() => onNavigate('dispatch')}
+                onClick={() => onNavigate('advisory')}
                 className="px-4 py-2 rounded-xl glass-card-subtle hover:bg-white text-[#153424] text-xs font-bold border border-white/80 flex items-center gap-2 shadow-xs transition-colors cursor-pointer"
               >
-                <FileText className="w-3.5 h-3.5 text-[#2E7D32]" />
-                <span>Go to Dispatch Desk</span>
+                <Sparkles className="w-3.5 h-3.5 text-[#2E7D32]" />
+                <span>AI Crop Advisory</span>
               </button>
               <button
-                onClick={() => onNavigate('crops')}
+                onClick={() => onNavigate('satellite')}
                 className="px-4 py-2 rounded-xl glass-card-subtle hover:bg-white text-[#153424] text-xs font-bold border border-white/80 flex items-center gap-2 shadow-xs transition-colors cursor-pointer"
               >
-                <span>Browse All Crops Database</span>
+                <Satellite className="w-3.5 h-3.5 text-[#2E7D32]" />
+                <span>Satellite Field NDVI</span>
               </button>
             </div>
 
@@ -660,15 +656,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                   </div>
                 </div>
 
-                {/* Row 1: Quantity Value Calculator & Net Return Calculator */}
-                <ValueCalculator
-                  market={selectedMarket}
-                  quantityQuintals={quantityQuintals}
-                  language={language}
-                  onOpenSlip={() => setIsSlipModalOpen(true)}
-                />
-
-                {/* Row 2: Deterministic Price Trend Chart */}
+                {/* Deterministic Price Trend Chart */}
                 <PriceTrendChart
                   crop={crop}
                   marketId={selectedMarket.market_id}
@@ -676,7 +664,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                   language={language}
                 />
 
-                {/* Row 3: AI Explanation Advisory Narrative */}
+                {/* AI Explanation Advisory Narrative */}
                 <AiExplanation
                   market={selectedMarket}
                   trend={activeTrend}
@@ -684,14 +672,6 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                   quantityQuintals={quantityQuintals}
                 />
               </div>
-
-              {/* Row 4: 11-Step Farmer's Selling Checklist */}
-              <SellingChecklist
-                crop={crop}
-                marketName={selectedMarket.market_name}
-                quantityQuintals={quantityQuintals}
-                language={language}
-              />
             </div>
           )}
         </div>
