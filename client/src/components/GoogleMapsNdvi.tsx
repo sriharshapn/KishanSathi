@@ -306,8 +306,13 @@ export const GoogleMapsNdvi: React.FC<GoogleMapsNdviProps> = ({
         infoWindowRef.current = new window.google.maps.InfoWindow();
         mapInstanceRef.current = map;
       } else {
+        mapInstanceRef.current.panTo(center);
         mapInstanceRef.current.setCenter(center);
+        mapInstanceRef.current.setZoom(16);
         mapInstanceRef.current.setMapTypeId(mapType);
+        if (infoWindowRef.current) {
+          infoWindowRef.current.close();
+        }
       }
 
       const map = mapInstanceRef.current;
@@ -407,7 +412,7 @@ export const GoogleMapsNdvi: React.FC<GoogleMapsNdviProps> = ({
     } catch (err) {
       console.warn('Google Maps JS setup warning:', err);
     }
-  }, [apiLoaded, lat, lon, viewMode, parcelGeometries, customGovPolygon]);
+  }, [apiLoaded, lat, lon, state, district, viewMode, parcelGeometries, customGovPolygon]);
 
   const handleSaveApiKey = (e: React.FormEvent) => {
     e.preventDefault();
@@ -419,13 +424,14 @@ export const GoogleMapsNdvi: React.FC<GoogleMapsNdviProps> = ({
 
   const recenterMap = () => {
     if (mapInstanceRef.current && window.google?.maps) {
+      mapInstanceRef.current.panTo({ lat, lng: lon });
       mapInstanceRef.current.setCenter({ lat, lng: lon });
       mapInstanceRef.current.setZoom(16);
     }
   };
 
   // Google Maps Direct Satellite Embed URL (Zero-configuration fallback with live real-world Google Earth imagery)
-  const embedUrl = `https://maps.google.com/maps?q=${lat},${lon}&t=${viewMode === 'hybrid' ? 'h' : 'k'}&z=16&ie=UTF8&iwloc=&output=embed`;
+  const embedUrl = `https://maps.google.com/maps?q=${lat.toFixed(6)},${lon.toFixed(6)}+(${encodeURIComponent(district + ', ' + state)})&t=${viewMode === 'hybrid' ? 'h' : 'k'}&z=15&ie=UTF8&iwloc=&output=embed`;
 
   return (
     <div className="relative w-full rounded-2xl overflow-hidden border border-[#CCE0D0] bg-[#10241A] shadow-inner">
@@ -488,6 +494,7 @@ export const GoogleMapsNdvi: React.FC<GoogleMapsNdviProps> = ({
           // Google Earth 3D Web Perspective
           <div className="relative w-full h-full bg-[#0d1f16] overflow-hidden">
             <iframe
+              key={`earth3d_${lat.toFixed(4)}_${lon.toFixed(4)}_${district}_${state}`}
               title={`Google Earth 3D - ${district}, ${state}`}
               src={`https://earth.google.com/web/@${lat.toFixed(6)},${lon.toFixed(6)},450a,1200d,35y,45h,60t,0r`}
               className="w-full h-full border-0 pointer-events-auto"
@@ -534,6 +541,7 @@ export const GoogleMapsNdvi: React.FC<GoogleMapsNdviProps> = ({
           // Google Maps High-Resolution Satellite View (Works out-of-the-box everywhere)
           <div className="relative w-full h-full">
             <iframe
+              key={`gmap_${lat.toFixed(4)}_${lon.toFixed(4)}_${district}_${state}_${viewMode}`}
               title={`Google Maps Satellite View - ${district}, ${state}`}
               src={embedUrl}
               className="w-full h-full border-0 pointer-events-auto"

@@ -285,12 +285,18 @@ export const SatellitePage: React.FC<SatellitePageProps> = ({ onNavigate }) => {
     const newDist = districtList[0] || '';
     setSelectedDistrict(newDist);
     setFocusedField(null);
+    setGovPlotResult(null);
+    setTalukInput(newDist);
+    setVillageInput('Central Village');
     setGpsMessage(null);
   };
 
   const handleDistrictChange = (dist: string) => {
     setSelectedDistrict(dist);
     setFocusedField(null);
+    setGovPlotResult(null);
+    setTalukInput(dist);
+    setVillageInput('Central Village');
     setGpsMessage(null);
   };
 
@@ -388,9 +394,17 @@ export const SatellitePage: React.FC<SatellitePageProps> = ({ onNavigate }) => {
     if (focusedField) {
       return { currentLat: focusedField.latitude, currentLon: focusedField.longitude };
     }
+    if (govPlotResult?.geospatial?.centroid &&
+        govPlotResult.query?.state?.toLowerCase() === selectedState.toLowerCase() &&
+        govPlotResult.query?.district?.toLowerCase() === selectedDistrict.toLowerCase()) {
+      return {
+        currentLat: govPlotResult.geospatial.centroid.latitude || govPlotResult.geospatial.centroid.lat,
+        currentLon: govPlotResult.geospatial.centroid.longitude || govPlotResult.geospatial.centroid.lng
+      };
+    }
     const coords = getLocationCoordinates(selectedState, selectedDistrict);
     return { currentLat: coords.lat, currentLon: coords.lon };
-  }, [focusedField, selectedState, selectedDistrict]);
+  }, [focusedField, govPlotResult, selectedState, selectedDistrict]);
 
   const currentArea = useMemo(() => {
     if (focusedField) return focusedField.area_hectares;
@@ -632,6 +646,7 @@ export const SatellitePage: React.FC<SatellitePageProps> = ({ onNavigate }) => {
 
           {/* Google Maps API Powered NDVI Map Display */}
           <GoogleMapsNdvi
+            key={`ndvi_map_${selectedState}_${selectedDistrict}_${currentLat.toFixed(4)}_${currentLon.toFixed(4)}_${focusedField?.field_id || 'unfocused'}`}
             lat={currentLat}
             lon={currentLon}
             state={selectedState}
