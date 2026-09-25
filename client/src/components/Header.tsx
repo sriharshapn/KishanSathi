@@ -86,12 +86,12 @@ export const Header: React.FC<HeaderProps> = ({
     };
   }, [langDropdownOpen, moreMenuOpen]);
 
-  const primaryNavItems: { id: NavigationPage; label: string; icon: React.ComponentType<{ className?: string }>; badge?: string }[] = [
+  const primaryNavItems: { id: NavigationPage; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
     { id: 'home', label: t.navHome || 'Home', icon: Compass },
-    { id: 'satellite', label: 'Satellite NDVI', icon: Compass, badge: 'Sentinel-2' },
-    { id: 'advisory', label: t.navAdvisory || 'AI Advisory', icon: Sprout, badge: 'Gemini AI' },
-    { id: 'diagnose', label: t.navDiagnose || 'Disease Scan', icon: Info, badge: 'Vision AI' },
-    { id: 'gov', label: t.navGov || 'Gov Network', icon: LayoutDashboard, badge: 'Inter-State' },
+    { id: 'satellite', label: 'Satellite NDVI', icon: Compass },
+    { id: 'advisory', label: t.navAdvisory || 'AI Advisory', icon: Sprout },
+    { id: 'diagnose', label: t.navDiagnose || 'Disease Scan', icon: Info },
+    { id: 'gov', label: t.navGov || 'Gov Network', icon: LayoutDashboard },
   ];
 
   const secondaryNavItems: { id: NavigationPage; label: string; icon: React.ComponentType<{ className?: string }>; desc: string }[] = [
@@ -176,13 +176,6 @@ export const Header: React.FC<HeaderProps> = ({
               >
                 {isActive && <Icon className="w-3.5 h-3.5 text-[#153424] shrink-0" />}
                 <span>{item.label}</span>
-                {item.badge && (
-                  <span className={`text-[9px] px-1.5 py-0.2 rounded-full uppercase tracking-wider font-extrabold ${
-                    isActive ? 'bg-[#E8A238] text-[#123826]' : 'bg-[#2E7D32]/40 text-emerald-300'
-                  }`}>
-                    {item.badge}
-                  </span>
-                )}
               </button>
             );
           })}

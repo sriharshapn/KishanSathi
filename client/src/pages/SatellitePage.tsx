@@ -279,6 +279,19 @@ export const SatellitePage: React.FC<SatellitePageProps> = ({ onNavigate }) => {
     fetchNDVI(selectedState, selectedDistrict);
   }, [selectedState, selectedDistrict]);
 
+  // Custom Polygon Adjustment state
+  const [customAdjustedArea, setCustomAdjustedArea] = useState<number | null>(null);
+  const [customAdjustedPolygon, setCustomAdjustedPolygon] = useState<{ lat: number; lng: number }[] | null>(null);
+
+  const handlePolygonAdjust = (coords: { lat: number; lng: number }[], areaHa: number) => {
+    setCustomAdjustedArea(areaHa);
+    setCustomAdjustedPolygon(coords);
+    if (focusedField) {
+      setFocusedField(prev => prev ? { ...prev, area_hectares: areaHa } : null);
+      setFields(prev => prev.map(f => f.field_id === focusedField.field_id ? { ...f, area_hectares: areaHa } : f));
+    }
+  };
+
   const handleStateChange = (st: string) => {
     setSelectedState(st);
     const districtList = STATE_DISTRICTS[st] || [];
@@ -286,6 +299,8 @@ export const SatellitePage: React.FC<SatellitePageProps> = ({ onNavigate }) => {
     setSelectedDistrict(newDist);
     setFocusedField(null);
     setGovPlotResult(null);
+    setCustomAdjustedArea(null);
+    setCustomAdjustedPolygon(null);
     setTalukInput(newDist);
     setVillageInput('Central Village');
     setGpsMessage(null);
@@ -295,6 +310,8 @@ export const SatellitePage: React.FC<SatellitePageProps> = ({ onNavigate }) => {
     setSelectedDistrict(dist);
     setFocusedField(null);
     setGovPlotResult(null);
+    setCustomAdjustedArea(null);
+    setCustomAdjustedPolygon(null);
     setTalukInput(dist);
     setVillageInput('Central Village');
     setGpsMessage(null);
@@ -304,12 +321,17 @@ export const SatellitePage: React.FC<SatellitePageProps> = ({ onNavigate }) => {
     setFocusedField(field);
     setSelectedState(field.state);
     setSelectedDistrict(field.district);
+    setCustomAdjustedArea(null);
+    setCustomAdjustedPolygon(null);
     setGpsMessage(null);
     fetchNDVI(field.state, field.district);
   };
 
   const handleClearFocus = () => {
     setFocusedField(null);
+    setGovPlotResult(null);
+    setCustomAdjustedArea(null);
+    setCustomAdjustedPolygon(null);
   };
 
   const handleUseGps = () => {
@@ -407,9 +429,10 @@ export const SatellitePage: React.FC<SatellitePageProps> = ({ onNavigate }) => {
   }, [focusedField, govPlotResult, selectedState, selectedDistrict]);
 
   const currentArea = useMemo(() => {
+    if (customAdjustedArea !== null) return customAdjustedArea;
     if (focusedField) return focusedField.area_hectares;
     return 2.5; // Default representative plot size in ha
-  }, [focusedField]);
+  }, [customAdjustedArea, focusedField]);
 
   // Dynamic Sub-Plot Zonation breakdown
   const zonation = useMemo(() => {
@@ -472,130 +495,156 @@ export const SatellitePage: React.FC<SatellitePageProps> = ({ onNavigate }) => {
         </div>
       </div>
 
-      {/* Control Selector Bar */}
-      <div className="bg-white rounded-2xl border border-[#CCE0D0] p-4 shadow-xs flex flex-wrap items-center justify-between gap-4">
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2">
-            <MapPin className="w-4 h-4 text-[#2E7D32]" />
-            <span className="text-xs font-extrabold uppercase text-[#123826]">State:</span>
-            <select
-              value={selectedState}
-              onChange={(e) => handleStateChange(e.target.value)}
-              className="bg-[#F7FBF8] border border-[#CCE0D0] rounded-xl px-3 py-1.5 text-xs font-bold text-[#123826] focus:outline-none focus:border-[#2E7D32]"
-            >
-              {Object.keys(STATE_DISTRICTS).map(st => (
-                <option key={st} value={st}>{st}</option>
-              ))}
-            </select>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-extrabold uppercase text-[#123826]">District:</span>
-            <select
-              value={selectedDistrict}
-              onChange={(e) => handleDistrictChange(e.target.value)}
-              className="bg-[#F7FBF8] border border-[#CCE0D0] rounded-xl px-3 py-1.5 text-xs font-bold text-[#123826] focus:outline-none focus:border-[#2E7D32]"
-            >
-              {(STATE_DISTRICTS[selectedState] || []).map(dist => (
-                <option key={dist} value={dist}>{dist}</option>
-              ))}
-            </select>
-          </div>
-
-          <button
-            type="button"
-            onClick={handleUseGps}
-            disabled={gpsLoading}
-            className="px-3 py-1.5 rounded-xl bg-[#EBF5ED] hover:bg-[#D4EAD9] border border-[#CCE0D0] text-[#123826] text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shadow-2xs"
-            title="Auto-detect current GPS coordinates"
-          >
-            {gpsLoading ? (
-              <RefreshCw className="w-3.5 h-3.5 text-[#2E7D32] animate-spin" />
-            ) : (
-              <LocateFixed className="w-3.5 h-3.5 text-[#2E7D32]" />
-            )}
-            <span>{gpsLoading ? 'Acquiring GPS...' : 'Use My GPS'}</span>
-          </button>
-
-          {focusedField && (
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold animate-in fade-in">
-              <Crosshair className="w-3.5 h-3.5 text-amber-700" />
-              <span>Target: {focusedField.field_name}</span>
-              <button
-                onClick={handleClearFocus}
-                className="ml-1 text-amber-700 hover:text-amber-900 p-0.5 rounded cursor-pointer"
-                title="Reset map to district view"
+      {/* Control Selector Bar - Sleek & Clean Layout */}
+      <div className="bg-white rounded-2xl border border-[#CCE0D0] p-4 shadow-xs space-y-3">
+        {/* Top Row: Location Selection, GPS, Target Status & Actions */}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          {/* Left: Location Pickers & GPS */}
+          <div className="flex flex-wrap items-center gap-2.5">
+            <div className="flex items-center gap-1.5 bg-[#F7FBF8] border border-[#CCE0D0] rounded-xl px-2.5 py-1.5 text-xs">
+              <MapPin className="w-3.5 h-3.5 text-[#2E7D32]" />
+              <span className="font-extrabold uppercase text-[#123826] text-[11px]">State:</span>
+              <select
+                value={selectedState}
+                onChange={(e) => handleStateChange(e.target.value)}
+                className="bg-transparent font-bold text-[#123826] focus:outline-none cursor-pointer"
               >
-                <X className="w-3 h-3" />
-              </button>
+                {Object.keys(STATE_DISTRICTS).map(st => (
+                  <option key={st} value={st}>{st}</option>
+                ))}
+              </select>
             </div>
-          )}
+
+            <div className="flex items-center gap-1.5 bg-[#F7FBF8] border border-[#CCE0D0] rounded-xl px-2.5 py-1.5 text-xs">
+              <span className="font-extrabold uppercase text-[#123826] text-[11px]">District:</span>
+              <select
+                value={selectedDistrict}
+                onChange={(e) => handleDistrictChange(e.target.value)}
+                className="bg-transparent font-bold text-[#123826] focus:outline-none cursor-pointer"
+              >
+                {(STATE_DISTRICTS[selectedState] || []).map(dist => (
+                  <option key={dist} value={dist}>{dist}</option>
+                ))}
+              </select>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleUseGps}
+              disabled={gpsLoading}
+              className="px-2.5 py-1.5 rounded-xl bg-[#EBF5ED] hover:bg-[#D4EAD9] border border-[#CCE0D0] text-[#123826] text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shadow-2xs"
+              title="Auto-detect current GPS coordinates"
+            >
+              {gpsLoading ? (
+                <RefreshCw className="w-3.5 h-3.5 text-[#2E7D32] animate-spin" />
+              ) : (
+                <LocateFixed className="w-3.5 h-3.5 text-[#2E7D32]" />
+              )}
+              <span>{gpsLoading ? 'Acquiring...' : 'My GPS'}</span>
+            </button>
+
+            {focusedField && (
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-bold animate-in fade-in">
+                <Crosshair className="w-3.5 h-3.5 text-amber-700" />
+                <span>Field: {focusedField.field_name}</span>
+                <button
+                  onClick={handleClearFocus}
+                  className="ml-0.5 text-amber-700 hover:text-amber-900 p-0.5 rounded cursor-pointer"
+                  title="Reset to district view"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            )}
+
+            {customAdjustedArea && (
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs font-bold animate-in fade-in">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Adjusted: {customAdjustedArea} ha</span>
+                <button
+                  onClick={() => { setCustomAdjustedArea(null); setCustomAdjustedPolygon(null); }}
+                  className="ml-0.5 text-emerald-700 hover:text-emerald-900 p-0.5 rounded cursor-pointer"
+                  title="Reset custom boundary"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Right: Actions */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowGeeScriptModal(true)}
+              className="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-900 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+              title="Inspect Google Earth Engine (GEE) Python/JS API Pipeline"
+            >
+              <Database className="w-3.5 h-3.5 text-emerald-700" />
+              <span>GEE Script</span>
+            </button>
+
+            <button
+              onClick={() => fetchNDVI(selectedState, selectedDistrict)}
+              disabled={loading}
+              className="p-1.5 rounded-xl bg-white border border-[#CCE0D0] text-[#123826] hover:bg-[#F7FBF8] transition-colors cursor-pointer"
+              title="Refresh Sentinel-2 satellite pass"
+            >
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            </button>
+          </div>
         </div>
 
-        {/* Spectral View Mode Toggle */}
-        <div className="flex items-center gap-1 bg-[#F4F8F5] p-1 rounded-xl border border-[#E2ECE3]">
-          <button
-            onClick={() => setViewMode('ndvi')}
-            className={`px-3 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-              viewMode === 'ndvi' ? 'bg-[#123826] text-white shadow-xs' : 'text-stone-600 hover:text-[#123826]'
-            }`}
-          >
-            NDVI False-Color
-          </button>
-          <button
-            onClick={() => setViewMode('rgb')}
-            className={`px-3 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-              viewMode === 'rgb' ? 'bg-[#123826] text-white shadow-xs' : 'text-stone-600 hover:text-[#123826]'
-            }`}
-          >
-            Google Satellite (RGB)
-          </button>
-          <button
-            onClick={() => setViewMode('stress')}
-            className={`px-3 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-              viewMode === 'stress' ? 'bg-[#123826] text-white shadow-xs' : 'text-stone-600 hover:text-[#123826]'
-            }`}
-          >
-            Moisture Stress
-          </button>
-          <button
-            onClick={() => setViewMode('hybrid')}
-            className={`px-3 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer flex items-center gap-1 ${
-              viewMode === 'hybrid' ? 'bg-[#123826] text-white shadow-xs' : 'text-stone-600 hover:text-[#123826]'
-            }`}
-          >
-            <MapIcon className="w-3 h-3" />
-            <span>Google Hybrid</span>
-          </button>
-          <button
-            onClick={() => setViewMode('earth3d')}
-            className={`px-3 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer flex items-center gap-1 ${
-              viewMode === 'earth3d' ? 'bg-[#123826] text-white shadow-xs' : 'text-stone-600 hover:text-[#123826]'
-            }`}
-            title="Google Earth 3D Topography perspective"
-          >
-            <Globe2 className="w-3 h-3" />
-            <span>Earth 3D</span>
-          </button>
+        {/* Bottom Row: Clean Segmented Spectral Layer Controls */}
+        <div className="pt-2 border-t border-[#F0F4F1] flex flex-wrap items-center justify-between gap-2">
+          <span className="text-[11px] font-bold text-stone-500 uppercase tracking-wider">
+            Layer Mode:
+          </span>
+          <div className="flex items-center gap-1 bg-[#F4F8F5] p-1 rounded-xl border border-[#E2ECE3] flex-wrap">
+            <button
+              onClick={() => setViewMode('ndvi')}
+              className={`px-3 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                viewMode === 'ndvi' ? 'bg-[#123826] text-white shadow-xs' : 'text-stone-600 hover:text-[#123826]'
+              }`}
+            >
+              NDVI False-Color
+            </button>
+            <button
+              onClick={() => setViewMode('rgb')}
+              className={`px-3 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                viewMode === 'rgb' ? 'bg-[#123826] text-white shadow-xs' : 'text-stone-600 hover:text-[#123826]'
+              }`}
+            >
+              Google Satellite (RGB)
+            </button>
+            <button
+              onClick={() => setViewMode('stress')}
+              className={`px-3 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                viewMode === 'stress' ? 'bg-[#123826] text-white shadow-xs' : 'text-stone-600 hover:text-[#123826]'
+              }`}
+            >
+              Moisture Stress
+            </button>
+            <button
+              onClick={() => setViewMode('hybrid')}
+              className={`px-3 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer flex items-center gap-1 ${
+                viewMode === 'hybrid' ? 'bg-[#123826] text-white shadow-xs' : 'text-stone-600 hover:text-[#123826]'
+              }`}
+            >
+              <MapIcon className="w-3 h-3" />
+              <span>Google Hybrid</span>
+            </button>
+            <button
+              onClick={() => setViewMode('earth3d')}
+              className={`px-3 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer flex items-center gap-1 ${
+                viewMode === 'earth3d' ? 'bg-[#123826] text-white shadow-xs' : 'text-stone-600 hover:text-[#123826]'
+              }`}
+              title="Google Earth 3D Topography perspective"
+            >
+              <Globe2 className="w-3 h-3" />
+              <span>Earth 3D</span>
+            </button>
+          </div>
         </div>
-
-        <button
-          onClick={() => setShowGeeScriptModal(true)}
-          className="px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-900 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
-          title="Inspect Google Earth Engine (GEE) Python/JS API Pipeline"
-        >
-          <Database className="w-3.5 h-3.5 text-emerald-700" />
-          <span>GEE Script</span>
-        </button>
-
-        <button
-          onClick={() => fetchNDVI(selectedState, selectedDistrict)}
-          disabled={loading}
-          className="p-2 rounded-xl bg-white border border-[#CCE0D0] text-[#123826] hover:bg-[#F7FBF8] transition-colors cursor-pointer"
-          title="Refresh Sentinel-2 satellite pass"
-        >
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-        </button>
       </div>
 
       {/* GPS Locked Status Notice */}
@@ -657,8 +706,9 @@ export const SatellitePage: React.FC<SatellitePageProps> = ({ onNavigate }) => {
             onViewModeChange={setViewMode}
             focusedField={focusedField}
             areaHectares={currentArea}
-            customGovPolygon={govPlotResult?.geospatial?.boundary_polygon}
+            customGovPolygon={customAdjustedPolygon || govPlotResult?.geospatial?.boundary_polygon}
             govPlotRecord={govPlotResult}
+            onPolygonAdjust={handlePolygonAdjust}
           />
 
           <div className="pt-2 flex flex-wrap items-center justify-between text-xs text-stone-500 gap-2">
