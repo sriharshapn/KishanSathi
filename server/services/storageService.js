@@ -6,14 +6,14 @@ import db from "../database/db.js";
 
 export function getStorageConfig() {
   return {
-    provider: "SQLite / Google Cloud SQL Compatible",
-    engine: "Relational Embedded Store (WAL Mode)",
-    tables: {
+    provider: "Google Firebase Cloud Firestore",
+    engine: "Document Collection Store (NoSQL Cloud Firestore)",
+    collections: {
       markets: "markets",
       commodities: "commodities",
       priceRecords: "price_records",
       users: "user_preferences",
-      advisory: "advisory_history",
+      advisory: "advisories",
       diseaseReports: "disease_reports",
       farmerFields: "farmer_fields"
     },

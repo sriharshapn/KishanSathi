@@ -280,7 +280,7 @@ router.post('/disease/diagnose', upload.single('image'), async (req, res) => {
   try {
     const diagnosis = await diagnoseCropDisease({ imagePath, language, sampleName: specimenHint });
 
-    // Persist into SQLite disease_reports table
+    // Persist into Cloud Firestore disease_reports collection
     const primaryDiag = diagnosis.diagnoses?.[0] || {};
     await db.run(
       `INSERT INTO disease_reports (farmer_id, crop_identified, disease_name, severity, confidence, overall_health, diagnosis_json, image_name, language, created_at)

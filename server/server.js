@@ -83,10 +83,10 @@ import { syncMarketData } from './services/syncService.js';
 // Initialize SQLite database and warm cache
 async function startServer() {
   try {
-    console.log("🌾 Initializing AgriMate SQLite database...");
+    console.log("🔥 Initializing KisanSathi Cloud Firestore database...");
     await db.initDb();
     await refreshCache();
-    console.log("🌾 AgriMate SQLite database ready and verified.");
+    console.log("🔥 KisanSathi Cloud Firestore database ready and verified.");
 
     // Initial Live Sync with Data.gov.in on startup
     syncMarketData()

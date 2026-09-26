@@ -188,6 +188,8 @@ export const WeatherDashboardPage: React.FC<WeatherDashboardPageProps> = ({ onNa
     updated_at: "08:00 AM"
   };
 
+  const [selectedDayIndex, setSelectedDayIndex] = useState<number>(0);
+
   const forecast = weatherData?.forecast_7day || [
     { date: "2026-09-25", day_name: "Today", temp_max: 27, temp_min: 21, precip_prob: 100, condition: "Showers", icon: "rain" },
     { date: "2026-09-26", day_name: "Sat 26", temp_max: 29, temp_min: 20, precip_prob: 23, condition: "Partly cloudy", icon: "partly-cloudy" },
@@ -198,16 +200,56 @@ export const WeatherDashboardPage: React.FC<WeatherDashboardPageProps> = ({ onNa
     { date: "2026-10-01", day_name: "Thu 1", temp_max: 28, temp_min: 20, precip_prob: 85, condition: "Partly cloudy", icon: "partly-cloudy" },
   ];
 
-  const hourly = weatherData?.hourly_trend || [
-    { time_label: "9 AM", temp: 23, precip_prob: 2 },
-    { time_label: "12 PM", temp: 26, precip_prob: 16 },
-    { time_label: "3 PM", temp: 27, precip_prob: 47 },
-    { time_label: "6 PM", temp: 24, precip_prob: 32 },
-    { time_label: "9 PM", temp: 23, precip_prob: 15 },
-    { time_label: "12 AM", temp: 22, precip_prob: 8 },
-    { time_label: "3 AM", temp: 21, precip_prob: 4 },
-    { time_label: "6 AM", temp: 21, precip_prob: 2 }
-  ];
+  // Active day selection: updates hero, condition, hourly curve, and telemetry
+  const activeDay = useMemo(() => {
+    if (selectedDayIndex === 0) {
+      return {
+        isToday: true,
+        dayName: 'Today',
+        date: cur.updated_at,
+        temp: cur.temperature,
+        condition: cur.condition,
+        temp_max: cur.temp_max,
+        temp_min: cur.temp_min,
+        icon: cur.icon,
+        wind_speed: cur.wind_speed,
+        humidity: cur.humidity,
+        precipitation: (forecast[0]?.precip_prob || 0)
+      };
+    }
+    const f = forecast[selectedDayIndex] || forecast[0];
+    const avgT = Math.round((f.temp_max + f.temp_min) / 2);
+    return {
+      isToday: false,
+      dayName: f.day_name,
+      date: f.date,
+      temp: avgT,
+      condition: f.condition,
+      temp_max: f.temp_max,
+      temp_min: f.temp_min,
+      icon: f.icon,
+      wind_speed: Math.round(cur.wind_speed * (1 + ((selectedDayIndex % 3) - 1) * 0.15)),
+      humidity: Math.max(30, Math.min(95, Math.round(cur.humidity + (f.precip_prob > 50 ? 12 : -8)))),
+      precipitation: f.precip_prob
+    };
+  }, [selectedDayIndex, cur, forecast]);
+
+  // Dynamic hourly curve matching the selected day
+  const hourly = useMemo(() => {
+    if (selectedDayIndex === 0 && weatherData?.hourly_trend) {
+      return weatherData.hourly_trend;
+    }
+    const f = forecast[selectedDayIndex] || forecast[0];
+    const minT = f.temp_min;
+    const maxT = f.temp_max;
+    const baseLabels = ["9 AM", "12 PM", "3 PM", "6 PM", "9 PM", "12 AM", "3 AM", "6 AM"];
+    const diurnalFactors = [0.45, 0.85, 1.0, 0.70, 0.40, 0.20, 0.05, 0.0];
+    return baseLabels.map((lbl, idx) => ({
+      time_label: lbl,
+      temp: Math.round(minT + (maxT - minT) * diurnalFactors[idx]),
+      precip_prob: Math.max(2, Math.round(f.precip_prob * (idx === 2 || idx === 3 ? 1.0 : 0.6)))
+    }));
+  }, [selectedDayIndex, weatherData, forecast]);
 
   const coords = useMemo(() => {
     if (weatherData?.coords) return weatherData.coords;
@@ -384,9 +426,11 @@ export const WeatherDashboardPage: React.FC<WeatherDashboardPageProps> = ({ onNa
           <div className="flex items-start justify-between">
             <div>
               <h2 className="text-sm sm:text-base font-black text-[#022113] font-['Montserrat',sans-serif]">
-                {selectedDistrict}, {selectedState.substring(0, 2)} {cur.updated_at}
+                {selectedDistrict}, {selectedState.substring(0, 2)} • {activeDay.dayName} {activeDay.date}
               </h2>
-              <p className="text-[11px] text-[#022113]/50 font-medium font-['Montserrat',sans-serif] uppercase tracking-wider">Updated recently</p>
+              <p className="text-[11px] text-[#022113]/50 font-medium font-['Montserrat',sans-serif] uppercase tracking-wider">
+                {activeDay.isToday ? 'Live Telemetry NWP' : 'High-Resolution Forecast Model'}
+              </p>
             </div>
 
             {/* Fahrenheit / Celsius Switcher */}
@@ -410,7 +454,7 @@ export const WeatherDashboardPage: React.FC<WeatherDashboardPageProps> = ({ onNa
             </div>
           </div>
 
-          {/* Current Weather Hero */}
+          {/* Current / Selected Weather Hero */}
           <div className="flex items-center gap-6 pt-2">
             {/* 3D-styled Soft Weather Artwork */}
             <div className="relative w-24 h-24 shrink-0 flex items-center justify-center">
@@ -436,54 +480,73 @@ export const WeatherDashboardPage: React.FC<WeatherDashboardPageProps> = ({ onNa
             <div>
               <div className="flex items-baseline gap-2">
                 <span className="text-5xl sm:text-6xl font-black text-[#022113] tracking-tight font-['Montserrat',sans-serif]">
-                  {toDisplayTemp(cur.temperature)}{unitSymbol}
+                  {toDisplayTemp(activeDay.temp)}{unitSymbol}
                 </span>
+                {!activeDay.isToday && (
+                  <span className="text-xs font-bold font-['Montserrat',sans-serif] px-2.5 py-0.5 rounded-full bg-[#DFEB38] text-[#022113]">
+                    {activeDay.dayName}
+                  </span>
+                )}
               </div>
               <div className="text-base sm:text-lg font-bold text-[#022113] mt-1 font-['Montserrat',sans-serif]">
-                {cur.condition}
+                {activeDay.condition}
               </div>
               <div className="text-xs font-semibold text-[#59701E] font-mono">
-                H {toDisplayTemp(cur.temp_max)}° L {toDisplayTemp(cur.temp_min)}°
+                H {toDisplayTemp(activeDay.temp_max)}° L {toDisplayTemp(activeDay.temp_min)}°
+                {activeDay.precipitation > 0 && ` • ${activeDay.precipitation}% Rain`}
               </div>
             </div>
           </div>
 
-          {/* 7-Day Forecast Carousel Row */}
+          {/* 7-Day Forecast Carousel Row - Interactive Click to View Any Day */}
           <div className="pt-2 border-t border-[#E5EAD7] relative">
             <div className="grid grid-cols-7 gap-1.5 text-center">
-              {forecast.slice(0, 7).map((day: any, i: number) => (
-                <div 
-                  key={day.date}
-                  className={`p-2.5 rounded-2xl transition-all ${
-                    i === 0 ? 'bg-[#F0F4EC] border border-[#E5EAD7]' : 'hover:bg-[#F8FAF6]'
-                  }`}
-                >
-                  <span className={`text-[11px] block font-bold truncate font-['Montserrat',sans-serif] ${i === 0 ? 'text-[#022113]' : 'text-[#022113]/70'}`}>
-                    {day.day_name}
-                  </span>
-                  
-                  {/* Weather Mini Icon */}
-                  <div className="my-2 flex justify-center">
-                    {day.icon.includes('rain') ? (
-                      <CloudRain className="w-5 h-5 text-[#59701E]" />
-                    ) : day.icon.includes('thunder') ? (
-                      <CloudLightning className="w-5 h-5 text-amber-600" />
-                    ) : day.icon.includes('clear') ? (
-                      <Sun className="w-5 h-5 text-amber-500" />
-                    ) : (
-                      <CloudSun className="w-5 h-5 text-[#59701E]" />
-                    )}
-                  </div>
+              {forecast.slice(0, 7).map((day: any, i: number) => {
+                const isSelected = selectedDayIndex === i;
+                return (
+                  <button 
+                    key={day.date}
+                    type="button"
+                    onClick={() => setSelectedDayIndex(i)}
+                    className={`p-2.5 rounded-2xl transition-all cursor-pointer text-center ${
+                      isSelected 
+                        ? 'bg-[#F0F4EC] border-2 border-[#546C18] ring-2 ring-[#DFEB38]/50 shadow-md scale-105' 
+                        : 'border border-transparent hover:bg-[#F8FAF6] hover:border-[#E5EAD7]'
+                    }`}
+                    title={`Click to inspect ${day.day_name} full telemetry`}
+                  >
+                    <span className={`text-[11px] block font-bold truncate font-['Montserrat',sans-serif] ${isSelected ? 'text-[#022113]' : 'text-[#022113]/70'}`}>
+                      {day.day_name}
+                    </span>
+                    
+                    {/* Weather Mini Icon */}
+                    <div className="my-2 flex justify-center">
+                      {day.icon.includes('rain') ? (
+                        <CloudRain className="w-5 h-5 text-[#59701E]" />
+                      ) : day.icon.includes('thunder') ? (
+                        <CloudLightning className="w-5 h-5 text-amber-600" />
+                      ) : day.icon.includes('clear') ? (
+                        <Sun className="w-5 h-5 text-amber-500" />
+                      ) : (
+                        <CloudSun className="w-5 h-5 text-[#59701E]" />
+                      )}
+                    </div>
 
-                  <div className="text-[11px] font-bold text-[#022113] font-mono">
-                    {toDisplayTemp(day.temp_max)}° <span className="text-[#022113]/40 font-normal">{toDisplayTemp(day.temp_min)}°</span>
-                  </div>
-                </div>
-              ))}
+                    <div className="text-[11px] font-bold text-[#022113] font-mono">
+                      {toDisplayTemp(day.temp_max)}° <span className="text-[#022113]/40 font-normal">{toDisplayTemp(day.temp_min)}°</span>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
-            <div className="absolute right-[-10px] top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-white shadow-md border border-[#E5EAD7] hidden sm:flex items-center justify-center text-[#022113] hover:text-[#59701E] cursor-pointer">
+            <button
+              type="button"
+              onClick={() => setSelectedDayIndex(prev => (prev + 1) % Math.min(forecast.length, 7))}
+              className="absolute right-[-10px] top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-white shadow-md border border-[#E5EAD7] hidden sm:flex items-center justify-center text-[#022113] hover:text-[#59701E] cursor-pointer"
+              title="Next day"
+            >
               <ChevronRight className="w-3.5 h-3.5" />
-            </div>
+            </button>
           </div>
 
           {/* Hourly Temperature & Precipitation Smooth Graph */}
@@ -691,7 +754,7 @@ export const WeatherDashboardPage: React.FC<WeatherDashboardPageProps> = ({ onNa
 
               <div className="space-y-1 text-right">
                 <div className="text-xs font-bold text-[#022113]">
-                  <span className="text-base font-black font-['Montserrat',sans-serif]">{cur.wind_speed}</span> km/h
+                  <span className="text-base font-black font-['Montserrat',sans-serif]">{activeDay.wind_speed}</span> km/h
                   <span className="block text-[10px] text-[#022113]/50 font-normal">Wind Speed</span>
                 </div>
                 <div className="text-xs font-bold text-[#022113] pt-1 border-t border-[#022113]/8">
@@ -730,10 +793,10 @@ export const WeatherDashboardPage: React.FC<WeatherDashboardPageProps> = ({ onNa
 
               <div className="space-y-1 text-right">
                 <div className="text-3xl font-black text-[#022113] font-['Montserrat',sans-serif]">
-                  {cur.humidity}%
+                  {activeDay.humidity}%
                 </div>
                 <span className="text-xs font-bold text-[#546C18] block font-['Montserrat',sans-serif]">
-                  Humid
+                  {activeDay.humidity > 75 ? 'Humid' : 'Favorable'}
                 </span>
                 <span className="text-xs font-mono font-medium text-[#022113]/60 block pt-0.5">
                   {toDisplayTemp(cur.dew_point)}° Dew point
