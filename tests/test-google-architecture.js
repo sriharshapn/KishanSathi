@@ -21,11 +21,10 @@ async function runGoogleArchitectureTests() {
 
   // 2. Check Standard Relational Storage Configuration
   const storageConfig = getStorageConfig();
-  console.log("2. Standard Storage Config:", storageConfig);
   assert.strictEqual(storageConfig.isConfigured, true);
-  assert.ok(storageConfig.provider.includes("Google Cloud SQL") || storageConfig.provider.includes("SQLite"));
-  assert.ok(storageConfig.tables.priceRecords);
-  console.log("   ✅ Standard Relational Storage Service: VALIDATED\n");
+  assert.ok(storageConfig.provider.includes("Google Cloud SQL") || storageConfig.provider.includes("SQLite") || storageConfig.provider.includes("Cloud Firestore"));
+  assert.ok(storageConfig.collections?.priceRecords || storageConfig.tables?.priceRecords);
+  console.log("   ✅ Standard Storage Service: VALIDATED\n");
 
   // 3. Test Storage Write & Read Operations
   const testRecord = {

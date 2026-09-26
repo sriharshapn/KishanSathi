@@ -21,12 +21,12 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const firebaseConfig = {
-  apiKey: process.env.FIREBASE_API_KEY || process.env.VITE_FIREBASE_API_KEY || process.env.GEMINI_API_KEY || "AIzaSyKisanSathiProduction2026",
-  authDomain: process.env.FIREBASE_AUTH_DOMAIN || "kisansathi-app.firebaseapp.com",
-  projectId: process.env.FIREBASE_PROJECT_ID || process.env.VITE_FIREBASE_PROJECT_ID || "kisansathi-app",
-  storageBucket: process.env.FIREBASE_STORAGE_BUCKET || "kisansathi-app.appspot.com",
-  messagingSenderId: "108374928172",
-  appId: "1:108374928172:web:a9841f38bc38d94e"
+  apiKey: process.env.FIREBASE_API_KEY || process.env.VITE_FIREBASE_API_KEY || process.env.GEMINI_API_KEY || "",
+  authDomain: process.env.FIREBASE_AUTH_DOMAIN || "",
+  projectId: process.env.FIREBASE_PROJECT_ID || process.env.VITE_FIREBASE_PROJECT_ID || "",
+  storageBucket: process.env.FIREBASE_STORAGE_BUCKET || "",
+  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID || "",
+  appId: process.env.FIREBASE_APP_ID || ""
 };
 
 let app;
@@ -34,10 +34,14 @@ let firestoreDb;
 let isFirestoreConnected = false;
 
 try {
-  app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
-  firestoreDb = getFirestore(app);
-  isFirestoreConnected = true;
-  console.log("[Firebase] Google Cloud Firestore engine connected successfully.");
+  if (firebaseConfig.apiKey && firebaseConfig.projectId) {
+    app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+    firestoreDb = getFirestore(app);
+    isFirestoreConnected = true;
+    console.log("[Firebase] Google Cloud Firestore engine connected successfully.");
+  } else {
+    isFirestoreConnected = false;
+  }
 } catch (err) {
   console.warn("[Firebase] Firestore connection notice, using local synchronized state:", err.message);
   isFirestoreConnected = false;
@@ -189,6 +193,18 @@ export function get(sql, params = []) {
     return Promise.resolve(firestoreStore.user_preferences[0] || null);
   }
 
+  if (lowerSql.includes('from advisories')) {
+    const list = firestoreStore.advisories;
+    const match = list.slice().reverse().find(a => lowerSql.includes(a.farmer_id) || (params && params.includes(a.farmer_id))) || list[list.length - 1] || null;
+    return Promise.resolve(match);
+  }
+
+  if (lowerSql.includes('from disease_reports')) {
+    const list = firestoreStore.disease_reports;
+    const match = list.slice().reverse().find(r => lowerSql.includes(r.farmer_id) || (params && params.includes(r.farmer_id))) || list[list.length - 1] || null;
+    return Promise.resolve(match);
+  }
+
   if (lowerSql.includes('from farmer_fields')) {
     const field = firestoreStore.farmer_fields.find(f => f.field_id === params[0]) || null;
     return Promise.resolve(field);
@@ -285,12 +301,56 @@ export function run(sql, params = []) {
     return Promise.resolve({ lastID: 1, changes: 1 });
   }
 
+  if (lowerSql.includes('price_records')) {
+    if (lowerSql.includes('update') && lowerSql.includes('set is_today = 0')) {
+      firestoreStore.price_records.forEach(r => { r.is_today = 0; });
+      return Promise.resolve({ lastID: 1, changes: firestoreStore.price_records.length });
+    }
+    if (lowerSql.includes('insert') || lowerSql.includes('replace')) {
+      if (params && params.length >= 10) {
+        const record = {
+          record_id: params[0],
+          market_id: params[1],
+          commodity_id: params[2],
+          variety: params[3] || 'Standard',
+          grade: params[4] || 'FAQ',
+          arrival_date: params[5],
+          min_price: Number(params[6]) || 0,
+          modal_price: Number(params[7]) || 0,
+          max_price: Number(params[8]) || 0,
+          arrival_quantity: Number(params[9]) || 0,
+          unit: params[10] || 'quintal',
+          source: params[11] || 'Agmarknet',
+          source_timestamp: params[12] || new Date().toISOString(),
+          is_today: 1
+        };
+        saveDocument('price_records', record.record_id, record);
+      }
+      return Promise.resolve({ lastID: firestoreStore.price_records.length, changes: 1 });
+    }
+  }
+
+  if (lowerSql.includes('sync_logs')) {
+    if (params && params.length >= 2) {
+      const log = {
+        id: firestoreStore.sync_logs.length + 1,
+        source: params[0],
+        records_synced: Number(params[1]) || 0,
+        timestamp: params[2] || new Date().toISOString(),
+        status: params[3] || 'SUCCESS'
+      };
+      saveDocument('sync_logs', `log_${Date.now()}`, log);
+    }
+    return Promise.resolve({ lastID: firestoreStore.sync_logs.length, changes: 1 });
+  }
+
   return Promise.resolve({ lastID: 1, changes: 1 });
 }
 
 // ── Database Initialization & Collection Seeding ───────────────
 
 export async function initDb() {
+  if (firestoreStore.markets.length > 0) return;
   console.log("[Firebase] Initializing KisanSathi Cloud Firestore Database...");
   
   const jsonPath = path.join(__dirname, '../data/verified_markets.json');
@@ -435,6 +495,9 @@ export async function initDb() {
     console.log(`[Firebase] Cloud Firestore collections initialized: ${firestoreStore.markets.length} mandis, ${firestoreStore.commodities.length} crops, ${firestoreStore.price_records.length} price records, ${firestoreStore.disease_reports.length} pathology scans.`);
   }
 }
+
+// Auto-seed in-memory Firestore cache immediately on module load
+initDb();
 
 export default {
   query,

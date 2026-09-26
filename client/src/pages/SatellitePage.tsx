@@ -52,8 +52,6 @@ export const SatellitePage: React.FC<SatellitePageProps> = ({ onNavigate }) => {
   const [govPlotResult, setGovPlotResult] = useState<any | null>(null);
   const [govPlotLoading, setGovPlotLoading] = useState(false);
   const [govPlotError, setGovPlotError] = useState<string | null>(null);
-  const [showGovApisModal, setShowGovApisModal] = useState(false);
-  const [govApisList, setGovApisList] = useState<any[]>([]);
 
   // GPS Geolocation state
   const [gpsLoading, setGpsLoading] = useState(false);
@@ -184,22 +182,6 @@ export const SatellitePage: React.FC<SatellitePageProps> = ({ onNavigate }) => {
       setLoading(false);
     }
   };
-
-  const fetchGovApis = async () => {
-    try {
-      const res = await fetch('/api/cadastre/apis');
-      const data = await res.json();
-      if (data.success && Array.isArray(data.apis)) {
-        setGovApisList(data.apis);
-      }
-    } catch (err) {
-      console.warn('Failed to load gov apis list', err);
-    }
-  };
-
-  useEffect(() => {
-    fetchGovApis();
-  }, []);
 
   const handleSearchGovPlot = async (e?: React.FormEvent, customSurvey?: string) => {
     if (e) e.preventDefault();
@@ -940,13 +922,6 @@ export const SatellitePage: React.FC<SatellitePageProps> = ({ onNavigate }) => {
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setShowGovApisModal(true)}
-              className="px-4 py-2 rounded-full bg-[#F0F2EB] hover:bg-[#E5EAD7] border border-[#022113]/8 text-[#022113] text-xs font-bold font-['Montserrat',sans-serif] transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
-            >
-              <Database className="w-3.5 h-3.5 text-[#59701E]" strokeWidth={2} />
-              <span>Connected Govt APIs ({govApisList.length || 5})</span>
-            </button>
-            <button
               type="button"
               onClick={() => handleSearchGovPlot(undefined, '142/2A')}
               className="px-4 py-2 rounded-full bg-[#DFEB38] text-[#022113] hover:bg-[#d0df2a] text-xs font-bold font-['Montserrat',sans-serif] transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
@@ -1374,126 +1349,6 @@ export const SatellitePage: React.FC<SatellitePageProps> = ({ onNavigate }) => {
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
-
-      {/* Connected Government APIs Directory Modal */}
-      {showGovApisModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#022113]/60 backdrop-blur-xs animate-in fade-in">
-          <div className="bg-white rounded-[2.5rem] border border-[#022113]/8 shadow-2xl max-w-3xl w-full p-8 space-y-5 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-3 border-b border-[#022113]/8">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2.5 rounded-2xl bg-[#F0F2EB] text-[#022113] border border-[#022113]/8">
-                  <Landmark className="w-5 h-5 text-[#59701E]" />
-                </div>
-                <div>
-                  <h3 className="text-base font-bold text-[#022113] font-['Montserrat',sans-serif]">
-                    Connected Government Agricultural & Cadastral APIs
-                  </h3>
-                  <p className="text-xs text-[#718096]">
-                    Official Indian Government systems integrated for farmer land records, digital crop surveys, and cadastral spatial data.
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => setShowGovApisModal(false)}
-                className="p-1.5 text-[#718096] hover:text-[#022113] rounded-full hover:bg-[#F0F2EB] cursor-pointer transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              {(govApisList.length > 0 ? govApisList : [
-                {
-                  id: "agristack",
-                  system_name: "AgriStack (Department of Agriculture & Farmers Welfare)",
-                  official_portal: "https://agristack.gov.in",
-                  api_endpoint: "https://api.agristack.gov.in/v1/cadastral/village-boundary",
-                  auth_type: "OAuth2 / Farmer Consent Manager (UFSI)",
-                  description: "Central Digital Public Infrastructure for agriculture. Geo-referenced village cadastral boundary layers, Unified Farmer ID (UFID), and Digital Crop Survey (DCS).",
-                  coverage: "National (Pan-India rolled out across states)"
-                },
-                {
-                  id: "isro_bhuvan",
-                  system_name: "ISRO Bhuvan Geo-Portal (NRSC / ISRO)",
-                  official_portal: "https://bhuvan.nrsc.gov.in",
-                  api_endpoint: "https://bhuvan-vec2.nrsc.gov.in/bhuvan/wms",
-                  auth_type: "Open OGC WMS/WFS / Free Public API Key",
-                  description: "Indian Space Research Organisation open geospatial services. Provides cadastral boundary vector layers, soil texture, land degradation, and water bodies.",
-                  coverage: "Pan-India OGC WMS standard spatial overlays"
-                },
-                {
-                  id: "data_gov_soil",
-                  system_name: "Open Government Data (OGD) & Soil Health Card",
-                  official_portal: "https://soilhealth.dac.gov.in",
-                  api_endpoint: "https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070",
-                  auth_type: "API Key (Data.gov.in Registered Gateway)",
-                  description: "National Soil Health Card Portal providing macronutrient and micronutrient metrics (N, P, K, pH, EC, Organic Carbon) linked to cadastral survey numbers.",
-                  coverage: "All agricultural districts across 28 states & 8 UTs"
-                },
-                {
-                  id: "bharat_maps",
-                  system_name: "Bharat Maps (National Informatics Centre - NIC)",
-                  official_portal: "https://bharatmaps.gov.in",
-                  api_endpoint: "https://bharatmaps.gov.in/geoserver/wms",
-                  auth_type: "Government NSDI Standards / NIC Open API",
-                  description: "Multi-layered GIS platform hosted by NIC containing administrative boundaries, revenue village boundaries, and cadastral survey polygons.",
-                  coverage: "National Spatial Data Infrastructure (NSDI)"
-                },
-                {
-                  id: "state_ror_bhoomi",
-                  system_name: "State Record of Rights (RoR) Portals (Bhoomi, MahaBhulekh, UP Bhulekh, PLRS)",
-                  official_portal: "https://bhoomilims.karnataka.gov.in",
-                  api_endpoint: "https://landrecords.karnataka.gov.in/service4/api/survey/geometry",
-                  auth_type: "State Land Records Gateway / Dishaank OGC Services",
-                  description: "Authoritative state revenue records providing Khata, Hissa, Pahani (RTC), ownership tenure, mutation history, and surveyed parcel boundary coordinates.",
-                  coverage: "State specific (Karnataka Bhoomi, Maharashtra MahaBhulekh 7/12, UP Bhulekh, Punjab PLRS)"
-                }
-              ]).map((api) => (
-                <div key={api.id} className="p-5 rounded-[2rem] bg-[#F0F2EB] border border-[#022113]/8 space-y-2">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <span className="h-2 w-2 rounded-full bg-[#59701E]"></span>
-                      <h4 className="font-bold text-xs text-[#022113] font-['Montserrat',sans-serif]">{api.system_name}</h4>
-                    </div>
-                    <a
-                      href={api.official_portal}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[11px] font-bold font-['Montserrat',sans-serif] text-[#59701E] hover:underline flex items-center gap-1"
-                    >
-                      <span>Visit Portal</span>
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                  </div>
-
-                  <p className="text-xs text-[#4A5568]">{api.description}</p>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-[11px] pt-2 border-t border-[#022113]/8">
-                    <div>
-                      <span className="text-[#718096] block text-[10px] uppercase font-bold font-['Montserrat',sans-serif]">API Endpoint / Standard</span>
-                      <span className="font-mono text-[#022113] break-all">{api.api_endpoint}</span>
-                    </div>
-                    <div>
-                      <span className="text-[#718096] block text-[10px] uppercase font-bold font-['Montserrat',sans-serif]">Authentication / Protocol</span>
-                      <span className="font-mono text-[#59701E] font-bold">{api.auth_type}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="pt-3 flex justify-end border-t border-[#022113]/8">
-              <button
-                type="button"
-                onClick={() => setShowGovApisModal(false)}
-                className="px-5 py-2.5 rounded-full bg-[#DFEB38] text-[#022113] text-xs font-bold font-['Montserrat',sans-serif] uppercase tracking-wider hover:bg-[#d0df2a] cursor-pointer shadow-sm"
-              >
-                Close Directory
-              </button>
-            </div>
           </div>
         </div>
       )}
