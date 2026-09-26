@@ -64,6 +64,13 @@ export const MarketComparison: React.FC<MarketComparisonProps> = ({
 }) => {
   const t = TRANSLATIONS[language];
   const carouselRef = useRef<HTMLDivElement>(null);
+  const isHoveringRef = useRef(false);
+  const targetScrollRef = useRef(0);
+  const animationFrameRef = useRef<number | null>(null);
+  const isDraggingRef = useRef(false);
+  const dragStartXRef = useRef(0);
+  const dragStartScrollRef = useRef(0);
+  const hasDraggedRef = useRef(false);
 
   // Layout mode: Spotlight Carousel vs Grid
   const [viewLayout, setViewLayout] = useState<'carousel' | 'grid'>('carousel');
@@ -185,6 +192,80 @@ export const MarketComparison: React.FC<MarketComparisonProps> = ({
       carouselRef.current.scrollTo({ left: idx * cardWidth, behavior: 'smooth' });
       setActiveIndex(idx);
     }
+  };
+
+  // Smooth mouse-follow scroll loop ("moving right and left by just moving it with mouse")
+  useEffect(() => {
+    if (viewLayout !== 'carousel') return;
+
+    const smoothScrollLoop = () => {
+      const el = carouselRef.current;
+      if (el && isHoveringRef.current && !isDraggingRef.current) {
+        const current = el.scrollLeft;
+        const target = targetScrollRef.current;
+        const diff = target - current;
+        if (Math.abs(diff) > 0.5) {
+          el.scrollLeft = current + diff * 0.08;
+        }
+      }
+      animationFrameRef.current = requestAnimationFrame(smoothScrollLoop);
+    };
+
+    animationFrameRef.current = requestAnimationFrame(smoothScrollLoop);
+
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, [viewLayout]);
+
+  const handleContainerMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const el = carouselRef.current;
+    if (!el) return;
+
+    if (isDraggingRef.current) {
+      const dx = e.clientX - dragStartXRef.current;
+      if (Math.abs(dx) > 5) {
+        hasDraggedRef.current = true;
+      }
+      el.scrollLeft = dragStartScrollRef.current - dx;
+      targetScrollRef.current = el.scrollLeft;
+      return;
+    }
+
+    const rect = el.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const ratio = Math.max(0, Math.min(1, mouseX / rect.width));
+    const maxScroll = el.scrollWidth - el.clientWidth;
+    if (maxScroll > 0) {
+      targetScrollRef.current = ratio * maxScroll;
+      isHoveringRef.current = true;
+    }
+  };
+
+  const handleContainerMouseEnter = () => {
+    isHoveringRef.current = true;
+    if (carouselRef.current) {
+      targetScrollRef.current = carouselRef.current.scrollLeft;
+    }
+  };
+
+  const handleContainerMouseLeave = () => {
+    isHoveringRef.current = false;
+    isDraggingRef.current = false;
+  };
+
+  const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!carouselRef.current) return;
+    isDraggingRef.current = true;
+    hasDraggedRef.current = false;
+    dragStartXRef.current = e.clientX;
+    dragStartScrollRef.current = carouselRef.current.scrollLeft;
+  };
+
+  const handleMouseUp = () => {
+    isDraggingRef.current = false;
   };
 
   // Aggregate Market Stats
@@ -404,27 +485,31 @@ export const MarketComparison: React.FC<MarketComparisonProps> = ({
               <div
                 ref={carouselRef}
                 onScroll={handleCarouselScroll}
-                className="flex gap-4 sm:gap-6 overflow-x-auto pb-6 pt-2 px-2 snap-x snap-mandatory scroll-smooth [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                onMouseMove={handleContainerMouseMove}
+                onMouseEnter={handleContainerMouseEnter}
+                onMouseLeave={handleContainerMouseLeave}
+                onMouseDown={handleMouseDown}
+                onMouseUp={handleMouseUp}
+                className="flex gap-4 sm:gap-6 overflow-x-auto pb-6 pt-2 px-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden cursor-ew-resize select-none"
               >
                 {processedMarkets.map((market, idx) => {
-                  const isCurrentActive = activeIndex === idx;
                   const isChosen = selectedMarket?.market_id === market.market_id;
 
                   return (
                     <div
                       key={market.market_id}
-                      onClick={() => setActiveIndex(idx)}
-                      className={`
-                        shrink-0 snap-center transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]
-                        w-[310px] sm:w-[360px] md:w-[390px]
-                        ${isCurrentActive || isChosen ? 'scale-[1.01]' : 'opacity-90 hover:opacity-100'}
-                      `}
+                      onClick={() => {
+                        if (hasDraggedRef.current) return;
+                        setActiveIndex(idx);
+                      }}
+                      className="shrink-0 w-[310px] sm:w-[350px] md:w-[370px] h-[460px] transition-opacity duration-300"
                     >
                       <MarketCard
                         market={market}
                         language={language}
                         isSelected={isChosen}
                         onSelect={(m) => {
+                          if (hasDraggedRef.current) return;
                           onSelectMarket(m);
                           setActiveIndex(idx);
                         }}

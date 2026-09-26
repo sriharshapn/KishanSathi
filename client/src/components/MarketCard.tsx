@@ -53,10 +53,10 @@ export const MarketCard: React.FC<MarketCardProps> = ({
         '--spotlight-opacity': '0',
       } as React.CSSProperties}
       className={`
-        group relative rounded-[2.2rem] cursor-pointer transition-all duration-300 flex flex-col overflow-hidden font-['Open_Sans',sans-serif]
+        group relative rounded-[2.2rem] cursor-pointer transition-all duration-300 flex flex-col justify-between h-[460px] w-full overflow-hidden font-['Open_Sans',sans-serif] select-none
         ${isSelected
-          ? 'bg-white border-2 border-[#546C18] shadow-2xl ring-4 ring-[#DFEB38]/40 -translate-y-1'
-          : 'bg-white border border-[#022113]/8 shadow-xl hover:shadow-2xl hover:-translate-y-1'
+          ? 'bg-white border-2 border-[#546C18] shadow-2xl'
+          : 'bg-white border-2 border-[#022113]/8 hover:border-[#546C18]/40 shadow-lg hover:shadow-xl'
         }
       `}
     >
@@ -71,10 +71,10 @@ export const MarketCard: React.FC<MarketCardProps> = ({
 
       {/* Top indicator line on select */}
       <div
-        className={`relative z-10 h-1.5 w-full transition-all duration-300 ${isSelected ? 'bg-[#546C18]' : 'bg-transparent group-hover:bg-[#DFEB38]'}`}
+        className={`relative z-10 h-1.5 w-full transition-all duration-300 shrink-0 ${isSelected ? 'bg-[#546C18]' : 'bg-transparent group-hover:bg-[#DFEB38]'}`}
       />
 
-      <div className="relative z-10 p-6 sm:p-7 flex flex-col gap-4 flex-1">
+      <div className="relative z-10 p-6 sm:p-7 flex flex-col justify-between h-[calc(460px-6px)]">
 
         {/* ── Row 1: Name + meta ── */}
         <div className="flex items-start justify-between gap-3">
@@ -166,7 +166,7 @@ export const MarketCard: React.FC<MarketCardProps> = ({
         </div>
 
         {/* ── Row 4: Pills — variety, grade, arrival ── */}
-        <div className="flex flex-wrap gap-1.5">
+        <div className="h-[54px] flex flex-wrap content-start gap-1.5 overflow-hidden">
           <span className="text-[10px] font-medium text-[#022113] bg-[#F0F4EC] border border-[#E5EAD7] px-2.5 py-0.5 rounded-full">
             {market.variety}
           </span>
