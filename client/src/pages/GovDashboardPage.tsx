@@ -357,106 +357,38 @@ export const GovDashboardPage: React.FC<GovDashboardPageProps> = ({ onNavigate }
   const [selectedNodeModal, setSelectedNodeModal] = useState<StateNode | null>(null);
 
   // Tab 1 (State Nodes) Carousel & Mouse-Glide State
+  // Tab 1 (State Nodes) Carousel State
   const [nodeViewLayout, setNodeViewLayout] = useState<'carousel' | 'grid'>('carousel');
   const [activeNodeIndex, setActiveNodeIndex] = useState(0);
   const nodeCarouselRef = useRef<HTMLDivElement>(null);
-  const isNodeHoveringRef = useRef(false);
-  const nodeTargetScrollRef = useRef(0);
-  const nodeAnimFrameRef = useRef<number | null>(null);
   const isNodeDraggingRef = useRef(false);
   const nodeDragStartXRef = useRef(0);
   const nodeDragStartScrollRef = useRef(0);
   const nodeHasDraggedRef = useRef(false);
 
-  // Tab 2 (Disease Corridors) Carousel & Mouse-Glide State
+  // Tab 2 (Disease Corridors) Carousel State
   const [alertViewLayout, setAlertViewLayout] = useState<'carousel' | 'grid'>('carousel');
   const [activeAlertIndex, setActiveAlertIndex] = useState(0);
   const alertCarouselRef = useRef<HTMLDivElement>(null);
-  const isAlertHoveringRef = useRef(false);
-  const alertTargetScrollRef = useRef(0);
-  const alertAnimFrameRef = useRef<number | null>(null);
   const isAlertDraggingRef = useRef(false);
   const alertDragStartXRef = useRef(0);
   const alertDragStartScrollRef = useRef(0);
   const alertHasDraggedRef = useRef(false);
 
-  // Smooth mouse-follow scroll loop for State Nodes
-  useEffect(() => {
-    if (nodeViewLayout !== 'carousel') return;
-    const smoothScrollLoop = () => {
-      const el = nodeCarouselRef.current;
-      if (el && isNodeHoveringRef.current && !isNodeDraggingRef.current) {
-        const current = el.scrollLeft;
-        const target = nodeTargetScrollRef.current;
-        const diff = target - current;
-        if (Math.abs(diff) > 0.5) {
-          el.scrollLeft = current + diff * 0.08;
-        }
-      }
-      nodeAnimFrameRef.current = requestAnimationFrame(smoothScrollLoop);
-    };
-    nodeAnimFrameRef.current = requestAnimationFrame(smoothScrollLoop);
-    return () => {
-      if (nodeAnimFrameRef.current) cancelAnimationFrame(nodeAnimFrameRef.current);
-    };
-  }, [nodeViewLayout]);
-
-  // Smooth mouse-follow scroll loop for Disease Corridors
-  useEffect(() => {
-    if (alertViewLayout !== 'carousel') return;
-    const smoothScrollLoop = () => {
-      const el = alertCarouselRef.current;
-      if (el && isAlertHoveringRef.current && !isAlertDraggingRef.current) {
-        const current = el.scrollLeft;
-        const target = alertTargetScrollRef.current;
-        const diff = target - current;
-        if (Math.abs(diff) > 0.5) {
-          el.scrollLeft = current + diff * 0.08;
-        }
-      }
-      alertAnimFrameRef.current = requestAnimationFrame(smoothScrollLoop);
-    };
-    alertAnimFrameRef.current = requestAnimationFrame(smoothScrollLoop);
-    return () => {
-      if (alertAnimFrameRef.current) cancelAnimationFrame(alertAnimFrameRef.current);
-    };
-  }, [alertViewLayout]);
-
-  // Mouse handlers for State Nodes
+  // Drag and 2-finger wheel handlers for State Nodes (Mandi Terminal Cards)
   const handleNodeContainerMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const el = nodeCarouselRef.current;
-    if (!el) return;
-    if (isNodeDraggingRef.current) {
-      const dx = e.clientX - nodeDragStartXRef.current;
-      if (Math.abs(dx) > 5) nodeHasDraggedRef.current = true;
-      el.scrollLeft = nodeDragStartScrollRef.current - dx;
-      nodeTargetScrollRef.current = el.scrollLeft;
-      return;
+    if (!el || !isNodeDraggingRef.current) return;
+    const dx = e.clientX - nodeDragStartXRef.current;
+    if (Math.abs(dx) > 3) {
+      nodeHasDraggedRef.current = true;
     }
-    const rect = el.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left;
-    const ratio = Math.max(0, Math.min(1, mouseX / rect.width));
-    const maxScroll = el.scrollWidth - el.clientWidth;
-    if (maxScroll > 0) {
-      nodeTargetScrollRef.current = ratio * maxScroll;
-      isNodeHoveringRef.current = true;
-    }
-  };
-
-  const handleNodeContainerMouseEnter = () => {
-    isNodeHoveringRef.current = true;
-    if (nodeCarouselRef.current) {
-      nodeTargetScrollRef.current = nodeCarouselRef.current.scrollLeft;
-    }
-  };
-
-  const handleNodeContainerMouseLeave = () => {
-    isNodeHoveringRef.current = false;
-    isNodeDraggingRef.current = false;
+    el.scrollLeft = nodeDragStartScrollRef.current - dx;
   };
 
   const handleNodeMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!nodeCarouselRef.current) return;
+    // Supports right-click drag (e.button === 2) and standard drag (e.button === 0)
     isNodeDraggingRef.current = true;
     nodeHasDraggedRef.current = false;
     nodeDragStartXRef.current = e.clientX;
@@ -467,7 +399,41 @@ export const GovDashboardPage: React.FC<GovDashboardPageProps> = ({ onNavigate }
     isNodeDraggingRef.current = false;
     setTimeout(() => {
       nodeHasDraggedRef.current = false;
-    }, 60);
+    }, 80);
+  };
+
+  const handleNodeWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    const el = nodeCarouselRef.current;
+    if (!el) return;
+    // 2-finger gesture on trackpad or mouse wheel horizontal/vertical scroll
+    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+      el.scrollLeft += e.deltaX;
+    } else if (Math.abs(e.deltaY) > 0) {
+      el.scrollLeft += e.deltaY;
+    }
+  };
+
+  const handleNodeTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (!nodeCarouselRef.current || e.touches.length === 0) return;
+    isNodeDraggingRef.current = true;
+    nodeHasDraggedRef.current = false;
+    nodeDragStartXRef.current = e.touches[0].clientX;
+    nodeDragStartScrollRef.current = nodeCarouselRef.current.scrollLeft;
+  };
+
+  const handleNodeTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    const el = nodeCarouselRef.current;
+    if (!el || !isNodeDraggingRef.current || e.touches.length === 0) return;
+    const dx = e.touches[0].clientX - nodeDragStartXRef.current;
+    if (Math.abs(dx) > 3) nodeHasDraggedRef.current = true;
+    el.scrollLeft = nodeDragStartScrollRef.current - dx;
+  };
+
+  const handleNodeTouchEnd = () => {
+    isNodeDraggingRef.current = false;
+    setTimeout(() => {
+      nodeHasDraggedRef.current = false;
+    }, 80);
   };
 
   const handleNodeScroll = () => {
@@ -492,37 +458,15 @@ export const GovDashboardPage: React.FC<GovDashboardPageProps> = ({ onNavigate }
     }
   };
 
-  // Mouse handlers for Disease Corridors
+  // Drag and 2-finger wheel handlers for Disease Corridors
   const handleAlertContainerMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const el = alertCarouselRef.current;
-    if (!el) return;
-    if (isAlertDraggingRef.current) {
-      const dx = e.clientX - alertDragStartXRef.current;
-      if (Math.abs(dx) > 5) alertHasDraggedRef.current = true;
-      el.scrollLeft = alertDragStartScrollRef.current - dx;
-      alertTargetScrollRef.current = el.scrollLeft;
-      return;
+    if (!el || !isAlertDraggingRef.current) return;
+    const dx = e.clientX - alertDragStartXRef.current;
+    if (Math.abs(dx) > 3) {
+      alertHasDraggedRef.current = true;
     }
-    const rect = el.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left;
-    const ratio = Math.max(0, Math.min(1, mouseX / rect.width));
-    const maxScroll = el.scrollWidth - el.clientWidth;
-    if (maxScroll > 0) {
-      alertTargetScrollRef.current = ratio * maxScroll;
-      isAlertHoveringRef.current = true;
-    }
-  };
-
-  const handleAlertContainerMouseEnter = () => {
-    isAlertHoveringRef.current = true;
-    if (alertCarouselRef.current) {
-      alertTargetScrollRef.current = alertCarouselRef.current.scrollLeft;
-    }
-  };
-
-  const handleAlertContainerMouseLeave = () => {
-    isAlertHoveringRef.current = false;
-    isAlertDraggingRef.current = false;
+    el.scrollLeft = alertDragStartScrollRef.current - dx;
   };
 
   const handleAlertMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -537,7 +481,40 @@ export const GovDashboardPage: React.FC<GovDashboardPageProps> = ({ onNavigate }
     isAlertDraggingRef.current = false;
     setTimeout(() => {
       alertHasDraggedRef.current = false;
-    }, 60);
+    }, 80);
+  };
+
+  const handleAlertWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    const el = alertCarouselRef.current;
+    if (!el) return;
+    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+      el.scrollLeft += e.deltaX;
+    } else if (Math.abs(e.deltaY) > 0) {
+      el.scrollLeft += e.deltaY;
+    }
+  };
+
+  const handleAlertTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (!alertCarouselRef.current || e.touches.length === 0) return;
+    isAlertDraggingRef.current = true;
+    alertHasDraggedRef.current = false;
+    alertDragStartXRef.current = e.touches[0].clientX;
+    alertDragStartScrollRef.current = alertCarouselRef.current.scrollLeft;
+  };
+
+  const handleAlertTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    const el = alertCarouselRef.current;
+    if (!el || !isAlertDraggingRef.current || e.touches.length === 0) return;
+    const dx = e.touches[0].clientX - alertDragStartXRef.current;
+    if (Math.abs(dx) > 3) alertHasDraggedRef.current = true;
+    el.scrollLeft = alertDragStartScrollRef.current - dx;
+  };
+
+  const handleAlertTouchEnd = () => {
+    isAlertDraggingRef.current = false;
+    setTimeout(() => {
+      alertHasDraggedRef.current = false;
+    }, 80);
   };
 
   const handleAlertScroll = () => {
@@ -909,12 +886,16 @@ export const GovDashboardPage: React.FC<GovDashboardPageProps> = ({ onNavigate }
               <div
                 ref={nodeCarouselRef}
                 onMouseMove={handleNodeContainerMouseMove}
-                onMouseEnter={handleNodeContainerMouseEnter}
-                onMouseLeave={handleNodeContainerMouseLeave}
                 onMouseDown={handleNodeMouseDown}
                 onMouseUp={handleNodeMouseUp}
+                onMouseLeave={handleNodeMouseUp}
+                onContextMenu={(e) => e.preventDefault()}
+                onWheel={handleNodeWheel}
+                onTouchStart={handleNodeTouchStart}
+                onTouchMove={handleNodeTouchMove}
+                onTouchEnd={handleNodeTouchEnd}
                 onScroll={handleNodeScroll}
-                className="flex gap-5 overflow-x-auto pb-4 pt-1 px-1 select-none cursor-grab active:cursor-grabbing scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:none"
+                className="flex gap-5 overflow-x-auto pb-4 pt-1 px-1 select-none cursor-grab active:cursor-grabbing scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:none overscroll-x-contain"
               >
                 {filteredNodes.map((node) => (
                   <div
@@ -1009,7 +990,7 @@ export const GovDashboardPage: React.FC<GovDashboardPageProps> = ({ onNavigate }
               <div className="flex items-center justify-between px-2 pt-1 text-xs text-[#022113]/60">
                 <span className="font-medium flex items-center gap-1.5">
                   <span className="inline-block w-2 h-2 rounded-full bg-[#546C18] animate-pulse" />
-                  <span>Glide mouse horizontally to explore federated state topologies</span>
+                  <span>Right-click & drag or use 2 fingers to scroll terminal cards</span>
                 </span>
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-[11px] font-bold text-[#022113]">
@@ -1258,12 +1239,16 @@ export const GovDashboardPage: React.FC<GovDashboardPageProps> = ({ onNavigate }
                 <div 
                   ref={alertCarouselRef}
                   onMouseMove={handleAlertContainerMouseMove}
-                  onMouseEnter={handleAlertContainerMouseEnter}
-                  onMouseLeave={handleAlertContainerMouseLeave}
                   onMouseDown={handleAlertMouseDown}
                   onMouseUp={handleAlertMouseUp}
+                  onMouseLeave={handleAlertMouseUp}
+                  onContextMenu={(e) => e.preventDefault()}
+                  onWheel={handleAlertWheel}
+                  onTouchStart={handleAlertTouchStart}
+                  onTouchMove={handleAlertTouchMove}
+                  onTouchEnd={handleAlertTouchEnd}
                   onScroll={handleAlertScroll}
-                  className="flex gap-6 overflow-x-auto pb-4 pt-1 px-1 select-none cursor-grab active:cursor-grabbing scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:none"
+                  className="flex gap-6 overflow-x-auto pb-4 pt-1 px-1 select-none cursor-grab active:cursor-grabbing scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:none overscroll-x-contain"
                 >
                   {diseaseAlerts.map((alert) => (
                     <div 
@@ -1357,7 +1342,7 @@ export const GovDashboardPage: React.FC<GovDashboardPageProps> = ({ onNavigate }
                 <div className="flex items-center justify-between px-2 pt-1 text-xs text-[#022113]/60">
                   <span className="font-medium flex items-center gap-1.5">
                     <span className="inline-block w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
-                    <span>Glide mouse horizontally to review inter-state pathogen corridors</span>
+                    <span>Right-click & drag or use 2 fingers to scroll pathogen corridors</span>
                   </span>
                   <div className="flex items-center gap-2">
                     <span className="font-mono text-[11px] font-bold text-[#022113]">
