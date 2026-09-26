@@ -195,6 +195,10 @@ export const MarketComparison: React.FC<MarketComparisonProps> = ({
   const handleContainerMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const el = carouselRef.current;
     if (!el || !isDraggingRef.current) return;
+    if (e.buttons === 0) {
+      isDraggingRef.current = false;
+      return;
+    }
     const dx = e.clientX - dragStartXRef.current;
     if (Math.abs(dx) > 3) {
       hasDraggedRef.current = true;

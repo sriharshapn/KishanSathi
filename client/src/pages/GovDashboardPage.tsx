@@ -379,6 +379,10 @@ export const GovDashboardPage: React.FC<GovDashboardPageProps> = ({ onNavigate }
   const handleNodeContainerMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const el = nodeCarouselRef.current;
     if (!el || !isNodeDraggingRef.current) return;
+    if (e.buttons === 0) {
+      isNodeDraggingRef.current = false;
+      return;
+    }
     const dx = e.clientX - nodeDragStartXRef.current;
     if (Math.abs(dx) > 3) {
       nodeHasDraggedRef.current = true;
@@ -462,6 +466,10 @@ export const GovDashboardPage: React.FC<GovDashboardPageProps> = ({ onNavigate }
   const handleAlertContainerMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const el = alertCarouselRef.current;
     if (!el || !isAlertDraggingRef.current) return;
+    if (e.buttons === 0) {
+      isAlertDraggingRef.current = false;
+      return;
+    }
     const dx = e.clientX - alertDragStartXRef.current;
     if (Math.abs(dx) > 3) {
       alertHasDraggedRef.current = true;
