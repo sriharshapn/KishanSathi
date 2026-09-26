@@ -64,9 +64,6 @@ export const MarketComparison: React.FC<MarketComparisonProps> = ({
 }) => {
   const t = TRANSLATIONS[language];
   const carouselRef = useRef<HTMLDivElement>(null);
-  const isHoveringRef = useRef(false);
-  const targetScrollRef = useRef(0);
-  const animationFrameRef = useRef<number | null>(null);
   const isDraggingRef = useRef(false);
   const dragStartXRef = useRef(0);
   const dragStartScrollRef = useRef(0);
@@ -194,70 +191,20 @@ export const MarketComparison: React.FC<MarketComparisonProps> = ({
     }
   };
 
-  // Smooth mouse-follow scroll loop ("moving right and left by just moving it with mouse")
-  useEffect(() => {
-    if (viewLayout !== 'carousel') return;
-
-    const smoothScrollLoop = () => {
-      const el = carouselRef.current;
-      if (el && isHoveringRef.current && !isDraggingRef.current) {
-        const current = el.scrollLeft;
-        const target = targetScrollRef.current;
-        const diff = target - current;
-        if (Math.abs(diff) > 0.5) {
-          el.scrollLeft = current + diff * 0.08;
-        }
-      }
-      animationFrameRef.current = requestAnimationFrame(smoothScrollLoop);
-    };
-
-    animationFrameRef.current = requestAnimationFrame(smoothScrollLoop);
-
-    return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-    };
-  }, [viewLayout]);
-
+  // Drag and 2-finger wheel handlers for Mandi Terminal Cards
   const handleContainerMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const el = carouselRef.current;
-    if (!el) return;
-
-    if (isDraggingRef.current) {
-      const dx = e.clientX - dragStartXRef.current;
-      if (Math.abs(dx) > 5) {
-        hasDraggedRef.current = true;
-      }
-      el.scrollLeft = dragStartScrollRef.current - dx;
-      targetScrollRef.current = el.scrollLeft;
-      return;
+    if (!el || !isDraggingRef.current) return;
+    const dx = e.clientX - dragStartXRef.current;
+    if (Math.abs(dx) > 3) {
+      hasDraggedRef.current = true;
     }
-
-    const rect = el.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left;
-    const ratio = Math.max(0, Math.min(1, mouseX / rect.width));
-    const maxScroll = el.scrollWidth - el.clientWidth;
-    if (maxScroll > 0) {
-      targetScrollRef.current = ratio * maxScroll;
-      isHoveringRef.current = true;
-    }
-  };
-
-  const handleContainerMouseEnter = () => {
-    isHoveringRef.current = true;
-    if (carouselRef.current) {
-      targetScrollRef.current = carouselRef.current.scrollLeft;
-    }
-  };
-
-  const handleContainerMouseLeave = () => {
-    isHoveringRef.current = false;
-    isDraggingRef.current = false;
+    el.scrollLeft = dragStartScrollRef.current - dx;
   };
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!carouselRef.current) return;
+    // Supports right-click drag (e.button === 2) and standard drag (e.button === 0)
     isDraggingRef.current = true;
     hasDraggedRef.current = false;
     dragStartXRef.current = e.clientX;
@@ -266,6 +213,43 @@ export const MarketComparison: React.FC<MarketComparisonProps> = ({
 
   const handleMouseUp = () => {
     isDraggingRef.current = false;
+    setTimeout(() => {
+      hasDraggedRef.current = false;
+    }, 80);
+  };
+
+  const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    const el = carouselRef.current;
+    if (!el) return;
+    // 2-finger gesture on trackpad or mouse wheel horizontal/vertical scroll
+    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+      el.scrollLeft += e.deltaX;
+    } else if (Math.abs(e.deltaY) > 0) {
+      el.scrollLeft += e.deltaY;
+    }
+  };
+
+  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (!carouselRef.current || e.touches.length === 0) return;
+    isDraggingRef.current = true;
+    hasDraggedRef.current = false;
+    dragStartXRef.current = e.touches[0].clientX;
+    dragStartScrollRef.current = carouselRef.current.scrollLeft;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    const el = carouselRef.current;
+    if (!el || !isDraggingRef.current || e.touches.length === 0) return;
+    const dx = e.touches[0].clientX - dragStartXRef.current;
+    if (Math.abs(dx) > 3) hasDraggedRef.current = true;
+    el.scrollLeft = dragStartScrollRef.current - dx;
+  };
+
+  const handleTouchEnd = () => {
+    isDraggingRef.current = false;
+    setTimeout(() => {
+      hasDraggedRef.current = false;
+    }, 80);
   };
 
   // Aggregate Market Stats
@@ -486,11 +470,15 @@ export const MarketComparison: React.FC<MarketComparisonProps> = ({
                 ref={carouselRef}
                 onScroll={handleCarouselScroll}
                 onMouseMove={handleContainerMouseMove}
-                onMouseEnter={handleContainerMouseEnter}
-                onMouseLeave={handleContainerMouseLeave}
                 onMouseDown={handleMouseDown}
                 onMouseUp={handleMouseUp}
-                className="flex gap-4 sm:gap-6 overflow-x-auto pb-6 pt-2 px-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden cursor-ew-resize select-none"
+                onMouseLeave={handleMouseUp}
+                onContextMenu={(e) => e.preventDefault()}
+                onWheel={handleWheel}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+                className="flex gap-4 sm:gap-6 overflow-x-auto pb-6 pt-2 px-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden cursor-grab active:cursor-grabbing select-none overscroll-x-contain"
               >
                 {processedMarkets.map((market, idx) => {
                   const isChosen = selectedMarket?.market_id === market.market_id;
@@ -522,10 +510,15 @@ export const MarketComparison: React.FC<MarketComparisonProps> = ({
             </div>
 
             {/* Carousel Bottom Control Bar: Dots + Counter + Arrows */}
-            <div className="flex items-center justify-between px-2 pt-1">
-              <span className="text-xs font-mono text-[#59701E] font-bold">
-                Mandi {activeIndex + 1} of {processedMarkets.length}
-              </span>
+            <div className="flex flex-wrap items-center justify-between gap-2 px-2 pt-1 text-xs">
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-[#59701E] font-bold">
+                  Mandi {activeIndex + 1} of {processedMarkets.length}
+                </span>
+                <span className="text-[11px] text-[#022113]/50 hidden sm:inline">
+                  • Right-click & drag or use 2 fingers to scroll
+                </span>
+              </div>
 
               {/* Dot Indicators */}
               <div className="flex items-center gap-1.5 max-w-[200px] overflow-hidden">
