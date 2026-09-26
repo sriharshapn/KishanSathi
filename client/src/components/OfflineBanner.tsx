@@ -18,7 +18,8 @@ export const OfflineBanner: React.FC<OfflineBannerProps> = ({
 }) => {
   const t = TRANSLATIONS[language];
 
-  if (isOnline && !cachedAt) {
+  // If user is online, do not show offline warning banner
+  if (isOnline) {
     return null;
   }
 
@@ -37,7 +38,7 @@ export const OfflineBanner: React.FC<OfflineBannerProps> = ({
         </div>
         <div>
           <span className="font-bold block sm:inline mr-2">
-            {!isOnline ? t.offlineWarning : t.offlineCachedNotice}
+            {t.offlineWarning}
           </span>
           {formattedTime && (
             <span className="inline-flex items-center gap-1 font-mono text-xs bg-amber-200/80 px-2 py-0.5 rounded text-amber-950 font-semibold">
@@ -48,13 +49,13 @@ export const OfflineBanner: React.FC<OfflineBannerProps> = ({
         </div>
       </div>
 
-      {isOnline && onRefresh && (
+      {onRefresh && (
         <button
           onClick={onRefresh}
           className="flex items-center gap-1.5 px-3 py-1 bg-amber-700 hover:bg-amber-800 text-white text-xs font-bold rounded-lg transition-colors cursor-pointer shrink-0"
         >
           <RefreshCw className="w-3.5 h-3.5" />
-          <span>Fetch Live Data</span>
+          <span>Retry Connection</span>
         </button>
       )}
     </div>
