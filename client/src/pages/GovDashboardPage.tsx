@@ -4,8 +4,6 @@ import {
   Network, 
   AlertTriangle, 
   Globe, 
-  FileCode, 
-  Download,
   Users,
   Sprout,
   ArrowRight,
@@ -13,11 +11,8 @@ import {
   ShieldCheck,
   Radio,
   Search,
-  Copy,
-  Check,
   Layers,
   ArrowUpRight,
-  Terminal,
   Activity,
   SlidersHorizontal,
   ChevronLeft,
@@ -351,154 +346,14 @@ const DEFAULT_DISEASE_ALERTS: DiseaseAlert[] = [
   }
 ];
 
-const NGSI_LD_SCHEMAS: Record<string, object> = {
-  AgriParcel: {
-    "@context": [
-      "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld",
-      "https://schema.org",
-      {
-        "AgriParcel": "https://smartdatamodels.org/dataModel.Agrifood/AgriParcel",
-        "ndviMean": "https://smartdatamodels.org/dataModel.Agrifood/ndviMean",
-        "cropStatus": "https://smartdatamodels.org/dataModel.Agrifood/cropStatus",
-        "soilHealth": "https://smartdatamodels.org/dataModel.Agrifood/soilHealth",
-        "irrigationSystem": "https://smartdatamodels.org/dataModel.Agrifood/irrigationSystem"
-      }
-    ],
-    "id": "urn:ngsi-ld:AgriParcel:IN-KA-BLR-0204",
-    "type": "AgriParcel",
-    "name": { "type": "Property", "value": "Bengaluru Rural AgriCluster Plot #204" },
-    "dataProvider": { "type": "Property", "value": "KisanSathi National DPG Mesh • KSDA Node" },
-    "cropStatus": {
-      "type": "Property",
-      "value": "Vegetative / Pod Initiation",
-      "observedAt": "2026-09-26T06:00:00Z"
-    },
-    "crop": {
-      "type": "Relationship",
-      "object": "urn:ngsi-ld:AgriCrop:Tomato-SolanumLycopersicum"
-    },
-    "soilHealth": {
-      "type": "Property",
-      "value": {
-        "type": "Red Sandy Loam",
-        "pH": 6.8,
-        "organicCarbon": "0.74%",
-        "nitrogenKgHa": 192,
-        "phosphorusKgHa": 28,
-        "potassiumKgHa": 240
-      }
-    },
-    "sentinelNDVI": {
-      "type": "Property",
-      "value": 0.68,
-      "dataset": "ESA Copernicus Sentinel-2 Level-2A",
-      "resolution": "10m Multispectral",
-      "observedAt": "2026-09-26T05:30:00Z"
-    },
-    "irrigationSystem": {
-      "type": "Property",
-      "value": {
-        "mode": "Micro-drip fertigation",
-        "flowRateLph": 4.2,
-        "schedule": "Alternate morning 45 min"
-      }
-    },
-    "location": {
-      "type": "GeoProperty",
-      "value": {
-        "type": "Point",
-        "coordinates": [77.57, 13.03]
-      }
-    },
-    "license": {
-      "type": "Property",
-      "value": "https://opendatacommons.org/licenses/by/1-0/"
-    }
-  },
-  AgriCrop: {
-    "@context": [
-      "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld",
-      "https://schema.org",
-      {
-        "AgriCrop": "https://smartdatamodels.org/dataModel.Agrifood/AgriCrop",
-        "growingSeason": "https://smartdatamodels.org/dataModel.Agrifood/growingSeason",
-        "expectedYield": "https://smartdatamodels.org/dataModel.Agrifood/expectedYield"
-      }
-    ],
-    "id": "urn:ngsi-ld:AgriCrop:IN-MH-NSK-ONION-01",
-    "type": "AgriCrop",
-    "name": { "type": "Property", "value": "Nashik Red Onion (Rabi Cycle)" },
-    "dataProvider": { "type": "Property", "value": "KisanSathi National DPG Mesh • MSAMB Node" },
-    "growingSeason": { "type": "Property", "value": "Rabi 2026-27" },
-    "thermalTimeGDD": { "type": "Property", "value": 1150, "unitCode": "A86" },
-    "expectedYield": { "type": "Property", "value": 220, "unitCode": "C62", "comment": "Quintals per Hectare" },
-    "harvestWindow": {
-      "type": "Property",
-      "value": { "start": "2026-11-15T00:00:00Z", "end": "2026-11-30T00:00:00Z" }
-    },
-    "location": {
-      "type": "GeoProperty",
-      "value": { "type": "Point", "coordinates": [73.79, 19.99] }
-    }
-  },
-  AgriPestAlert: {
-    "@context": [
-      "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld",
-      "https://schema.org",
-      {
-        "AgriPestAlert": "https://smartdatamodels.org/dataModel.Agrifood/AgriPestAlert",
-        "vectorVelocity": "https://smartdatamodels.org/dataModel.Agrifood/vectorVelocity"
-      }
-    ],
-    "id": "urn:ngsi-ld:AgriPestAlert:IN-PB-YRUST-09",
-    "type": "AgriPestAlert",
-    "name": { "type": "Property", "value": "Yellow Rust Sub-Mountainous Corridor Alert" },
-    "pathogen": { "type": "Property", "value": "Puccinia striiformis f. sp. tritici" },
-    "severity": { "type": "Property", "value": "High" },
-    "originNode": { "type": "Property", "value": "urn:ngsi-ld:AgriNode:IN-PB-Ludhiana" },
-    "quarantineRadiusKm": { "type": "Property", "value": 35, "unitCode": "KMT" },
-    "icarPrescription": {
-      "type": "Property",
-      "value": "Apply Propiconazole 25% EC @ 0.1% barrier foliar spray within 48 hours."
-    },
-    "location": {
-      "type": "GeoProperty",
-      "value": { "type": "Point", "coordinates": [75.85, 30.90] }
-    }
-  },
-  AgriSoil: {
-    "@context": [
-      "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld",
-      "https://schema.org",
-      {
-        "AgriSoil": "https://smartdatamodels.org/dataModel.Agrifood/AgriSoil",
-        "electricalConductivity": "https://smartdatamodels.org/dataModel.Agrifood/electricalConductivity"
-      }
-    ],
-    "id": "urn:ngsi-ld:AgriSoil:IN-KA-BALLARI-BLACK-01",
-    "type": "AgriSoil",
-    "name": { "type": "Property", "value": "Ballari Deep Black Cotton Regur Soil Profile" },
-    "soilClass": { "type": "Property", "value": "Vertisols (Heavy Clay)" },
-    "pH": { "type": "Property", "value": 8.1 },
-    "organicCarbon": { "type": "Property", "value": "0.62%" },
-    "electricalConductivity": { "type": "Property", "value": 0.42, "unitCode": "D10" },
-    "availableNitrogen": { "type": "Property", "value": "Low (175 kg/ha)" },
-    "availablePhosphorus": { "type": "Property", "value": "Medium (22 kg/ha)" },
-    "availablePotassium": { "type": "Property", "value": "High (310 kg/ha)" }
-  }
-};
-
 export const GovDashboardPage: React.FC<GovDashboardPageProps> = ({ onNavigate }) => {
   const [nodes, setNodes] = useState<StateNode[]>(DEFAULT_STATE_NODES);
   const [diseaseAlerts, setDiseaseAlerts] = useState<DiseaseAlert[]>(DEFAULT_DISEASE_ALERTS);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'optimal' | 'watch'>('all');
-  const [selectedTab, setSelectedTab] = useState<'topology' | 'surveillance' | 'models' | 'console'>('topology');
-  const [selectedEntityKey, setSelectedEntityKey] = useState<keyof typeof NGSI_LD_SCHEMAS>('AgriParcel');
-  const [copiedKey, setCopiedKey] = useState(false);
+  const [selectedTab, setSelectedTab] = useState<'topology' | 'surveillance'>('topology');
   const [selectedNodeModal, setSelectedNodeModal] = useState<StateNode | null>(null);
-  const [apiPingStatus, setApiPingStatus] = useState<{ status: number; latency: number } | null>(null);
 
   // Tab 1 (State Nodes) Carousel & Mouse-Glide State
   const [nodeViewLayout, setNodeViewLayout] = useState<'carousel' | 'grid'>('carousel');
@@ -747,42 +602,6 @@ export const GovDashboardPage: React.FC<GovDashboardPageProps> = ({ onNavigate }
     loadGovData();
   }, []);
 
-  const handleExportNgsiLd = async () => {
-    try {
-      const res = await fetch(apiUrl('/interop/ngsi-ld/v1/entities'));
-      const json = await res.json();
-      const blob = new Blob([JSON.stringify(json, null, 2)], { type: 'application/ld+json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `kisansathi-ngsi-ld-entities-${new Date().toISOString().split('T')[0]}.jsonld`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error('Export failed:', err);
-    }
-  };
-
-  const handleCopyJson = () => {
-    const code = JSON.stringify(NGSI_LD_SCHEMAS[selectedEntityKey], null, 2);
-    navigator.clipboard.writeText(code);
-    setCopiedKey(true);
-    setTimeout(() => setCopiedKey(false), 2000);
-  };
-
-  const runApiPing = async () => {
-    const t0 = performance.now();
-    try {
-      const res = await fetch(apiUrl('/interop/ngsi-ld/v1/entities?type=AgriParcel'));
-      const t1 = performance.now();
-      setApiPingStatus({ status: res.status, latency: Math.round(t1 - t0) });
-    } catch {
-      setApiPingStatus({ status: 200, latency: 18 });
-    }
-  };
-
   // Filtered nodes
   const filteredNodes = useMemo(() => {
     return nodes.filter(n => {
@@ -976,40 +795,6 @@ export const GovDashboardPage: React.FC<GovDashboardPageProps> = ({ onNavigate }
           >
             <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
             <span>2. Pathogen Surveillance ({diseaseAlerts.length})</span>
-          </button>
-
-          <button
-            onClick={() => setSelectedTab('models')}
-            className={`px-5 py-2.5 rounded-full text-xs font-bold font-['Montserrat',sans-serif] uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap flex items-center gap-2 ${
-              selectedTab === 'models'
-                ? 'bg-[#546C18] text-[#DFEB38] shadow-md'
-                : 'bg-[#F0F4EC] text-[#022113] hover:bg-[#E2ECE3] border border-[#E5EAD7]'
-            }`}
-          >
-            <FileCode className="w-3.5 h-3.5" />
-            <span>3. Smart Data Models (JSON-LD)</span>
-          </button>
-
-          <button
-            onClick={() => setSelectedTab('console')}
-            className={`px-5 py-2.5 rounded-full text-xs font-bold font-['Montserrat',sans-serif] uppercase tracking-wider transition-all cursor-pointer whitespace-nowrap flex items-center gap-2 ${
-              selectedTab === 'console'
-                ? 'bg-[#546C18] text-[#DFEB38] shadow-md'
-                : 'bg-[#F0F4EC] text-[#022113] hover:bg-[#E2ECE3] border border-[#E5EAD7]'
-            }`}
-          >
-            <Terminal className="w-3.5 h-3.5" />
-            <span>4. Interop API Console</span>
-          </button>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <button
-            onClick={handleExportNgsiLd}
-            className="px-4 py-2 bg-[#DFEB38] hover:bg-[#d0df2a] text-[#022113] font-black text-xs font-['Montserrat',sans-serif] uppercase tracking-wider rounded-full shadow-md flex items-center gap-1.5 cursor-pointer hover:scale-105 transition-all"
-          >
-            <Download className="w-3.5 h-3.5" />
-            <span>Export DPG Mesh (.jsonld)</span>
           </button>
         </div>
       </div>
@@ -1680,178 +1465,7 @@ export const GovDashboardPage: React.FC<GovDashboardPageProps> = ({ onNavigate }
       )}
 
 
-      {/* ── 6. TAB 3: SMART DATA MODELS & NGSI-LD EXPLORER ── */}
-      {selectedTab === 'models' && (
-        <div className="bg-white rounded-[2.5rem] border border-[#022113]/8 p-8 sm:p-10 shadow-xl space-y-6">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-[#022113]/8">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <FileCode className="w-5 h-5 text-[#546C18]" />
-                <h3 className="text-base font-bold uppercase tracking-wider font-['Montserrat',sans-serif] text-[#022113]">
-                  ETSI NGSI-LD & Schema.org Compliant Linked Data Entity
-                </h3>
-              </div>
-              <p className="text-xs text-[#022113]/70 font-normal">
-                Open Smart Data Models for agriculture, telemetry, and crop pathology without vendor lock-in.
-              </p>
-            </div>
-
-            {/* Model switcher tabs */}
-            <div className="flex items-center gap-2 flex-wrap">
-              {(Object.keys(NGSI_LD_SCHEMAS) as Array<keyof typeof NGSI_LD_SCHEMAS>).map((key) => (
-                <button
-                  key={key}
-                  onClick={() => setSelectedEntityKey(key)}
-                  className={`px-3.5 py-1.5 rounded-full text-xs font-bold font-['Montserrat',sans-serif] transition-all cursor-pointer ${
-                    selectedEntityKey === key
-                      ? 'bg-[#546C18] text-[#DFEB38] shadow-sm'
-                      : 'bg-[#F0F2EB] text-[#022113] hover:bg-[#E2ECE3]'
-                  }`}
-                >
-                  {key}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="relative">
-            <div className="absolute right-4 top-4 z-10 flex items-center gap-2">
-              <button
-                onClick={handleCopyJson}
-                className="px-3 py-1.5 bg-white/90 hover:bg-white text-[#022113] rounded-xl text-xs font-bold font-['Montserrat',sans-serif] flex items-center gap-1.5 shadow-sm transition-all cursor-pointer border border-[#022113]/10"
-              >
-                {copiedKey ? (
-                  <>
-                    <Check className="w-3.5 h-3.5 text-emerald-600" />
-                    <span>Copied!</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-3.5 h-3.5" />
-                    <span>Copy JSON-LD</span>
-                  </>
-                )}
-              </button>
-            </div>
-
-            <pre className="p-6 rounded-3xl bg-[#022113] text-[#DFEB38] font-mono text-xs overflow-x-auto leading-relaxed border border-[#022113]/10 max-h-[480px]">
-              {JSON.stringify(NGSI_LD_SCHEMAS[selectedEntityKey], null, 2)}
-            </pre>
-          </div>
-
-          <div className="pt-2 flex items-center justify-between text-xs text-[#022113]/60 flex-wrap gap-3">
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-              <span className="font-semibold text-[#022113]">100% Validated against ETSI GS CIM 009 v1.4.1</span>
-              <span>•</span>
-              <span>Open Data Commons Attribution License (ODC-By v1.0)</span>
-            </div>
-
-            <button
-              onClick={handleExportNgsiLd}
-              className="px-5 py-2.5 rounded-full bg-[#DFEB38] text-[#022113] font-black text-xs font-['Montserrat',sans-serif] uppercase tracking-wider hover:bg-[#d0df2a] transition-all flex items-center gap-1.5 cursor-pointer shadow-md"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span>Export Open Model (.jsonld)</span>
-            </button>
-          </div>
-        </div>
-      )}
-
-
-      {/* ── 7. TAB 4: SOVEREIGN INTEROP API CONSOLE ── */}
-      {selectedTab === 'console' && (
-        <div className="bg-white rounded-[2.5rem] border border-[#022113]/8 p-8 sm:p-10 shadow-xl space-y-6">
-          <div className="flex items-center justify-between pb-4 border-b border-[#022113]/8">
-            <div>
-              <h3 className="text-base font-bold uppercase tracking-wider font-['Montserrat',sans-serif] text-[#022113]">
-                Federated Developer & Institutional Console
-              </h3>
-              <p className="text-xs text-[#022113]/70 mt-0.5">
-                Interact with live KisanSathi NGSI-LD REST and GraphQL endpoints
-              </p>
-            </div>
-            <button
-              onClick={runApiPing}
-              className="px-4 py-2 rounded-full bg-[#546C18] text-[#DFEB38] font-bold text-xs font-['Montserrat',sans-serif] uppercase tracking-wider hover:bg-[#465a13] transition-all flex items-center gap-1.5 cursor-pointer"
-            >
-              <Terminal className="w-3.5 h-3.5" />
-              <span>Test Edge Ping</span>
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="p-6 rounded-[2rem] bg-[#F8FAF6] border border-[#022113]/8 space-y-4">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-[#022113] font-['Montserrat',sans-serif]">
-                Core Public Endpoints
-              </h4>
-
-              <div className="space-y-2.5 font-mono text-xs">
-                <div className="p-3 rounded-xl bg-white border border-[#022113]/8 flex items-center justify-between">
-                  <div>
-                    <span className="font-bold text-emerald-700 mr-2">GET</span>
-                    <span className="text-[#022113]">/api/interop/ngsi-ld/v1/entities</span>
-                  </div>
-                  <span className="text-[10px] text-[#022113]/50">JSON-LD</span>
-                </div>
-
-                <div className="p-3 rounded-xl bg-white border border-[#022113]/8 flex items-center justify-between">
-                  <div>
-                    <span className="font-bold text-emerald-700 mr-2">GET</span>
-                    <span className="text-[#022113]">/api/gov/dashboard</span>
-                  </div>
-                  <span className="text-[10px] text-[#022113]/50">State Mesh</span>
-                </div>
-
-                <div className="p-3 rounded-xl bg-white border border-[#022113]/8 flex items-center justify-between">
-                  <div>
-                    <span className="font-bold text-emerald-700 mr-2">GET</span>
-                    <span className="text-[#022113]">/api/satellite/ndvi</span>
-                  </div>
-                  <span className="text-[10px] text-[#022113]/50">Sentinel-2</span>
-                </div>
-              </div>
-
-              {apiPingStatus && (
-                <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs flex items-center justify-between">
-                  <span className="font-bold text-emerald-900">HTTP {apiPingStatus.status} OK</span>
-                  <span className="font-mono text-emerald-700">{apiPingStatus.latency}ms Round-Trip</span>
-                </div>
-              )}
-            </div>
-
-            <div className="p-6 rounded-[2rem] bg-[#F8FAF6] border border-[#022113]/8 space-y-4 flex flex-col justify-between">
-              <div className="space-y-3">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-[#022113] font-['Montserrat',sans-serif]">
-                  Sovereignty & Governance Principles
-                </h4>
-                <ul className="text-xs text-[#022113]/70 space-y-2 leading-relaxed">
-                  <li className="flex items-start gap-2">
-                    <Check className="w-3.5 h-3.5 text-[#546C18] shrink-0 mt-0.5" />
-                    <span><strong>Decentralized Ownership:</strong> State departments retain complete ownership of land records and farmer consent registers.</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="w-3.5 h-3.5 text-[#546C18] shrink-0 mt-0.5" />
-                    <span><strong>Zero Vendor Lock-in:</strong> Fully compatible with FIWARE Orion-LD, Scorpio, and Stellio Context Brokers.</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="w-3.5 h-3.5 text-[#546C18] shrink-0 mt-0.5" />
-                    <span><strong>Cryptographic Integrity:</strong> Inter-node records verified with ECDSA signatures and W3C Decentralized Identifiers.</span>
-                  </li>
-                </ul>
-              </div>
-
-              <div className="pt-3 border-t border-[#022113]/8 flex items-center justify-between text-xs font-mono text-[#022113]/60">
-                <span>Core Spec: FIWARE / ETSI NGSI-LD</span>
-                <span className="text-[#546C18] font-bold">DPG Verified</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-
-      {/* ── 8. STATE NODE INSPECTION MODAL ── */}
+      {/* ── 6. STATE NODE INSPECTION MODAL ── */}
       {selectedNodeModal && (
         <div 
           className="fixed inset-0 z-50 bg-[#022113]/50 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto"
