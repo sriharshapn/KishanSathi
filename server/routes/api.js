@@ -497,39 +497,325 @@ router.get('/ivr/advisory', async (req, res) => {
 // ── Government Dashboard & Inter-State DPG ────────
 // GET /api/gov/dashboard
 router.get('/gov/dashboard', (req, res) => {
-  const states = ['Karnataka', 'Maharashtra', 'Punjab', 'Tamil Nadu', 'Andhra Pradesh', 'Uttar Pradesh', 'Rajasthan', 'Gujarat'];
-  const districtData = states.map(state => {
-    const ndvi = getSatelliteNDVI(state, '');
-    return {
-      state,
-      ndvi_mean: ndvi.ndvi_mean,
-      health_status: ndvi.health_status,
-      health_color: ndvi.health_color,
-      disease_alerts: Math.floor(Math.random() * 12),
-      farmers_count: Math.floor(Math.random() * 45000) + 5000,
-      dominant_crop: ['Tomato', 'Onion', 'Wheat', 'Rice', 'Cotton', 'Maize', 'Soybean'][Math.floor(Math.random() * 7)]
-    };
-  });
+  const stateNodes = [
+    {
+      state: 'Karnataka',
+      code: 'IN-KA',
+      hub: 'Bengaluru - Yeshwanthpur Agmarknet Terminal Hub',
+      agency: 'Karnataka State Department of Agriculture (KSDA)',
+      dominant_crops: ['Tomato', 'Maize', 'Ragi', 'Chilli'],
+      ndvi_mean: 0.68,
+      health_status: 'Optimal',
+      latency_ms: 14,
+      sync_interval: '15 min',
+      verified_parcels: 62450,
+      active_growers: 138200,
+      data_contracts: 14,
+      protocol_version: 'ETSI NGSI-LD v2.1.1',
+      security: 'X.509 Mutual TLS & Sovereign Enclave',
+      status: 'synced',
+      disease_alerts: 4,
+      last_sync: new Date().toISOString()
+    },
+    {
+      state: 'Maharashtra',
+      code: 'IN-MH',
+      hub: 'Nashik - Lasalgaon National Onion Hub',
+      agency: 'Maharashtra State Agricultural Marketing Board (MSAMB)',
+      dominant_crops: ['Onion', 'Soybean', 'Cotton', 'Grapes'],
+      ndvi_mean: 0.61,
+      health_status: 'Favorable',
+      latency_ms: 18,
+      sync_interval: '15 min',
+      verified_parcels: 78100,
+      active_growers: 154300,
+      data_contracts: 16,
+      protocol_version: 'ETSI NGSI-LD v2.1.1',
+      security: 'X.509 Mutual TLS & Sovereign Enclave',
+      status: 'synced',
+      disease_alerts: 3,
+      last_sync: new Date().toISOString()
+    },
+    {
+      state: 'Punjab',
+      code: 'IN-PB',
+      hub: 'Ludhiana - Khanna Grain Terminal Hub',
+      agency: 'Punjab Mandi Board (PMB)',
+      dominant_crops: ['Wheat', 'Basmati Paddy', 'Mustard', 'Maize'],
+      ndvi_mean: 0.74,
+      health_status: 'Optimal',
+      latency_ms: 24,
+      sync_interval: '15 min',
+      verified_parcels: 51200,
+      active_growers: 98400,
+      data_contracts: 12,
+      protocol_version: 'ETSI NGSI-LD v2.1.1',
+      security: 'X.509 Mutual TLS & Sovereign Enclave',
+      status: 'synced',
+      disease_alerts: 5,
+      last_sync: new Date().toISOString()
+    },
+    {
+      state: 'Tamil Nadu',
+      code: 'IN-TN',
+      hub: 'Thanjavur - Cauvery Delta Agri Node',
+      agency: 'Tamil Nadu Agricultural University (TNAU) & Agri Marketing',
+      dominant_crops: ['Paddy', 'Banana', 'Coconut', 'Turmeric'],
+      ndvi_mean: 0.69,
+      health_status: 'Optimal',
+      latency_ms: 21,
+      sync_interval: '15 min',
+      verified_parcels: 46900,
+      active_growers: 104500,
+      data_contracts: 11,
+      protocol_version: 'ETSI NGSI-LD v2.1.1',
+      security: 'X.509 Mutual TLS & Sovereign Enclave',
+      status: 'synced',
+      disease_alerts: 4,
+      last_sync: new Date().toISOString()
+    },
+    {
+      state: 'Andhra Pradesh',
+      code: 'IN-AP',
+      hub: 'Guntur - Asia Spice Terminal & Chilli Yard',
+      agency: 'AP Rythu Bharosa Kendras (RBK) & Dept of Agriculture',
+      dominant_crops: ['Chilli', 'Cotton', 'Groundnut', 'Tobacco'],
+      ndvi_mean: 0.63,
+      health_status: 'Favorable',
+      latency_ms: 17,
+      sync_interval: '15 min',
+      verified_parcels: 58300,
+      active_growers: 118900,
+      data_contracts: 13,
+      protocol_version: 'ETSI NGSI-LD v2.1.1',
+      security: 'X.509 Mutual TLS & Sovereign Enclave',
+      status: 'synced',
+      disease_alerts: 6,
+      last_sync: new Date().toISOString()
+    },
+    {
+      state: 'Uttar Pradesh',
+      code: 'IN-UP',
+      hub: 'Agra - Khandauli Cold Belt & Potato Exchange',
+      agency: 'UP Rajya Krishi Utpadan Mandi Parishad',
+      dominant_crops: ['Potato', 'Wheat', 'Sugarcane', 'Mustard'],
+      ndvi_mean: 0.65,
+      health_status: 'Favorable',
+      latency_ms: 22,
+      sync_interval: '15 min',
+      verified_parcels: 84600,
+      active_growers: 182100,
+      data_contracts: 15,
+      protocol_version: 'ETSI NGSI-LD v2.1.1',
+      security: 'X.509 Mutual TLS & Sovereign Enclave',
+      status: 'synced',
+      disease_alerts: 5,
+      last_sync: new Date().toISOString()
+    },
+    {
+      state: 'Gujarat',
+      code: 'IN-GJ',
+      hub: 'Rajkot - Saurashtra Groundnut & Cotton APMC',
+      agency: 'Gujarat State Agricultural Marketing Board (GSAMB)',
+      dominant_crops: ['Groundnut', 'Cotton', 'Cumin', 'Castor'],
+      ndvi_mean: 0.56,
+      health_status: 'Under Watch',
+      latency_ms: 19,
+      sync_interval: '15 min',
+      verified_parcels: 41800,
+      active_growers: 86400,
+      data_contracts: 10,
+      protocol_version: 'ETSI NGSI-LD v2.1.1',
+      security: 'X.509 Mutual TLS & Sovereign Enclave',
+      status: 'synced',
+      disease_alerts: 2,
+      last_sync: new Date().toISOString()
+    },
+    {
+      state: 'Madhya Pradesh',
+      code: 'IN-MP',
+      hub: 'Indore - Malwa Soybean & Wheat Terminal',
+      agency: 'Madhya Pradesh Mandi Board (Sauda Patrak Network)',
+      dominant_crops: ['Soybean', 'Wheat', 'Garlic', 'Gram'],
+      ndvi_mean: 0.62,
+      health_status: 'Favorable',
+      latency_ms: 23,
+      sync_interval: '15 min',
+      verified_parcels: 67200,
+      active_growers: 129700,
+      data_contracts: 12,
+      protocol_version: 'ETSI NGSI-LD v2.1.1',
+      security: 'X.509 Mutual TLS & Sovereign Enclave',
+      status: 'synced',
+      disease_alerts: 3,
+      last_sync: new Date().toISOString()
+    },
+    {
+      state: 'Rajasthan',
+      code: 'IN-RJ',
+      hub: 'Kota - Hadoti Coriander & Mustard Yard',
+      agency: 'Rajasthan State Agricultural Marketing Board (RSAMB)',
+      dominant_crops: ['Mustard', 'Bajra', 'Coriander', 'Wheat'],
+      ndvi_mean: 0.53,
+      health_status: 'Under Watch',
+      latency_ms: 26,
+      sync_interval: '15 min',
+      verified_parcels: 39500,
+      active_growers: 74600,
+      data_contracts: 9,
+      protocol_version: 'ETSI NGSI-LD v2.1.1',
+      security: 'X.509 Mutual TLS & Sovereign Enclave',
+      status: 'synced',
+      disease_alerts: 2,
+      last_sync: new Date().toISOString()
+    },
+    {
+      state: 'Haryana',
+      code: 'IN-HR',
+      hub: 'Karnal - National Rice Research Corridor Node',
+      agency: 'Haryana State Agricultural Marketing Board (HSAMB)',
+      dominant_crops: ['Basmati Paddy', 'Wheat', 'Mustard', 'Sugarcane'],
+      ndvi_mean: 0.72,
+      health_status: 'Optimal',
+      latency_ms: 20,
+      sync_interval: '15 min',
+      verified_parcels: 44800,
+      active_growers: 89300,
+      data_contracts: 11,
+      protocol_version: 'ETSI NGSI-LD v2.1.1',
+      security: 'X.509 Mutual TLS & Sovereign Enclave',
+      status: 'synced',
+      disease_alerts: 4,
+      last_sync: new Date().toISOString()
+    }
+  ];
 
   const diseaseAlerts = [
-    { district: 'Ballari', state: 'Karnataka', disease: 'Yellow Rust', severity: 'moderate', reports: 8, lat: 15.15, lon: 76.92 },
-    { district: 'Nashik', state: 'Maharashtra', disease: 'Powdery Mildew', severity: 'mild', reports: 5, lat: 19.99, lon: 73.79 },
-    { district: 'Ludhiana', state: 'Punjab', disease: 'Stem Borer', severity: 'severe', reports: 14, lat: 30.90, lon: 75.85 },
-    { district: 'Guntur', state: 'Andhra Pradesh', disease: 'Leaf Blight', severity: 'moderate', reports: 7, lat: 16.30, lon: 80.44 },
-    { district: 'Thanjavur', state: 'Tamil Nadu', disease: 'Rice Blast', severity: 'severe', reports: 11, lat: 10.79, lon: 79.13 },
+    {
+      id: 'ALERT-IN-PB-HR-01',
+      pathogen: 'Yellow Rust (Puccinia striiformis)',
+      crop: 'Wheat (PBW-550, HD-2967)',
+      originDistrict: 'Hoshiarpur',
+      originState: 'Punjab',
+      destinationDistrict: 'Yamunanagar',
+      destinationState: 'Haryana',
+      severity: 'high',
+      vectorType: 'Airborne windward fungal urediniospores',
+      vectorDistanceKm: 145,
+      containmentRadiusKm: 35,
+      verifiedReports: 28,
+      recommendedAdvisory: 'Foliar prophylactic spray of Propiconazole 25% EC @ 0.1% (1ml/L) along western border acreage before dew set.',
+      status: 'Quarantine Protocol Active',
+      timestamp: new Date().toISOString()
+    },
+    {
+      id: 'ALERT-IN-KA-AP-02',
+      pathogen: 'Fall Armyworm (Spodoptera frugiperda)',
+      crop: 'Maize (Kaveri 50, Pioneer 3302)',
+      originDistrict: 'Ballari',
+      originState: 'Karnataka',
+      destinationDistrict: 'Kurnool',
+      destinationState: 'Andhra Pradesh',
+      severity: 'moderate',
+      vectorType: 'Adult nocturnal moth migration vector',
+      vectorDistanceKm: 112,
+      containmentRadiusKm: 25,
+      verifiedReports: 19,
+      recommendedAdvisory: 'Install pheromone funnel traps @ 5 per acre; foliar application of Emamectin benzoate 5% SG @ 0.4g/L in whorls.',
+      status: 'Surveillance Active',
+      timestamp: new Date().toISOString()
+    },
+    {
+      id: 'ALERT-IN-MH-GJ-03',
+      pathogen: 'Late Blight (Phytophthora infestans)',
+      crop: 'Potato & Tomato',
+      originDistrict: 'Nashik',
+      originState: 'Maharashtra',
+      destinationDistrict: 'Valsad',
+      destinationState: 'Gujarat',
+      severity: 'high',
+      vectorType: 'High relative humidity (>90%) fog transmission',
+      vectorDistanceKm: 138,
+      containmentRadiusKm: 30,
+      verifiedReports: 23,
+      recommendedAdvisory: 'Cymoxanil 8% + Mancozeb 64% WP @ 1.5g/L preventive barrier spray; ensure field drainage.',
+      status: 'Early Warning Broadcast',
+      timestamp: new Date().toISOString()
+    },
+    {
+      id: 'ALERT-IN-AP-TS-04',
+      pathogen: 'Chilli Leaf Curl & Thrips Parvispinus',
+      crop: 'Chilli (Teja & Byadgi varieties)',
+      originDistrict: 'Guntur',
+      originState: 'Andhra Pradesh',
+      destinationDistrict: 'Khammam',
+      destinationState: 'Telangana',
+      severity: 'moderate',
+      vectorType: 'Wind-assisted sucking pest dispersal',
+      vectorDistanceKm: 88,
+      containmentRadiusKm: 20,
+      verifiedReports: 16,
+      recommendedAdvisory: 'Blue & yellow sticky traps @ 30/acre; Neem oil 10,000 ppm @ 2ml/L + Diafenthiuron 50% WP @ 1.25g/L.',
+      status: 'Advisory Dispatched',
+      timestamp: new Date().toISOString()
+    },
+    {
+      id: 'ALERT-IN-TN-PY-05',
+      pathogen: 'Blast of Paddy (Magnaporthe oryzae)',
+      crop: 'Paddy (CR-1009, ADT-45)',
+      originDistrict: 'Thanjavur',
+      originState: 'Tamil Nadu',
+      destinationDistrict: 'Karaikal',
+      destinationState: 'Puducherry',
+      severity: 'high',
+      vectorType: 'Cloudburst dew & canopy droplet dispersion',
+      vectorDistanceKm: 65,
+      containmentRadiusKm: 25,
+      verifiedReports: 21,
+      recommendedAdvisory: 'Prophylactic Tricyclazole 75% WP @ 0.6g/L at late tillering stage; avoid excessive nitrogen top-dressing.',
+      status: 'Containment Enforced',
+      timestamp: new Date().toISOString()
+    }
   ];
+
+  const totalGrowers = stateNodes.reduce((acc, n) => acc + n.active_growers, 0);
+  const totalParcels = stateNodes.reduce((acc, n) => acc + n.verified_parcels, 0);
+  const totalAlerts = diseaseAlerts.reduce((acc, a) => acc + a.verifiedReports, 0);
+  const avgNdvi = parseFloat((stateNodes.reduce((acc, n) => acc + n.ndvi_mean, 0) / stateNodes.length).toFixed(3));
 
   res.json({
     success: true,
     stats: {
-      total_farmers: 284750,
-      advisories_today: 18420,
-      disease_reports_week: 63,
-      states_active: 8,
-      avg_ndvi: parseFloat((districtData.reduce((a, b) => a + b.ndvi_mean, 0) / districtData.length).toFixed(3))
+      total_farmers: totalGrowers,
+      verified_parcels: totalParcels,
+      advisories_today: 34820,
+      disease_reports_week: totalAlerts,
+      states_active: stateNodes.length,
+      federated_contracts: 117,
+      network_throughput_hr: 284000,
+      avg_ndvi: avgNdvi
     },
-    district_data: districtData,
+    state_nodes: stateNodes,
+    district_data: stateNodes.map(n => ({
+      state: n.state,
+      code: n.code,
+      dominant_crop: n.dominant_crops.join(' / '),
+      ndvi_mean: n.ndvi_mean,
+      health_status: n.health_status,
+      farmers_count: n.active_growers,
+      disease_alerts: n.disease_alerts,
+      latency_ms: n.latency_ms,
+      hub: n.hub,
+      agency: n.agency
+    })),
     disease_alerts: diseaseAlerts,
+    protocol_specs: {
+      standard: 'ETSI GS CIM 009 V1.4.1 (NGSI-LD)',
+      dataModels: 'Smart Data Models Initiative (AgriFood)',
+      cryptography: 'ECDSA secp256r1 + W3C DID',
+      sovereignty: 'Decentralized Data Mesh (No Single Vendor Lock-in)',
+      license: 'Open Data Commons Attribution License (ODC-By v1.0)'
+    },
     last_updated: new Date().toISOString()
   });
 });
@@ -537,55 +823,130 @@ router.get('/gov/dashboard', (req, res) => {
 // ── ETSI NGSI-LD & Schema.org Interoperability ───
 // GET /api/interop/ngsi-ld/v1/entities
 router.get('/interop/ngsi-ld/v1/entities', (req, res) => {
-  const states = ['Karnataka', 'Maharashtra', 'Punjab', 'Tamil Nadu', 'Andhra Pradesh', 'Uttar Pradesh', 'Rajasthan', 'Gujarat'];
-  const entities = states.map((state, idx) => {
-    const coords = STATE_COORDINATES[state] || { lat: 15.14, lon: 76.92, defaultDistrict: 'Ballari' };
-    const ndvi = getSatelliteNDVI(state, coords.defaultDistrict);
-    return {
+  const entityType = req.query.type || 'AgriParcel';
+
+  const entities = [
+    {
       "@context": [
         "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld",
         "https://schema.org",
         {
           "AgriParcel": "https://smartdatamodels.org/dataModel.Agrifood/AgriParcel",
           "ndviMean": "https://smartdatamodels.org/dataModel.Agrifood/ndviMean",
-          "cropStatus": "https://smartdatamodels.org/dataModel.Agrifood/cropStatus"
+          "cropStatus": "https://smartdatamodels.org/dataModel.Agrifood/cropStatus",
+          "soilHealth": "https://smartdatamodels.org/dataModel.Agrifood/soilHealth",
+          "irrigationSystem": "https://smartdatamodels.org/dataModel.Agrifood/irrigationSystem"
         }
       ],
-      "id": `urn:ngsi-ld:AgriParcel:IN-${state.replace(/\s+/g, '_').toUpperCase()}-${idx + 101}`,
+      "id": "urn:ngsi-ld:AgriParcel:IN-KA-BLR-0204",
       "type": "AgriParcel",
-      "name": { "type": "Property", "value": `${state} Regional Agricultural Observation Unit` },
+      "name": { "type": "Property", "value": "Bengaluru Rural AgriCluster Plot #204" },
+      "dataProvider": { "type": "Property", "value": "KisanSathi National DPG Mesh • KSDA Node" },
+      "cropStatus": {
+        "type": "Property",
+        "value": "Vegetative / Pod Initiation",
+        "observedAt": new Date().toISOString()
+      },
+      "crop": {
+        "type": "Relationship",
+        "object": "urn:ngsi-ld:AgriCrop:Tomato-SolanumLycopersicum"
+      },
+      "soilHealth": {
+        "type": "Property",
+        "value": {
+          "type": "Red Sandy Loam",
+          "pH": 6.8,
+          "organicCarbon": "0.74%",
+          "nitrogenKgHa": 192,
+          "phosphorusKgHa": 28,
+          "potassiumKgHa": 240
+        }
+      },
+      "sentinelNDVI": {
+        "type": "Property",
+        "value": 0.68,
+        "dataset": "ESA Copernicus Sentinel-2 Level-2A",
+        "resolution": "10m Multispectral",
+        "observedAt": new Date().toISOString()
+      },
+      "irrigationSystem": {
+        "type": "Property",
+        "value": {
+          "mode": "Micro-drip fertigation",
+          "flowRateLph": 4.2,
+          "schedule": "Alternate morning 45 min"
+        }
+      },
       "location": {
         "type": "GeoProperty",
         "value": {
           "type": "Point",
-          "coordinates": [coords.lon, coords.lat]
+          "coordinates": [77.57, 13.03]
         }
-      },
-      "ndviMean": {
-        "type": "Property",
-        "value": ndvi.ndvi_mean,
-        "unitCode": "C62",
-        "observedAt": new Date().toISOString()
-      },
-      "healthStatus": {
-        "type": "Property",
-        "value": ndvi.health_status
-      },
-      "dataProvider": {
-        "type": "Property",
-        "value": "AgriMate National DPG Mesh (ISRO Sentinel-2 + AGMARKNET)"
       },
       "license": {
         "type": "Property",
         "value": "https://opendatacommons.org/licenses/by/1-0/"
       }
-    };
-  });
+    },
+    {
+      "@context": [
+        "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld",
+        "https://schema.org",
+        {
+          "AgriCrop": "https://smartdatamodels.org/dataModel.Agrifood/AgriCrop",
+          "growingSeason": "https://smartdatamodels.org/dataModel.Agrifood/growingSeason",
+          "expectedYield": "https://smartdatamodels.org/dataModel.Agrifood/expectedYield"
+        }
+      ],
+      "id": "urn:ngsi-ld:AgriCrop:IN-MH-NSK-ONION-01",
+      "type": "AgriCrop",
+      "name": { "type": "Property", "value": "Nashik Red Onion (Rabi Cycle)" },
+      "dataProvider": { "type": "Property", "value": "KisanSathi National DPG Mesh • MSAMB Node" },
+      "growingSeason": { "type": "Property", "value": "Rabi 2026-27" },
+      "thermalTimeGDD": { "type": "Property", "value": 1150, "unitCode": "A86" },
+      "expectedYield": { "type": "Property", "value": 220, "unitCode": "C62", "comment": "Quintals per Hectare" },
+      "harvestWindow": {
+        "type": "Property",
+        "value": { "start": "2026-11-15T00:00:00Z", "end": "2026-11-30T00:00:00Z" }
+      },
+      "location": {
+        "type": "GeoProperty",
+        "value": { "type": "Point", "coordinates": [73.79, 19.99] }
+      }
+    },
+    {
+      "@context": [
+        "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld",
+        "https://schema.org",
+        {
+          "AgriPestAlert": "https://smartdatamodels.org/dataModel.Agrifood/AgriPestAlert",
+          "vectorVelocity": "https://smartdatamodels.org/dataModel.Agrifood/vectorVelocity"
+        }
+      ],
+      "id": "urn:ngsi-ld:AgriPestAlert:IN-PB-YRUST-09",
+      "type": "AgriPestAlert",
+      "name": { "type": "Property", "value": "Yellow Rust Sub-Mountainous Corridor Alert" },
+      "pathogen": { "type": "Property", "value": "Puccinia striiformis f. sp. tritici" },
+      "severity": { "type": "Property", "value": "High" },
+      "originNode": { "type": "Property", "value": "urn:ngsi-ld:AgriNode:IN-PB-Ludhiana" },
+      "quarantineRadiusKm": { "type": "Property", "value": 35, "unitCode": "KMT" },
+      "icarPrescription": {
+        "type": "Property",
+        "value": "Apply Propiconazole 25% EC @ 0.1% barrier foliar spray within 48 hours."
+      },
+      "location": {
+        "type": "GeoProperty",
+        "value": { "type": "Point", "coordinates": [75.85, 30.90] }
+      }
+    }
+  ];
 
   res.setHeader('Content-Type', 'application/ld+json');
   res.json({
     "@context": "https://uri.etsi.org/ngsi-ld/v1/ngsi-ld-core-context.jsonld",
     "type": "QueryResponse",
+    "queryFilter": entityType,
     "totalCount": entities.length,
     "entities": entities
   });

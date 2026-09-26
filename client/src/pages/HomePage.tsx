@@ -399,7 +399,7 @@ export const HomePage: React.FC<HomePageProps> = ({
               </h2>
 
               <p className="text-xs sm:text-sm text-stone-600 leading-relaxed font-normal">
-                India's sovereign agri-intelligence network combining Agmarknet terminal prices, ISRO & ESA Sentinel-2 multispectral satellite telemetry, and Gemini 2.0 AI agronomist advisory in 10 regional Indian dialects.
+                India's sovereign agri-intelligence network combining Agmarknet terminal prices, ISRO & ESA Sentinel-2 multispectral satellite telemetry, and Gemini 3.8 AI agronomist advisory in 10 regional Indian dialects.
               </p>
 
               {/* Authentic Behance Double-Pill Button: Lime Pill + Circlepod Arrow */}
@@ -540,7 +540,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           >
             <div>
               <div className="flex items-start justify-between">
-                <span className="text-[11px] font-bold text-stone-500 font-mono">Gemini 2.0 AI Vision</span>
+                <span className="text-[11px] font-bold text-stone-500 font-mono">Gemini 3.8 AI Vision</span>
                 <span className="w-10 h-10 rounded-full border border-[#022113]/40 flex items-center justify-center text-[#022113] group-hover:bg-[#DFEB38] transition">
                   <ArrowUpRight className="w-5 h-5" />
                 </span>

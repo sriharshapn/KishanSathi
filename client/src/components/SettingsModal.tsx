@@ -264,8 +264,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       {u.label}
                     </span>
                     {isSelected && (
-                      <span className="w-4 h-4 rounded-full bg-[#DFEB38] text-[#022113] flex items-center justify-center text-[10px] font-black">
-                        ✓
+                      <span className="w-4 h-4 rounded-full bg-[#DFEB38] text-[#022113] flex items-center justify-center">
+                        <Check className="w-2.5 h-2.5 stroke-[3]" />
                       </span>
                     )}
                   </div>
@@ -319,7 +319,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 Edge Data Store
               </span>
               <span className="font-extrabold text-[#022113] font-['Montserrat',sans-serif] mt-0.5 block">
-                Offline-First SQLite
+                Google Cloud Firestore
               </span>
             </div>
 

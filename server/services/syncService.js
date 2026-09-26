@@ -123,23 +123,23 @@ const COMMODITY_ALIASES = {
 };
 
 const COMMODITY_METAS = {
-  'Bengal Gram': { icon: '🧆', hi: 'चना', kn: 'ಕಡಲೆ', category: 'Pulses' },
-  'Bhindi (Okra)': { icon: '🥬', hi: 'भिंडी', kn: 'ಬೆಂಡೆಕಾಯಿ', category: 'Vegetables' },
-  'Brinjal': { icon: '🍆', hi: 'बैंगन', kn: 'ಬದನೆಕಾಯಿ', category: 'Vegetables' },
-  'Cauliflower': { icon: '🥦', hi: 'फूलगोभी', kn: 'ಹೂಕೋಸು', category: 'Vegetables' },
-  'Cabbage': { icon: '🥬', hi: 'पत्तागोभी', kn: 'ಎಲೆಕೋಸು', category: 'Vegetables' },
-  'Carrot': { icon: '🥕', hi: 'गाजर', kn: 'ಕ್ಯಾರೆಟ್', category: 'Vegetables' },
-  'Beans': { icon: '🫘', hi: 'बीन्स', kn: 'ಹುರುಳಿಕಾಯಿ', category: 'Vegetables' },
-  'Cucumber': { icon: '🥒', hi: 'खीरा', kn: 'ಸೌತೆಕಾಯಿ', category: 'Vegetables' },
-  'Banana': { icon: '🍌', hi: 'केला', kn: 'ಬಾಳೆಹಣ್ಣು', category: 'Fruits' },
-  'Apple': { icon: '🍎', hi: 'सेब', kn: 'ಸೇಬು', category: 'Fruits' },
-  'Ginger': { icon: '🫚', hi: 'अदरक', kn: 'ಶುಂಠಿ', category: 'Spices' },
-  'Coriander': { icon: '🌿', hi: 'धनिया', kn: 'ಕೊತ್ತಂಬರಿ', category: 'Spices' },
-  'Bitter Gourd': { icon: '🥒', hi: 'करेला', kn: 'ಹಾಗಲಕಾಯಿ', category: 'Vegetables' },
-  'Bottle Gourd': { icon: '🥒', hi: 'लौकी', kn: 'ಸೋರೆಕಾಯಿ', category: 'Vegetables' },
-  'Jowar': { icon: '🌾', hi: 'ज्वार', kn: 'ಜೋಳ', category: 'Cereals' },
-  'Radish': { icon: '🌱', hi: 'मूली', kn: 'ಮೂಲಂಗಿ', category: 'Vegetables' },
-  'Knol Khol': { icon: '🥬', hi: 'गांठ गोभी', kn: 'ನವಿಲುಕೋಸು', category: 'Vegetables' }
+  'Bengal Gram': { icon: '', hi: 'चना', kn: 'ಕಡಲೆ', category: 'Pulses' },
+  'Bhindi (Okra)': { icon: '', hi: 'भिंडी', kn: 'ಬೆಂಡೆಕಾಯಿ', category: 'Vegetables' },
+  'Brinjal': { icon: '', hi: 'बैंगन', kn: 'ಬದನೆಕಾಯಿ', category: 'Vegetables' },
+  'Cauliflower': { icon: '', hi: 'फूलगोभी', kn: 'ಹೂಕೋಸು', category: 'Vegetables' },
+  'Cabbage': { icon: '', hi: 'पत्तागोभी', kn: 'ಎಲೆಕೋಸು', category: 'Vegetables' },
+  'Carrot': { icon: '', hi: 'गाजर', kn: 'ಕ್ಯಾರೆಟ್', category: 'Vegetables' },
+  'Beans': { icon: '', hi: 'बीन्स', kn: 'ಹುರುಳಿಕಾಯಿ', category: 'Vegetables' },
+  'Cucumber': { icon: '', hi: 'खीरा', kn: 'ಸೌತೆಕಾಯಿ', category: 'Vegetables' },
+  'Banana': { icon: '', hi: 'केला', kn: 'ಬಾಳೆಹಣ್ಣು', category: 'Fruits' },
+  'Apple': { icon: '', hi: 'सेब', kn: 'ಸೇಬು', category: 'Fruits' },
+  'Ginger': { icon: '', hi: 'अदरक', kn: 'ಶುಂಠಿ', category: 'Spices' },
+  'Coriander': { icon: '', hi: 'धनिया', kn: 'ಕೊತ್ತಂಬರಿ', category: 'Spices' },
+  'Bitter Gourd': { icon: '', hi: 'करेला', kn: 'ಹಾಗಲಕಾಯಿ', category: 'Vegetables' },
+  'Bottle Gourd': { icon: '', hi: 'लौकी', kn: 'ಸೋರೆಕಾಯಿ', category: 'Vegetables' },
+  'Jowar': { icon: '', hi: 'ज्वार', kn: 'ಜೋಳ', category: 'Cereals' },
+  'Radish': { icon: '', hi: 'मूली', kn: 'ಮೂಲಂಗಿ', category: 'Vegetables' },
+  'Knol Khol': { icon: '', hi: 'गांठ गोभी', kn: 'ನವಿಲುಕೋಸು', category: 'Vegetables' }
 };
 
 function slugify(text) {
@@ -231,7 +231,7 @@ export async function syncMarketData({ simulateLiveData = false } = {}) {
         const canonName = COMMODITY_ALIASES[commKey] || rawCommodity;
         let commObj = commodityMap.get(canonName.toLowerCase());
         if (!commObj) {
-          const meta = COMMODITY_METAS[canonName] || { icon: '🌾', hi: canonName, kn: canonName, category: 'General Produce' };
+          const meta = COMMODITY_METAS[canonName] || { icon: '', hi: canonName, kn: canonName, category: 'General Produce' };
           const commId = `CROP-GOV-${slugify(canonName)}`;
           await db.run(`
             INSERT OR REPLACE INTO commodities (commodity_id, name, name_hi, name_kn, category, unit, icon, varieties_json)

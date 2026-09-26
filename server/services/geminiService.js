@@ -350,20 +350,20 @@ Provide a JSON response with this EXACT structure (no extra text, pure JSON):
       "expected_yield_qtl_per_ha": 45,
       "regenerative_score": "A",
       "market_price_inr_per_qtl": 2200,
-      "icon": "🌾"
+      "icon": ""
     }
   ],
   "current_field_assessment": "2-3 sentence assessment of current field health based on NDVI and weather",
   "irrigation_advice": "Specific irrigation advice for next 7 days based on weather data",
   "pest_disease_warning": "Any pest or disease warnings based on weather conditions",
   "farming_calendar": [
-    { "milestone": "milestone name", "days_from_now": 5, "action": "what to do", "icon": "🌱" }
+    { "milestone": "milestone name", "days_from_now": 5, "action": "what to do", "icon": "" }
   ],
   "weather_summary": "${weather.summary}",
   "ndvi_score": ${ndviScore}
 }
 
-Include exactly 3 crop recommendations and 4 farming calendar milestones. Return ONLY the JSON, nothing else.`;
+Include exactly 3 crop recommendations and 4 farming calendar milestones. Do not include any emojis anywhere in the response. Return ONLY the JSON, nothing else.`;
 
   const client = getClient();
   if (!client) return getFallbackAdvisory(state, district, crop, season, language);
@@ -495,24 +495,24 @@ function getWeatherMock(state) {
 
 // ── Dynamic crop knowledge base ───────────────
 const CROP_DB = {
-  'Tomato':    { icon: '🍅', nextCrops: ['Onion','Maize','Cowpea'], waterNeed: 'medium', yieldQtlHa: 280, regenScore: 'B', pricePerQtl: 1850, baseScore: 88, notes: 'High demand; use stakes & drip irrigation' },
-  'Onion':     { icon: '🧅', nextCrops: ['Maize','Wheat','Green Gram'], waterNeed: 'low', yieldQtlHa: 200, regenScore: 'A', pricePerQtl: 2100, baseScore: 85, notes: 'Excellent storage; avoid over-irrigation' },
-  'Maize':     { icon: '🌽', nextCrops: ['Soybean','Chickpea','Potato'], waterNeed: 'low', yieldQtlHa: 65, regenScore: 'A', pricePerQtl: 2150, baseScore: 82, notes: 'Soil regenerative; good for crop rotation' },
-  'Rice':      { icon: '🌾', nextCrops: ['Wheat','Mustard','Potato'], waterNeed: 'high', yieldQtlHa: 55, regenScore: 'C', pricePerQtl: 2200, baseScore: 78, notes: 'Paddy blast risk in humid weather' },
-  'Wheat':     { icon: '🌾', nextCrops: ['Soybean','Sunflower','Maize'], waterNeed: 'medium', yieldQtlHa: 45, regenScore: 'B', pricePerQtl: 2300, baseScore: 84, notes: 'Rabi crop; sow after monsoon withdrawal' },
-  'Chilli':    { icon: '🌶️', nextCrops: ['Maize','Sorghum','Chickpea'], waterNeed: 'medium', yieldQtlHa: 30, regenScore: 'B', pricePerQtl: 8500, baseScore: 80, notes: 'Thrips & leaf curl risk in dry hot spells' },
-  'Soybean':   { icon: '🫘', nextCrops: ['Wheat','Rabi Onion','Gram'], waterNeed: 'medium', yieldQtlHa: 22, regenScore: 'A', pricePerQtl: 4200, baseScore: 86, notes: 'Nitrogen fixing; excellent pre-Rabi crop' },
-  'Cotton':    { icon: '🌿', nextCrops: ['Chickpea','Wheat','Sorghum'], waterNeed: 'medium', yieldQtlHa: 18, regenScore: 'C', pricePerQtl: 6500, baseScore: 75, notes: 'Bollworm monitoring required throughout' },
-  'Sugarcane': { icon: '🎋', nextCrops: ['Wheat','Onion','Vegetable'], waterNeed: 'high', yieldQtlHa: 800, regenScore: 'C', pricePerQtl: 350, baseScore: 70, notes: '12-month crop; inter-crop vegetables early' },
-  'Potato':    { icon: '🥔', nextCrops: ['Onion','Maize','Paddy'], waterNeed: 'medium', yieldQtlHa: 250, regenScore: 'B', pricePerQtl: 1200, baseScore: 83, notes: 'Late blight risk in cool humid conditions' },
-  'Groundnut': { icon: '🥜', nextCrops: ['Wheat','Sorghum','Maize'], waterNeed: 'low', yieldQtlHa: 25, regenScore: 'A', pricePerQtl: 5800, baseScore: 81, notes: 'Nitrogen fixing legume; good sand-soil crop' },
-  'Mustard':   { icon: '🌻', nextCrops: ['Maize','Soybean','Vegetables'], waterNeed: 'low', yieldQtlHa: 18, regenScore: 'A', pricePerQtl: 5000, baseScore: 79, notes: 'Rabi; tolerates frost; minimal irrigation' },
-  'Turmeric':  { icon: '🟡', nextCrops: ['Maize','Paddy','Banana'], waterNeed: 'high', yieldQtlHa: 250, regenScore: 'B', pricePerQtl: 7500, baseScore: 77, notes: 'Rhizome rot risk in waterlogged soils' },
-  'Banana':    { icon: '🍌', nextCrops: ['Turmeric','Vegetables','Groundnut'], waterNeed: 'high', yieldQtlHa: 400, regenScore: 'B', pricePerQtl: 1800, baseScore: 76, notes: 'Drip irrigation essential; 12-18 month crop' },
-  'Grapes':    { icon: '🍇', nextCrops: ['Onion','Vegetables','Wheat'], waterNeed: 'low', yieldQtlHa: 300, regenScore: 'B', pricePerQtl: 3500, baseScore: 74, notes: 'Downy mildew risk in humid conditions' },
+  'Tomato':    { icon: '', nextCrops: ['Onion','Maize','Cowpea'], waterNeed: 'medium', yieldQtlHa: 280, regenScore: 'B', pricePerQtl: 1850, baseScore: 88, notes: 'High demand; use stakes & drip irrigation' },
+  'Onion':     { icon: '', nextCrops: ['Maize','Wheat','Green Gram'], waterNeed: 'low', yieldQtlHa: 200, regenScore: 'A', pricePerQtl: 2100, baseScore: 85, notes: 'Excellent storage; avoid over-irrigation' },
+  'Maize':     { icon: '', nextCrops: ['Soybean','Chickpea','Potato'], waterNeed: 'low', yieldQtlHa: 65, regenScore: 'A', pricePerQtl: 2150, baseScore: 82, notes: 'Soil regenerative; good for crop rotation' },
+  'Rice':      { icon: '', nextCrops: ['Wheat','Mustard','Potato'], waterNeed: 'high', yieldQtlHa: 55, regenScore: 'C', pricePerQtl: 2200, baseScore: 78, notes: 'Paddy blast risk in humid weather' },
+  'Wheat':     { icon: '', nextCrops: ['Soybean','Sunflower','Maize'], waterNeed: 'medium', yieldQtlHa: 45, regenScore: 'B', pricePerQtl: 2300, baseScore: 84, notes: 'Rabi crop; sow after monsoon withdrawal' },
+  'Chilli':    { icon: '', nextCrops: ['Maize','Sorghum','Chickpea'], waterNeed: 'medium', yieldQtlHa: 30, regenScore: 'B', pricePerQtl: 8500, baseScore: 80, notes: 'Thrips & leaf curl risk in dry hot spells' },
+  'Soybean':   { icon: '', nextCrops: ['Wheat','Rabi Onion','Gram'], waterNeed: 'medium', yieldQtlHa: 22, regenScore: 'A', pricePerQtl: 4200, baseScore: 86, notes: 'Nitrogen fixing; excellent pre-Rabi crop' },
+  'Cotton':    { icon: '', nextCrops: ['Chickpea','Wheat','Sorghum'], waterNeed: 'medium', yieldQtlHa: 18, regenScore: 'C', pricePerQtl: 6500, baseScore: 75, notes: 'Bollworm monitoring required throughout' },
+  'Sugarcane': { icon: '', nextCrops: ['Wheat','Onion','Vegetable'], waterNeed: 'high', yieldQtlHa: 800, regenScore: 'C', pricePerQtl: 350, baseScore: 70, notes: '12-month crop; inter-crop vegetables early' },
+  'Potato':    { icon: '', nextCrops: ['Onion','Maize','Paddy'], waterNeed: 'medium', yieldQtlHa: 250, regenScore: 'B', pricePerQtl: 1200, baseScore: 83, notes: 'Late blight risk in cool humid conditions' },
+  'Groundnut': { icon: '', nextCrops: ['Wheat','Sorghum','Maize'], waterNeed: 'low', yieldQtlHa: 25, regenScore: 'A', pricePerQtl: 5800, baseScore: 81, notes: 'Nitrogen fixing legume; good sand-soil crop' },
+  'Mustard':   { icon: '', nextCrops: ['Maize','Soybean','Vegetables'], waterNeed: 'low', yieldQtlHa: 18, regenScore: 'A', pricePerQtl: 5000, baseScore: 79, notes: 'Rabi; tolerates frost; minimal irrigation' },
+  'Turmeric':  { icon: '', nextCrops: ['Maize','Paddy','Banana'], waterNeed: 'high', yieldQtlHa: 250, regenScore: 'B', pricePerQtl: 7500, baseScore: 77, notes: 'Rhizome rot risk in waterlogged soils' },
+  'Banana':    { icon: '', nextCrops: ['Turmeric','Vegetables','Groundnut'], waterNeed: 'high', yieldQtlHa: 400, regenScore: 'B', pricePerQtl: 1800, baseScore: 76, notes: 'Drip irrigation essential; 12-18 month crop' },
+  'Grapes':    { icon: '', nextCrops: ['Onion','Vegetables','Wheat'], waterNeed: 'low', yieldQtlHa: 300, regenScore: 'B', pricePerQtl: 3500, baseScore: 74, notes: 'Downy mildew risk in humid conditions' },
 };
 
-const DEFAULT_CROP = { icon: '🌱', nextCrops: ['Maize','Onion','Soybean'], waterNeed: 'medium', yieldQtlHa: 50, regenScore: 'B', pricePerQtl: 2000, baseScore: 80, notes: 'Follow ICAR recommended practices for your region' };
+const DEFAULT_CROP = { icon: '', nextCrops: ['Maize','Onion','Soybean'], waterNeed: 'medium', yieldQtlHa: 50, regenScore: 'B', pricePerQtl: 2000, baseScore: 80, notes: 'Follow ICAR recommended practices for your region' };
 
 function getCropEntry(crop) {
   if (!crop) return DEFAULT_CROP;
@@ -569,14 +569,14 @@ function buildFarmingCalendar(crop, weatherRainfall) {
   const fmt = (d) => { const n = new Date(today); n.setDate(n.getDate() + d); return `${n.getDate()}/${n.getMonth()+1}`; };
 
   const common = [
-    { milestone: 'Soil test & prep', days_from_now: 1, action: `Apply lime if pH < 6.5; deep plough 20cm. Date: ${fmt(1)}`, icon: '🧪' },
-    { milestone: 'Seed treatment', days_from_now: 5, action: `Treat seeds with Trichoderma 10g/kg + Carbendazim 2g/kg. Date: ${fmt(5)}`, icon: '🌱' },
-    { milestone: 'Sowing / Transplant', days_from_now: 8, action: rainy ? `Ideal post-rain window. Sow at 8-10cm depth. Date: ${fmt(8)}` : `Ensure moisture before sowing. Date: ${fmt(8)}`, icon: '🪴' },
-    { milestone: 'Basal fertiliser', days_from_now: 10, action: `DAP 50kg/acre + MOP 20kg/acre at planting. Date: ${fmt(10)}`, icon: '💧' },
-    { milestone: 'First weeding', days_from_now: 21, action: `Hand weed / Pendimethalin pre-emergence herbicide. Date: ${fmt(21)}`, icon: '🌿' },
-    { milestone: 'Topdress urea', days_from_now: 30, action: `Urea 25kg/acre + micronutrient spray. Date: ${fmt(30)}`, icon: '⬆️' },
-    { milestone: 'Pest scouting', days_from_now: 40, action: `Scout every 3 days; install yellow sticky traps. Date: ${fmt(40)}`, icon: '🔍' },
-    { milestone: 'Harvest window', days_from_now: 75, action: `Harvest at physiological maturity; dry to 14% moisture. Date: ${fmt(75)}`, icon: '🌾' },
+    { milestone: 'Soil test & prep', days_from_now: 1, action: `Apply lime if pH < 6.5; deep plough 20cm. Date: ${fmt(1)}`, icon: '' },
+    { milestone: 'Seed treatment', days_from_now: 5, action: `Treat seeds with Trichoderma 10g/kg + Carbendazim 2g/kg. Date: ${fmt(5)}`, icon: '' },
+    { milestone: 'Sowing / Transplant', days_from_now: 8, action: rainy ? `Ideal post-rain window. Sow at 8-10cm depth. Date: ${fmt(8)}` : `Ensure moisture before sowing. Date: ${fmt(8)}`, icon: '' },
+    { milestone: 'Basal fertiliser', days_from_now: 10, action: `DAP 50kg/acre + MOP 20kg/acre at planting. Date: ${fmt(10)}`, icon: '' },
+    { milestone: 'First weeding', days_from_now: 21, action: `Hand weed / Pendimethalin pre-emergence herbicide. Date: ${fmt(21)}`, icon: '' },
+    { milestone: 'Topdress urea', days_from_now: 30, action: `Urea 25kg/acre + micronutrient spray. Date: ${fmt(30)}`, icon: '' },
+    { milestone: 'Pest scouting', days_from_now: 40, action: `Scout every 3 days; install yellow sticky traps. Date: ${fmt(40)}`, icon: '' },
+    { milestone: 'Harvest window', days_from_now: 75, action: `Harvest at physiological maturity; dry to 14% moisture. Date: ${fmt(75)}`, icon: '' },
   ];
 
   // Return 4 most relevant

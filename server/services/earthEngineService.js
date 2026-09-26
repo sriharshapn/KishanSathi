@@ -31,11 +31,11 @@ const initEarthEngine = () => {
             null,
             () => {
               isEeInitialized = true;
-              console.log('✅ Google Earth Engine API initialized successfully with Service Account');
+              console.log('[GEE] Google Earth Engine API initialized successfully with Service Account');
             },
             (err) => {
               initError = err;
-              console.warn('⚠️ Google Earth Engine initialize warning:', err.message || err);
+              console.warn('[GEE] Google Earth Engine initialize warning:', err.message || err);
             },
             null,
             projectId
@@ -43,13 +43,13 @@ const initEarthEngine = () => {
         },
         (authErr) => {
           initError = authErr;
-          console.warn('⚠️ Google Earth Engine authentication failed:', authErr.message || authErr);
+          console.warn('[GEE] Google Earth Engine authentication failed:', authErr.message || authErr);
         }
       );
       return;
     } catch (e) {
       initError = e;
-      console.warn('⚠️ Could not parse GEE private key file:', e.message);
+      console.warn('[GEE] Could not parse GEE private key file:', e.message);
     }
   }
 
@@ -60,12 +60,12 @@ const initEarthEngine = () => {
       null,
       () => {
         isEeInitialized = true;
-        console.log('✅ Google Earth Engine initialized in default environment');
+        console.log('[GEE] Google Earth Engine initialized in default environment');
       },
       (err) => {
         initError = err;
         // Normal in client/dev environments without credentials
-        console.log('ℹ️ Google Earth Engine SDK loaded (Standby Mode / Harmonized Processing Engine Active)');
+        console.log('[GEE] Google Earth Engine SDK loaded (Standby Mode / Harmonized Processing Engine Active)');
       },
       null,
       projectId

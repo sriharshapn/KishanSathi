@@ -83,29 +83,29 @@ import { syncMarketData } from './services/syncService.js';
 // Initialize SQLite database and warm cache
 async function startServer() {
   try {
-    console.log("🔥 Initializing KisanSathi Cloud Firestore database...");
+    console.log("[Firebase] Initializing KisanSathi Cloud Firestore database...");
     await db.initDb();
     await refreshCache();
-    console.log("🔥 KisanSathi Cloud Firestore database ready and verified.");
+    console.log("[Firebase] KisanSathi Cloud Firestore database ready and verified.");
 
     // Initial Live Sync with Data.gov.in on startup
     syncMarketData()
-      .then(res => console.log(`🌾 Initial live mandi sync complete: ${res.records_synced} records (${res.live_records || 0} live Data.gov.in)`))
-      .catch(err => console.warn("🌾 Initial live sync notice:", err.message));
+      .then(res => console.log(`[MandiSync] Initial live mandi sync complete: ${res.records_synced} records (${res.live_records || 0} live Data.gov.in)`))
+      .catch(err => console.warn("[MandiSync] Initial live sync notice:", err.message));
 
     // Recurring 30-minute live sync for continuous fresh mandi rate updates
     const SYNC_INTERVAL_MS = 30 * 60 * 1000;
     setInterval(() => {
-      console.log("🌾 [Auto-Sync] Scheduled 30-min live mandi rate update running...");
+      console.log("[Auto-Sync] Scheduled 30-min live mandi rate update running...");
       syncMarketData()
-        .then(res => console.log(`🌾 [Auto-Sync] Complete: ${res.records_synced} records (${res.live_records || 0} live Data.gov.in)`))
-        .catch(err => console.warn("🌾 [Auto-Sync Notice] Background sync failed:", err.message));
+        .then(res => console.log(`[Auto-Sync] Complete: ${res.records_synced} records (${res.live_records || 0} live Data.gov.in)`))
+        .catch(err => console.warn("[Auto-Sync Notice] Background sync failed:", err.message));
     }, SYNC_INTERVAL_MS);
 
     app.listen(PORT, '0.0.0.0', () => {
-      console.log(`🌾 AgriMate full-stack service running on http://localhost:${PORT}`);
-      console.log(`🌾 Also accessible on http://127.0.0.1:${PORT}`);
-      console.log(`🌾 Verified agricultural intelligence ready.`);
+      console.log(`[AgriMate] Full-stack service running on http://localhost:${PORT}`);
+      console.log(`[AgriMate] Also accessible on http://127.0.0.1:${PORT}`);
+      console.log(`[AgriMate] Verified agricultural intelligence ready.`);
     });
   } catch (err) {
     console.error("Failed to start AgriMate service:", err);

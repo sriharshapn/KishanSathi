@@ -37,9 +37,9 @@ try {
   app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
   firestoreDb = getFirestore(app);
   isFirestoreConnected = true;
-  console.log("🔥 [Firebase] Google Cloud Firestore engine connected successfully.");
+  console.log("[Firebase] Google Cloud Firestore engine connected successfully.");
 } catch (err) {
-  console.warn("🔥 [Firebase] Firestore connection notice, using local synchronized state:", err.message);
+  console.warn("[Firebase] Firestore connection notice, using local synchronized state:", err.message);
   isFirestoreConnected = false;
 }
 
@@ -291,7 +291,7 @@ export function run(sql, params = []) {
 // ── Database Initialization & Collection Seeding ───────────────
 
 export async function initDb() {
-  console.log("🔥 Initializing KisanSathi Cloud Firestore Database...");
+  console.log("[Firebase] Initializing KisanSathi Cloud Firestore Database...");
   
   const jsonPath = path.join(__dirname, '../data/verified_markets.json');
   if (fs.existsSync(jsonPath)) {
@@ -345,7 +345,7 @@ export async function initDb() {
       { field_id: 'field_03', farmer_id: 'default_farmer', field_name: 'Nashik Valley Vineyard #12', state: 'Maharashtra', district: 'Nashik', area_hectares: 3.5, latitude: 19.99, longitude: 73.79, soil_type: 'Black Cotton', current_crop: 'Onion', ndvi_latest: 0.58, ndvi_health: 'Good', created_at: new Date().toISOString() }
     ];
 
-    console.log(`🔥 Cloud Firestore collections initialized: ${firestoreStore.markets.length} mandis, ${firestoreStore.commodities.length} crops, ${firestoreStore.price_records.length} price records.`);
+    console.log(`[Firebase] Cloud Firestore collections initialized: ${firestoreStore.markets.length} mandis, ${firestoreStore.commodities.length} crops, ${firestoreStore.price_records.length} price records.`);
   }
 }
 
