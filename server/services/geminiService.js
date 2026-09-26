@@ -13,7 +13,7 @@ function getClient() {
   return new GoogleGenerativeAI(key);
 }
 
-const PREFERRED_GEMINI_MODELS = ['gemini-flash-latest', 'gemini-3.8-flash', 'gemini-2.0-flash'];
+const PREFERRED_GEMINI_MODELS = ['gemini-3.8-flash', 'gemini-flash-latest', 'gemini-2.5-flash'];
 
 async function generateWithFallbackModel(client, contents) {
   let lastErr = null;
@@ -492,55 +492,156 @@ function getWeatherMock(state) {
   return weatherByState[state] || { summary: 'Partly cloudy, 25-32°C, moderate conditions', rainfall: '12' };
 }
 
-function getFallbackAdvisory(state, district, crop, season, language) {
+
+// ── Dynamic crop knowledge base ───────────────
+const CROP_DB = {
+  'Tomato':    { icon: '🍅', nextCrops: ['Onion','Maize','Cowpea'], waterNeed: 'medium', yieldQtlHa: 280, regenScore: 'B', pricePerQtl: 1850, baseScore: 88, notes: 'High demand; use stakes & drip irrigation' },
+  'Onion':     { icon: '🧅', nextCrops: ['Maize','Wheat','Green Gram'], waterNeed: 'low', yieldQtlHa: 200, regenScore: 'A', pricePerQtl: 2100, baseScore: 85, notes: 'Excellent storage; avoid over-irrigation' },
+  'Maize':     { icon: '🌽', nextCrops: ['Soybean','Chickpea','Potato'], waterNeed: 'low', yieldQtlHa: 65, regenScore: 'A', pricePerQtl: 2150, baseScore: 82, notes: 'Soil regenerative; good for crop rotation' },
+  'Rice':      { icon: '🌾', nextCrops: ['Wheat','Mustard','Potato'], waterNeed: 'high', yieldQtlHa: 55, regenScore: 'C', pricePerQtl: 2200, baseScore: 78, notes: 'Paddy blast risk in humid weather' },
+  'Wheat':     { icon: '🌾', nextCrops: ['Soybean','Sunflower','Maize'], waterNeed: 'medium', yieldQtlHa: 45, regenScore: 'B', pricePerQtl: 2300, baseScore: 84, notes: 'Rabi crop; sow after monsoon withdrawal' },
+  'Chilli':    { icon: '🌶️', nextCrops: ['Maize','Sorghum','Chickpea'], waterNeed: 'medium', yieldQtlHa: 30, regenScore: 'B', pricePerQtl: 8500, baseScore: 80, notes: 'Thrips & leaf curl risk in dry hot spells' },
+  'Soybean':   { icon: '🫘', nextCrops: ['Wheat','Rabi Onion','Gram'], waterNeed: 'medium', yieldQtlHa: 22, regenScore: 'A', pricePerQtl: 4200, baseScore: 86, notes: 'Nitrogen fixing; excellent pre-Rabi crop' },
+  'Cotton':    { icon: '🌿', nextCrops: ['Chickpea','Wheat','Sorghum'], waterNeed: 'medium', yieldQtlHa: 18, regenScore: 'C', pricePerQtl: 6500, baseScore: 75, notes: 'Bollworm monitoring required throughout' },
+  'Sugarcane': { icon: '🎋', nextCrops: ['Wheat','Onion','Vegetable'], waterNeed: 'high', yieldQtlHa: 800, regenScore: 'C', pricePerQtl: 350, baseScore: 70, notes: '12-month crop; inter-crop vegetables early' },
+  'Potato':    { icon: '🥔', nextCrops: ['Onion','Maize','Paddy'], waterNeed: 'medium', yieldQtlHa: 250, regenScore: 'B', pricePerQtl: 1200, baseScore: 83, notes: 'Late blight risk in cool humid conditions' },
+  'Groundnut': { icon: '🥜', nextCrops: ['Wheat','Sorghum','Maize'], waterNeed: 'low', yieldQtlHa: 25, regenScore: 'A', pricePerQtl: 5800, baseScore: 81, notes: 'Nitrogen fixing legume; good sand-soil crop' },
+  'Mustard':   { icon: '🌻', nextCrops: ['Maize','Soybean','Vegetables'], waterNeed: 'low', yieldQtlHa: 18, regenScore: 'A', pricePerQtl: 5000, baseScore: 79, notes: 'Rabi; tolerates frost; minimal irrigation' },
+  'Turmeric':  { icon: '🟡', nextCrops: ['Maize','Paddy','Banana'], waterNeed: 'high', yieldQtlHa: 250, regenScore: 'B', pricePerQtl: 7500, baseScore: 77, notes: 'Rhizome rot risk in waterlogged soils' },
+  'Banana':    { icon: '🍌', nextCrops: ['Turmeric','Vegetables','Groundnut'], waterNeed: 'high', yieldQtlHa: 400, regenScore: 'B', pricePerQtl: 1800, baseScore: 76, notes: 'Drip irrigation essential; 12-18 month crop' },
+  'Grapes':    { icon: '🍇', nextCrops: ['Onion','Vegetables','Wheat'], waterNeed: 'low', yieldQtlHa: 300, regenScore: 'B', pricePerQtl: 3500, baseScore: 74, notes: 'Downy mildew risk in humid conditions' },
+};
+
+const DEFAULT_CROP = { icon: '🌱', nextCrops: ['Maize','Onion','Soybean'], waterNeed: 'medium', yieldQtlHa: 50, regenScore: 'B', pricePerQtl: 2000, baseScore: 80, notes: 'Follow ICAR recommended practices for your region' };
+
+function getCropEntry(crop) {
+  if (!crop) return DEFAULT_CROP;
+  const key = Object.keys(CROP_DB).find(k => crop.toLowerCase().includes(k.toLowerCase()) || k.toLowerCase().includes(crop.toLowerCase()));
+  return key ? CROP_DB[key] : DEFAULT_CROP;
+}
+
+function getNextCropRecs(primaryCrop, state, season, weather) {
+  const primary = getCropEntry(primaryCrop);
+  const nextKeys = primary.nextCrops;
+  const rainfallMm = parseFloat(weather?.rainfall || '0');
+  const isRainy = rainfallMm > 30;
+  const isKharif = season && season.toLowerCase().includes('kharif');
+
+  return nextKeys.slice(0, 3).map((cropName, i) => {
+    const c = CROP_DB[cropName] || DEFAULT_CROP;
+    const waterPenalty = isRainy && c.waterNeed === 'high' ? 0 : (c.waterNeed === 'low' && isRainy ? -5 : 0);
+    const seasonBoost = isKharif && ['Tomato','Maize','Soybean','Cotton','Rice'].includes(cropName) ? 5 : 0;
+    const score = Math.min(98, Math.max(65, c.baseScore + seasonBoost + waterPenalty - i * 3));
+    return {
+      crop: cropName,
+      variety: getVariety(cropName, state),
+      suitability_score: score,
+      reason: `Ideal post-${primaryCrop || 'current crop'} rotation for ${state}. ${c.notes}.`,
+      water_need: c.waterNeed,
+      expected_yield_qtl_per_ha: c.yieldQtlHa,
+      regenerative_score: c.regenScore,
+      market_price_inr_per_qtl: c.pricePerQtl,
+      icon: c.icon
+    };
+  });
+}
+
+function getVariety(crop, state) {
+  const varietyMap = {
+    'Tomato': state === 'Maharashtra' ? 'Abhinav F1' : state === 'Karnataka' ? 'Arka Vikas' : 'Hybrid 909',
+    'Onion':  state === 'Maharashtra' ? 'Bhima Kiran' : 'Nashik Red N-53',
+    'Maize':  'DEKALB 9144 / Pioneer 3396',
+    'Rice':   state === 'Punjab' ? 'PR-126' : state === 'Tamil Nadu' ? 'CO-51' : 'BPT 5204',
+    'Wheat':  state === 'Punjab' ? 'PBW 725' : state === 'Haryana' ? 'DBW 187' : 'HD 2967',
+    'Soybean':'JS 9560 / MACS 1407',
+    'Cotton': 'Bollgard II Hybrid',
+    'Potato': state === 'Uttar Pradesh' ? 'Kufri Pukhraj' : 'Kufri Jyoti',
+    'Chilli': state === 'Andhra Pradesh' ? 'LCA 334 (Guntur Sannam)' : 'Byadgi Kaddi',
+    'Groundnut':'GG-20 / TAG-24',
+    'Mustard':'Pusa Bold / RH-749',
+  };
+  return varietyMap[crop] || 'Locally recommended variety';
+}
+
+function buildFarmingCalendar(crop, weatherRainfall) {
+  const rainy = parseFloat(weatherRainfall || '0') > 20;
+  const today = new Date();
+  const fmt = (d) => { const n = new Date(today); n.setDate(n.getDate() + d); return `${n.getDate()}/${n.getMonth()+1}`; };
+
+  const common = [
+    { milestone: 'Soil test & prep', days_from_now: 1, action: `Apply lime if pH < 6.5; deep plough 20cm. Date: ${fmt(1)}`, icon: '🧪' },
+    { milestone: 'Seed treatment', days_from_now: 5, action: `Treat seeds with Trichoderma 10g/kg + Carbendazim 2g/kg. Date: ${fmt(5)}`, icon: '🌱' },
+    { milestone: 'Sowing / Transplant', days_from_now: 8, action: rainy ? `Ideal post-rain window. Sow at 8-10cm depth. Date: ${fmt(8)}` : `Ensure moisture before sowing. Date: ${fmt(8)}`, icon: '🪴' },
+    { milestone: 'Basal fertiliser', days_from_now: 10, action: `DAP 50kg/acre + MOP 20kg/acre at planting. Date: ${fmt(10)}`, icon: '💧' },
+    { milestone: 'First weeding', days_from_now: 21, action: `Hand weed / Pendimethalin pre-emergence herbicide. Date: ${fmt(21)}`, icon: '🌿' },
+    { milestone: 'Topdress urea', days_from_now: 30, action: `Urea 25kg/acre + micronutrient spray. Date: ${fmt(30)}`, icon: '⬆️' },
+    { milestone: 'Pest scouting', days_from_now: 40, action: `Scout every 3 days; install yellow sticky traps. Date: ${fmt(40)}`, icon: '🔍' },
+    { milestone: 'Harvest window', days_from_now: 75, action: `Harvest at physiological maturity; dry to 14% moisture. Date: ${fmt(75)}`, icon: '🌾' },
+  ];
+
+  // Return 4 most relevant
+  return common.filter((_, i) => [0, 2, 5, 7].includes(i));
+}
+
+async function getFallbackAdvisory(state, district, crop, season, language) {
   const isHindi = language === 'hi';
   const isKannada = language === 'kn';
+
+  // Always fetch live weather even in fallback path
+  const weather = await getLiveWeather(state, district);
+  const rainfallMm = parseFloat(weather?.rainfall || '0');
+  const temp = weather?.current?.temperature || 26;
+
+  const cropEntry = getCropEntry(crop);
+  const nextCrops = getNextCropRecs(crop, state, season, weather);
+
+  // Field assessment using real weather
+  const rainyNote = rainfallMm > 30
+    ? `With ${rainfallMm}mm expected rainfall this week, moisture stress is low.`
+    : rainfallMm > 10
+      ? `Moderate ${rainfallMm}mm rainfall expected — supplement with drip if needed.`
+      : `Low rainfall (${rainfallMm}mm) — ensure scheduled irrigation.`;
+
+  const tempNote = temp > 35 ? `High heat (${temp}°C) stress risk for ${crop || 'your crop'} — provide shade nets if available.`
+    : temp < 15 ? `Cool temperatures (${temp}°C) may slow germination — delay sowing if below 12°C.`
+    : `Temperature ${temp}°C is ideal growing conditions for ${crop || 'your crop'}.`;
+
+  const pestNote = rainfallMm > 25 && temp > 25
+    ? `High humidity + heat combo: monitor for fungal diseases (${cropEntry.notes}). Apply preventive neem oil spray.`
+    : temp > 32
+      ? `Hot & dry: watch for mite and thrips infestations. ${cropEntry.notes}.`
+      : `Weather conditions are currently moderate. Regular scouting recommended.`;
+
   return {
-    crop_recommendations: [
-      {
-        crop: isHindi ? 'टमाटर' : isKannada ? 'ಟೊಮೆಟೊ' : 'Tomato',
-        variety: isHindi ? 'हाइब्रिड 909' : 'Hybrid 909',
-        suitability_score: 88,
-        reason: isHindi ? 'इस मौसम में उच्च मांग और अच्छा बाजार भाव मिलता है।' : 'High demand this season with good market price.',
-        water_need: 'medium', expected_yield_qtl_per_ha: 280,
-        regenerative_score: 'B', market_price_inr_per_qtl: 1850, icon: '🍅'
-      },
-      {
-        crop: isHindi ? 'प्याज' : isKannada ? 'ಈರುಳ್ಳಿ' : 'Onion',
-        variety: isHindi ? 'नासिक रेड' : 'Nashik Red',
-        suitability_score: 82,
-        reason: isHindi ? 'मिट्टी और जलवायु के लिए उपयुक्त, अच्छा भंडारण।' : 'Well-suited to soil and climate, excellent storage.',
-        water_need: 'low', expected_yield_qtl_per_ha: 200,
-        regenerative_score: 'A', market_price_inr_per_qtl: 2100, icon: '🧅'
-      },
-      {
-        crop: isHindi ? 'मक्का' : isKannada ? 'ಮೆಕ್ಕೆಜೋಳ' : 'Maize',
-        variety: 'DEKALB 9144',
-        suitability_score: 76,
-        reason: isHindi ? 'कम पानी में अच्छी उपज, मिट्टी सुधारता है।' : 'Good yield with low water, regenerative for soil.',
-        water_need: 'low', expected_yield_qtl_per_ha: 65,
-        regenerative_score: 'A', market_price_inr_per_qtl: 2150, icon: '🌽'
-      }
-    ],
+    crop_recommendations: nextCrops,
     current_field_assessment: isHindi
-      ? 'आपके खेत की स्थिति अच्छी है। NDVI स्कोर सामान्य से ऊपर है।'
-      : 'Your field is in good condition. NDVI score is above average for this season.',
+      ? `${crop || 'आपकी फसल'} के लिए ${district}, ${state} की स्थितियां अनुकूल हैं। ${rainyNote} ${tempNote}`
+      : isKannada
+        ? `${district}, ${state}ದಲ್ಲಿ ${crop || 'ನಿಮ್ಮ ಬೆಳೆ'}ಗೆ ಪರಿಸ್ಥಿತಿಗಳು ಅನುಕೂಲಕರವಾಗಿವೆ. ${rainyNote}`
+        : `Conditions in ${district}, ${state} are ${rainfallMm > 20 ? 'favorable with rain support' : 'moderate — manage irrigation'}. ${rainyNote} ${tempNote}`,
     irrigation_advice: isHindi
-      ? 'अगले 3 दिन सिंचाई बंद रखें, बारिश की संभावना है।'
-      : 'Hold irrigation for next 3 days — light showers expected. Resume drip irrigation on Day 4.',
+      ? rainfallMm > 25
+          ? `अगले 3 दिन सिंचाई बंद रखें — ${rainfallMm}mm बारिश की संभावना। चौथे दिन से ड्रिप जारी करें।`
+          : `${rainfallMm < 5 ? 'तुरंत' : 'नियमित'} सिंचाई करें — ${rainfallMm}mm बारिश पर्याप्त नहीं है।`
+      : isKannada
+        ? rainfallMm > 25
+            ? `ಮುಂದಿನ 3 ದಿನ ನೀರಾವರಿ ನಿಲ್ಲಿಸಿ — ${rainfallMm}mm ಮಳೆ ಅಂದಾಜು. 4ನೇ ದಿನ ಡ್ರಿಪ್ ಮುಂದುವರಿಸಿ.`
+            : `${rainfallMm < 5 ? 'ತಕ್ಷಣ' : 'ನಿಯಮಿತ'} ನೀರಾವರಿ ಮಾಡಿ — ${rainfallMm}mm ಮಳೆ ಸಾಕಾಗದು.`
+        : rainfallMm > 25
+          ? `Hold irrigation next 3 days — ${rainfallMm}mm rainfall forecast. Resume drip on Day 4.`
+          : `${rainfallMm < 5 ? 'Immediate' : 'Scheduled'} irrigation needed — only ${rainfallMm}mm rain expected this week.`,
     pest_disease_warning: isHindi
-      ? 'आर्द्र मौसम में फफूंद रोग का खतरा — नीम तेल का छिड़काव करें।'
-      : 'High humidity raises fungal risk. Apply neem oil spray preventively this week.',
-    farming_calendar: [
-      { milestone: isHindi ? 'बुआई' : 'Sowing', days_from_now: 3, action: isHindi ? 'बीज बोएं' : 'Begin seed sowing', icon: '🌱' },
-      { milestone: isHindi ? 'खाद डालना' : 'Fertiliser', days_from_now: 14, action: isHindi ? 'DAP 50kg/एकड़' : 'Apply DAP 50kg/acre', icon: '💧' },
-      { milestone: isHindi ? 'कीट नियंत्रण' : 'Pest Control', days_from_now: 25, action: isHindi ? 'नीम तेल छिड़काव' : 'Neem oil spray', icon: '🔍' },
-      { milestone: isHindi ? 'कटाई' : 'Harvest', days_from_now: 75, action: isHindi ? 'फसल काटें' : 'Begin harvest', icon: '🌾' }
-    ],
-    weather_summary: getWeatherMock(state).summary,
-    ndvi_score: 0.58
+      ? `${pestNote} नीम का तेल 3ml/लीटर का छिड़काव करें।`
+      : isKannada
+        ? `${pestNote} ಬೇವಿನ ಎಣ್ಣೆ 3ml/ಲೀಟರ್ ಸಿಂಪಡಿಸಿ.`
+        : `${pestNote}`,
+    farming_calendar: buildFarmingCalendar(crop, weather?.rainfall),
+    weather_summary: weather.summary || `${temp}°C, ${rainfallMm}mm expected this week in ${district}, ${state}.`,
+    ndvi_score: 0.58,
+    data_source: 'KisanSathi Agro-Intelligence (ICAR + Open-Meteo Live)'
   };
 }
+
 
 function getFallbackDiagnosis(language = 'en', sampleHint = '') {
   const isHi = language === 'hi';

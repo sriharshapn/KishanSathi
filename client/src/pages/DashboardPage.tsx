@@ -20,7 +20,6 @@ import {
   Sparkles, 
   AlertCircle, 
   Satellite,
-  Sprout,
   TrendingUp,
 } from 'lucide-react';
 

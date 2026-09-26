@@ -6,7 +6,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { generateMarketExplanation, TERMINOLOGY_EXPLANATIONS } from "./aiService.js";
 
-const DEFAULT_MODEL_ID = process.env.GEMINI_MODEL || "gemini-2.0-flash";
+const DEFAULT_MODEL_ID = process.env.GEMINI_MODEL || "gemini-3.8-flash";
 
 let geminiClient = null;
 

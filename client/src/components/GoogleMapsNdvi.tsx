@@ -3,12 +3,9 @@ import {
   Globe2, 
   MapPin, 
   Crosshair, 
-  Key, 
   Check, 
   ExternalLink,
   Satellite,
-  AlertTriangle,
-  X,
   Edit3,
   RotateCcw,
   Move,
@@ -118,15 +115,12 @@ export const GoogleMapsNdvi: React.FC<GoogleMapsNdviProps> = ({
   const markerRef = useRef<any>(null);
   const infoWindowRef = useRef<any>(null);
 
-  // API Key Management: Check env, localStorage, or fallback
-  const envKey = (import.meta.env.VITE_GOOGLE_MAPS_API_KEY || import.meta.env.VITE_GEMINI_API_KEY || '') as string;
-  const [apiKey, setApiKey] = useState<string>(() => {
+  // API Key Management: Check env or fallback
+  const envKey = (import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '') as string;
+  const [apiKey] = useState<string>(() => {
     return localStorage.getItem('agri_google_maps_key') || envKey;
   });
-  const [keyInput, setKeyInput] = useState(apiKey);
-  const [showKeyModal, setShowKeyModal] = useState(false);
   const [apiLoaded, setApiLoaded] = useState(false);
-  const [apiError, setApiError] = useState<string | null>(null);
 
   // Polygon Editing State
   const [isEditingPolygon, setIsEditingPolygon] = useState(false);
@@ -342,11 +336,9 @@ export const GoogleMapsNdvi: React.FC<GoogleMapsNdviProps> = ({
 
     script.onload = () => {
       setApiLoaded(true);
-      setApiError(null);
     };
 
     script.onerror = () => {
-      setApiError('Unable to load Google Maps JavaScript API. Using Google Satellite Embed View.');
       setApiLoaded(false);
     };
 
@@ -586,13 +578,6 @@ export const GoogleMapsNdvi: React.FC<GoogleMapsNdviProps> = ({
     setTimeout(() => setShowSaveToast(false), 4000);
   }, [activeCoords, currentAreaHa, onPolygonAdjust]);
 
-  const handleSaveApiKey = (e: React.FormEvent) => {
-    e.preventDefault();
-    const cleanKey = keyInput.trim();
-    setApiKey(cleanKey);
-    localStorage.setItem('agri_google_maps_key', cleanKey);
-    setShowKeyModal(false);
-  };
 
   const recenterMap = () => {
     if (mapInstanceRef.current && window.google?.maps) {
@@ -685,14 +670,6 @@ export const GoogleMapsNdvi: React.FC<GoogleMapsNdviProps> = ({
                 <Crosshair className="w-3.5 h-3.5 text-emerald-400" />
               </button>
             )}
-
-            <button
-              onClick={() => setShowKeyModal(true)}
-              className="p-1.5 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-xl text-xs font-bold transition-all cursor-pointer"
-              title="Google Maps API Settings"
-            >
-              <Key className="w-3.5 h-3.5 text-zinc-300" />
-            </button>
 
             <a
               href={`https://www.google.com/maps/@${lat},${lon},16z/data=!3m1!1e3`}
@@ -884,14 +861,6 @@ export const GoogleMapsNdvi: React.FC<GoogleMapsNdviProps> = ({
         )}
       </div>
 
-      {/* Optional API Error Notification Banner */}
-      {apiError && (
-        <div className="absolute top-16 left-3 right-3 z-30 bg-amber-950/80 backdrop-blur-md text-amber-200 text-xs px-3 py-1.5 rounded-lg border border-amber-500/20 flex items-center gap-1.5">
-          <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0" strokeWidth={1.5} />
-          <span>{apiError}</span>
-        </div>
-      )}
-
       {/* Bottom Floating Legend & Spectral Controls */}
       <div className="absolute bottom-3 left-3 right-3 z-30 flex flex-wrap items-end justify-between gap-3 pointer-events-none">
         {/* Layer Selector & Engine Badge */}
@@ -972,73 +941,6 @@ export const GoogleMapsNdvi: React.FC<GoogleMapsNdviProps> = ({
           </div>
         </div>
       </div>
-
-      {/* Google Maps API Key Modal */}
-      {showKeyModal && (
-        <div className="absolute inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#0F0F12] rounded-2xl p-6 max-w-md w-full border border-white/[0.08] shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
-              <div className="flex items-center gap-2">
-                <Globe2 className="w-5 h-5 text-emerald-400" strokeWidth={1.5} />
-                <h3 className="text-base font-semibold text-white tracking-[-0.03em]">
-                  Maps API Configuration
-                </h3>
-              </div>
-              <button 
-                onClick={() => setShowKeyModal(false)}
-                className="text-zinc-500 hover:text-white p-1 rounded-lg cursor-pointer transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <p className="text-xs text-zinc-400 leading-relaxed font-normal">
-              KisanSathi connects to the Google Maps JavaScript API & Google Earth Constellation to render high-resolution satellite imagery with NDVI vector overlays.
-            </p>
-
-            <form onSubmit={handleSaveApiKey} className="space-y-3">
-              <div>
-                <label className="text-xs font-mono uppercase tracking-wider text-zinc-400 block mb-1">
-                  Google Maps JavaScript API Key:
-                </label>
-                <input
-                  type="text"
-                  value={keyInput}
-                  onChange={(e) => setKeyInput(e.target.value)}
-                  placeholder="AIzaSy..."
-                  className="w-full px-3 py-2 text-xs font-mono border border-white/[0.08] rounded-xl focus:outline-none focus:border-emerald-500/50 bg-[#08080A] text-white placeholder-zinc-600"
-                />
-              </div>
-
-              <div className="bg-emerald-500/[0.08] border border-emerald-500/20 rounded-xl p-3 text-[11px] text-emerald-300 space-y-1">
-                <div className="font-medium flex items-center gap-1.5">
-                  <Check className="w-3.5 h-3.5 text-emerald-400" strokeWidth={1.5} />
-                  <span>Built-in Fallback Active</span>
-                </div>
-                <p className="text-emerald-300/80">
-                  Even without a custom key, the Google Satellite Earth engine is fully operational for all 36 Indian States & UTs.
-                </p>
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setShowKeyModal(false)}
-                  className="px-3 py-1.5 text-xs font-mono text-zinc-400 hover:text-white cursor-pointer transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-white text-black hover:bg-zinc-200 text-xs font-semibold rounded-xl shadow-md transition-all cursor-pointer"
-                >
-                  Apply & Reload Map
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

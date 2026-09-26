@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useCallback } from 'react';
 import type { MarketItem, Language } from '../types';
 import { TRANSLATIONS } from '../i18n/translations';
 import { MapPin, Clock, ShieldCheck, HelpCircle, CheckCircle, Zap, Check, ArrowRight } from 'lucide-react';
@@ -19,12 +19,39 @@ export const MarketCard: React.FC<MarketCardProps> = ({
   onExplainTerm
 }) => {
   const t = TRANSLATIONS[language];
+  const cardRef = useRef<HTMLDivElement>(null);
   const arrivalPct = Math.min(100, Math.max(4, Math.round((market.arrival_quantity / 500) * 100)));
   const isEstimated = market.source?.toLowerCase().includes('fallback') || market.source?.toLowerCase().includes('dynamic');
 
+  // Scrolltide-style spotlight: radial glow follows mouse within card
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const card = cardRef.current;
+    if (!card) return;
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    card.style.setProperty('--spotlight-x', `${x}px`);
+    card.style.setProperty('--spotlight-y', `${y}px`);
+    card.style.setProperty('--spotlight-opacity', '1');
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    const card = cardRef.current;
+    if (!card) return;
+    card.style.setProperty('--spotlight-opacity', '0');
+  }, []);
+
   return (
     <div
+      ref={cardRef}
       onClick={() => onSelect(market)}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      style={{
+        '--spotlight-x': '50%',
+        '--spotlight-y': '50%',
+        '--spotlight-opacity': '0',
+      } as React.CSSProperties}
       className={`
         group relative rounded-[2.2rem] cursor-pointer transition-all duration-300 flex flex-col overflow-hidden font-['Open_Sans',sans-serif]
         ${isSelected
@@ -33,12 +60,21 @@ export const MarketCard: React.FC<MarketCardProps> = ({
         }
       `}
     >
-      {/* Top indicator line on select */}
+      {/* Spotlight glow overlay — pure CSS radial, no dependencies */}
       <div
-        className={`h-1.5 w-full transition-all duration-300 ${isSelected ? 'bg-[#546C18]' : 'bg-transparent group-hover:bg-[#DFEB38]'}`}
+        className="pointer-events-none absolute inset-0 z-0 rounded-[2.2rem] transition-opacity duration-300"
+        style={{
+          background: `radial-gradient(280px circle at var(--spotlight-x) var(--spotlight-y), rgba(223,235,56,0.12), transparent 70%)`,
+          opacity: 'var(--spotlight-opacity)',
+        }}
       />
 
-      <div className="p-6 sm:p-7 flex flex-col gap-4 flex-1">
+      {/* Top indicator line on select */}
+      <div
+        className={`relative z-10 h-1.5 w-full transition-all duration-300 ${isSelected ? 'bg-[#546C18]' : 'bg-transparent group-hover:bg-[#DFEB38]'}`}
+      />
+
+      <div className="relative z-10 p-6 sm:p-7 flex flex-col gap-4 flex-1">
 
         {/* ── Row 1: Name + meta ── */}
         <div className="flex items-start justify-between gap-3">
