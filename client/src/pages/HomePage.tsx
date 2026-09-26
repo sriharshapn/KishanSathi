@@ -5,7 +5,6 @@ import {
   ArrowDown, 
   ChevronLeft, 
   ChevronRight, 
-  Play, 
   CheckCircle2, 
   ArrowRight,
   MapPin
@@ -27,13 +26,25 @@ interface HomePageProps {
  * - Typography: Montserrat (Headings, Buttons, Numbers), Open Sans (Body, Descriptions).
  */
 const QUICK_PRODUCE_OPTIONS = [
-  { name: 'Tomato', label: 'Tomato', sub: 'टमाटर', modalRate: 2450, mandi: 'Ballari, KA', msp: 2100 },
+  { name: 'Tomato', label: 'Tomato', sub: 'टमाटर', modalRate: 2450, mandi: 'Bengaluru, KA', msp: 2100 },
   { name: 'Onion', label: 'Onion', sub: 'प्याज़', modalRate: 1850, mandi: 'Nashik, MH', msp: 1650 },
   { name: 'Potato', label: 'Potato', sub: 'आलू', modalRate: 1620, mandi: 'Agra, UP', msp: 1500 },
   { name: 'Maize', label: 'Maize', sub: 'मक्का', modalRate: 2150, mandi: 'Davanagere, KA', msp: 2090 },
   { name: 'Paddy', label: 'Paddy', sub: 'धान', modalRate: 2320, mandi: 'Raichur, KA', msp: 2300 },
   { name: 'Cotton', label: 'Cotton', sub: 'कपास', modalRate: 7120, mandi: 'Guntur, AP', msp: 6620 },
 ];
+
+// Location-based price multiplier so rates realistically vary by mandi hub
+const MANDI_PRICE_MULTIPLIER: Record<string, number> = {
+  bengaluru: 1.08, kolar: 1.02, nashik: 1.05, lasalgaon: 1.03,
+  agra: 0.97, davanagere: 0.96, raichur: 0.94, guntur: 0.99,
+  ballari: 0.95, azadpur: 1.04, unjha: 1.01, kota: 0.98,
+  khanna: 0.96, kolkata: 1.03, indore: 0.99,
+};
+const getMandiMultiplier = (loc: string) => {
+  const key = loc.trim().toLowerCase().split(/[\s,]+/)[0];
+  return MANDI_PRICE_MULTIPLIER[key] ?? 1.0;
+};
 
 export const HomePage: React.FC<HomePageProps> = ({
   onNavigate,
@@ -42,15 +53,17 @@ export const HomePage: React.FC<HomePageProps> = ({
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
   const [activeSatelliteHotspot, setActiveSatelliteHotspot] = useState<number | null>(null);
   const [demoQuickCrop, setDemoQuickCrop] = useState('Tomato');
-  const [demoQuickLocation, setDemoQuickLocation] = useState('Ballari');
+  const [demoQuickLocation, setDemoQuickLocation] = useState('Bengaluru');
   const [demoQuickQty, setDemoQuickQty] = useState(1000);
 
   const currentBenchmark = QUICK_PRODUCE_OPTIONS.find(
     p => p.name.toLowerCase() === demoQuickCrop.toLowerCase()
   ) || QUICK_PRODUCE_OPTIONS[0];
 
+  const mandiMultiplier = getMandiMultiplier(demoQuickLocation);
+  const adjustedModalRate = Math.round(currentBenchmark.modalRate * mandiMultiplier);
   const qtlCount = demoQuickQty / 100;
-  const estimatedGross = Math.round(qtlCount * currentBenchmark.modalRate);
+  const estimatedGross = Math.round(qtlCount * adjustedModalRate);
   const estimatedFreight = Math.round(350 + qtlCount * 65);
   const estimatedNet = Math.max(0, estimatedGross - estimatedFreight);
   const mspBenchmarkTotal = Math.round(qtlCount * currentBenchmark.msp);
@@ -59,29 +72,29 @@ export const HomePage: React.FC<HomePageProps> = ({
   const satelliteSpecs = [
     {
       id: 1,
-      pct: '85%',
+      pct: '92%',
       label: 'Canopy NDVI & vegetative vigor index.',
       thumb: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=150&q=80',
       pos: 'top-[8%] left-[2%] sm:left-[8%]'
     },
     {
       id: 2,
-      pct: '85%',
+      pct: '88%',
       label: 'Soil moisture & surface hydration.',
       thumb: 'https://images.unsplash.com/photo-1592982537447-7440770cbfc9?auto=format&fit=crop&w=150&q=80',
       pos: 'top-[8%] right-[2%] sm:right-[8%]'
     },
     {
       id: 3,
-      pct: '70%',
+      pct: '74%',
       label: 'Multi-band nitrogen & thermal stress.',
       thumb: 'https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?auto=format&fit=crop&w=150&q=80',
       pos: 'bottom-[8%] left-[4%] sm:left-[12%]'
     },
     {
       id: 4,
-      pct: '90%',
-      label: '10m spatial ground resolution.',
+      pct: '10m',
+      label: 'Spatial ground resolution per pixel.',
       thumb: 'https://images.unsplash.com/photo-1595974482597-4b8da8879bc5?auto=format&fit=crop&w=150&q=80',
       pos: 'bottom-[8%] right-[4%] sm:right-[12%]'
     }
@@ -97,17 +110,20 @@ export const HomePage: React.FC<HomePageProps> = ({
     {
       id: 2,
       q: 'How does Sentinel-2 satellite NDVI crop health monitoring work?',
-      a: 'KisanSathi pulls 10-meter multispectral optical and infrared satellite bands from European Space Agency Sentinel-2 satellites to measure chlorophyll absorption and compute Normalized Difference Vegetation Index (NDVI) for any parcel in India.'
+      a: 'KisanSathi pulls 10-meter multispectral optical and infrared satellite bands from European Space Agency Sentinel-2 satellites to measure chlorophyll absorption and compute Normalized Difference Vegetation Index (NDVI) for any parcel in India.',
+      image: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800&q=80'
     },
     {
       id: 3,
       q: 'Can I receive agronomy advice in Hindi, Kannada, Telugu, or Marathi?',
-      a: 'Yes. KisanSathi is natively tuned for 10 regional Indian languages with localized vernacular crop dictionaries and regional agronomic practices.'
+      a: 'Yes. KisanSathi is natively tuned for 10 regional Indian languages with localized vernacular crop dictionaries and regional agronomic practices.',
+      image: 'https://images.unsplash.com/photo-1574943320219-553eb213f72d?auto=format&fit=crop&w=800&q=80'
     },
     {
       id: 4,
       q: 'Is KisanSathi free for individual farmers and FPOs?',
-      a: 'Yes. Core mandi price terminals, weather alerts, and AI advisory are 100% free and open as a Digital Public Good. Advanced enterprise spatial analytics are available for cooperatives and agribusinesses.'
+      a: 'Yes. Core mandi price terminals, weather alerts, and AI advisory are 100% free and open as a Digital Public Good. Advanced enterprise spatial analytics are available for cooperatives and agribusinesses.',
+      image: 'https://images.unsplash.com/photo-1592982537447-7440770cbfc9?auto=format&fit=crop&w=800&q=80'
     }
   ];
 
@@ -141,45 +157,19 @@ export const HomePage: React.FC<HomePageProps> = ({
             {/* Top Row: Floating Video Badge (Left) + Center Headline + Collaboration Button */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start pb-16 pt-4">
               
-              {/* Left Floating Badge: Video Materials */}
-              <div className="lg:col-span-3">
-                <div className="inline-block bg-white/95 backdrop-blur-md rounded-3xl p-3.5 shadow-xl border border-white/60 max-w-[260px]">
-                  <div className="flex items-center gap-3">
-                    <div className="relative w-14 h-14 rounded-2xl overflow-hidden shrink-0 group cursor-pointer"
-                      onClick={() => onNavigate('satellite')}
-                    >
-                      <img 
-                        src="https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?auto=format&fit=crop&w=200&q=80" 
-                        alt="Greenhouse" 
-                        className="w-full h-full object-cover group-hover:scale-105 transition"
-                      />
-                      <div className="absolute inset-0 bg-black/25 flex items-center justify-center">
-                        <div className="w-6 h-6 rounded-full bg-white/90 flex items-center justify-center shadow">
-                          <Play className="w-3 h-3 text-[#022113] fill-[#022113] ml-0.5" />
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-left">
-                      <p className="text-[11px] leading-tight text-stone-600 font-medium">
-                        Live satellite telemetry & daily mandi arrivals across India.
-                      </p>
-                    </div>
-                  </div>
-                  <button 
-                    onClick={() => onNavigate('satellite')}
-                    className="mt-2.5 w-full py-1.5 px-3 rounded-full bg-[#DFEB38] hover:bg-[#cde025] text-[#022113] font-bold text-[11px] font-['Montserrat',sans-serif] flex items-center justify-center gap-1 transition shadow-xs cursor-pointer"
-                  >
-                    <span>Satellite Feed</span>
-                    <ArrowUpRight className="w-3.5 h-3.5" />
-                  </button>
+              {/* Left: Live Data Status Pill */}
+              <div className="lg:col-span-3 flex items-start">
+                <div className="inline-flex items-center gap-2 bg-white/90 backdrop-blur-md rounded-full px-4 py-2 shadow-md border border-white/60">
+                  <span className="w-2 h-2 rounded-full bg-[#59701E] animate-pulse shrink-0" />
+                  <span className="text-[11px] font-bold text-[#022113] font-['Montserrat',sans-serif]">2,400+ Mandis Live</span>
                 </div>
               </div>
 
               {/* Center Main Headline & Collaboration CTA */}
               <div className="lg:col-span-6 text-center space-y-4">
                 <h1 className="text-4xl sm:text-6xl lg:text-[68px] font-extrabold tracking-tight text-[#022113] font-['Montserrat',sans-serif] leading-[1.05]">
-                  Investments in <br />
-                  <span className="font-light text-[#022113]">Agri-Tech & Mandis</span>
+                  Intelligence for <br />
+                  <span className="font-light text-[#022113]">Farmers & Mandis</span>
                 </h1>
 
                 <p className="text-xs sm:text-sm text-[#022113]/80 max-w-md mx-auto leading-relaxed font-medium">
@@ -251,7 +241,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                 <div>
                   <span className="text-[10px] uppercase tracking-wider text-stone-300 font-mono block">APMC Arbitrage</span>
                   <span className="text-3xl lg:text-4xl font-extrabold font-['Montserrat',sans-serif] text-white block mt-1">
-                    +14,6%
+                    +14.6%
                   </span>
                 </div>
                 <p className="text-[11px] text-stone-200 leading-snug mt-2">
@@ -267,7 +257,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                 <div>
                   <span className="text-[10px] uppercase tracking-wider text-stone-300 font-mono block">NDVI Recovery</span>
                   <span className="text-3xl lg:text-4xl font-extrabold font-['Montserrat',sans-serif] text-[#DFEB38] block mt-1">
-                    +1,1%
+                    +1.1%
                   </span>
                 </div>
                 <p className="text-[11px] text-stone-200 leading-snug mt-2">
@@ -286,7 +276,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                       Movement of <br />Mandi Rates
                     </h4>
                     <p className="text-[10px] text-stone-300 mt-1">Modal price trend across 2,400+ APMC mandis</p>
-                    <span className="text-[11px] font-bold text-[#DFEB38] font-mono block mt-0.5">↑ +9,60%/month</span>
+                    <span className="text-[11px] font-bold text-[#DFEB38] font-mono block mt-0.5">↑ +9.6%/month</span>
                   </div>
                   <span className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-white shrink-0">
                     <ArrowUpRight className="w-3.5 h-3.5" />
@@ -344,11 +334,12 @@ export const HomePage: React.FC<HomePageProps> = ({
           {/* Main White Container (73K Gauge + Smiling Farmer Photo + Analytics Copy) */}
           <div className="lg:col-span-8 bg-white rounded-[2.5rem] p-6 sm:p-10 border border-[#022113]/10 shadow-sm flex flex-col md:flex-row items-center gap-8">
             
-            {/* 73K Donut Gauge */}
+            {/* 86K Donut Gauge */}
             <div className="flex flex-col items-center shrink-0">
               <div className="relative w-36 h-36 flex items-center justify-center">
                 <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
                   <circle cx="50" cy="50" r="40" stroke="#F0F2EB" strokeWidth="8" fill="none" />
+                  {/* 78% dark arc: 251.2 × 0.78 = 195.9, offset = 251.2 - 195.9 = 55.3 */}
                   <circle 
                     cx="50" 
                     cy="50" 
@@ -356,10 +347,11 @@ export const HomePage: React.FC<HomePageProps> = ({
                     stroke="#022113" 
                     strokeWidth="8" 
                     strokeDasharray="251.2" 
-                    strokeDashoffset="60" 
+                    strokeDashoffset="55.3" 
                     strokeLinecap="round" 
                     fill="none" 
                   />
+                  {/* 22% olive arc: 251.2 × 0.22 = 55.3, offset = 251.2 - 55.3 = 195.9 */}
                   <circle 
                     cx="50" 
                     cy="50" 
@@ -367,13 +359,13 @@ export const HomePage: React.FC<HomePageProps> = ({
                     stroke="#59701E" 
                     strokeWidth="8" 
                     strokeDasharray="251.2" 
-                    strokeDashoffset="210" 
+                    strokeDashoffset="195.9" 
                     strokeLinecap="round" 
                     fill="none" 
                   />
                 </svg>
                 <div className="absolute flex flex-col items-center">
-                  <span className="text-3xl font-extrabold text-[#022113] font-['Montserrat',sans-serif]">73K</span>
+                  <span className="text-3xl font-extrabold text-[#022113] font-['Montserrat',sans-serif]">86K</span>
                 </div>
               </div>
 
@@ -720,32 +712,36 @@ export const HomePage: React.FC<HomePageProps> = ({
             </div>
           </div>
 
-          {/* Cards 2, 3, 4: Off-white Cards with Circle Down-Arrow */}
+          {/* Cards 2, 3, 4: Photo Cards with toggle overlay */}
           {faqs.slice(1).map((faq) => {
             const isOpen = activeFaq === faq.id;
             return (
               <div 
                 key={faq.id}
                 onClick={() => setActiveFaq(isOpen ? null : faq.id)}
-                className="bg-[#F0F2EB] rounded-[2.5rem] p-7 sm:p-8 flex flex-col justify-between min-h-[380px] border border-[#022113]/5 hover:shadow-md transition cursor-pointer"
+                className="rounded-[2.5rem] overflow-hidden relative p-7 sm:p-8 flex flex-col justify-end text-white min-h-[380px] shadow-lg cursor-pointer hover:shadow-xl transition"
               >
-                <div>
-                  <h3 className="text-base sm:text-lg font-bold font-['Montserrat',sans-serif] text-[#022113] leading-snug">
+                <img 
+                  src={(faq as { image?: string }).image} 
+                  alt={faq.q}
+                  className="absolute inset-0 w-full h-full object-cover filter brightness-75 hover:scale-105 transition duration-500"
+                />
+                <div className={`absolute inset-0 transition-opacity duration-300 ${isOpen ? 'bg-gradient-to-t from-[#022113] via-[#022113]/80 to-[#022113]/40' : 'bg-gradient-to-t from-[#022113] via-[#022113]/60 to-transparent'}`} />
+                
+                <div className="relative z-10 space-y-3">
+                  <h3 className="text-base sm:text-lg font-bold font-['Montserrat',sans-serif] text-white leading-snug">
                     {faq.q}
                   </h3>
                   {isOpen && (
-                    <p className="text-xs text-stone-600 mt-4 leading-relaxed animate-in fade-in">
+                    <p className="text-xs text-stone-200 leading-relaxed animate-in fade-in font-normal">
                       {faq.a}
                     </p>
                   )}
-                </div>
-
-                <div className="flex justify-center pt-6">
-                  <span className={`w-12 h-12 rounded-full bg-white flex items-center justify-center text-[#022113] border border-[#022113]/20 shadow-xs transition-transform ${
-                    isOpen ? 'rotate-180 bg-[#DFEB38]' : ''
-                  }`}>
-                    <ArrowDown className="w-5 h-5" />
-                  </span>
+                  <div className="flex justify-start pt-2">
+                    <span className={`w-10 h-10 rounded-full bg-white/20 border border-white/30 flex items-center justify-center text-white transition-transform ${isOpen ? 'rotate-180 bg-[#DFEB38]/30' : ''}`}>
+                      <ArrowDown className="w-4 h-4" />
+                    </span>
+                  </div>
                 </div>
               </div>
             );
@@ -876,7 +872,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                     <span className="text-[11px] font-bold text-[#022113]/50 font-['Montserrat',sans-serif] mr-1">
                       Quick Hubs:
                     </span>
-                    {['Ballari', 'Nashik', 'Agra', 'Davanagere', 'Guntur'].map(hub => (
+                    {['Bengaluru', 'Nashik', 'Agra', 'Davanagere', 'Guntur'].map(hub => (
                       <button
                         key={hub}
                         type="button"
@@ -954,7 +950,7 @@ export const HomePage: React.FC<HomePageProps> = ({
                         ₹{estimatedNet.toLocaleString('en-IN')}
                       </span>
                       <span className="text-xs text-white/70 font-normal">
-                        (@ ₹{(currentBenchmark.modalRate / 100).toFixed(2)}/kg)
+                        (@ ₹{(adjustedModalRate / 100).toFixed(2)}/kg)
                       </span>
                     </div>
                   </div>
