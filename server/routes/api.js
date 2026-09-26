@@ -27,7 +27,7 @@ import {
   STATE_COORDINATES 
 } from '../services/geminiService.js';
 import { GOV_API_REGISTRY, searchGovPlotData } from '../services/govPlotService.js';
-import { processEarthEnginePass, getEarthEngineStatus } from '../services/earthEngineService.js';
+import { processEarthEnginePass, getEarthEngineStatus, getEarthEngineNdviTiles } from '../services/earthEngineService.js';
 import db, { saveDocument, getCollection, deleteDocument } from '../database/db.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -428,6 +428,27 @@ router.get('/earthengine/status', (req, res) => {
 router.post('/earthengine/process', async (req, res) => {
   try {
     const result = await processEarthEnginePass(req.body);
+    res.json({ success: true, ...result });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// GET /api/earthengine/ndvi-tiles?lat=13.03&lon=77.57
+router.get('/earthengine/ndvi-tiles', async (req, res) => {
+  try {
+    const { lat = 13.03, lon = 77.57, days = 45 } = req.query;
+    const dateEnd = new Date().toISOString().split('T')[0];
+    const dStart = new Date();
+    dStart.setDate(dStart.getDate() - Number(days));
+    const dateStart = dStart.toISOString().split('T')[0];
+    
+    const result = await getEarthEngineNdviTiles({
+      lat: Number(lat),
+      lon: Number(lon),
+      dateStart,
+      dateEnd
+    });
     res.json({ success: true, ...result });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });

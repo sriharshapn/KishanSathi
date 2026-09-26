@@ -256,6 +256,60 @@ export async function processEarthEnginePass({ lat, lon, state, district, crop, 
   };
 }
 
+export async function getEarthEngineNdviTiles({ lat, lon, dateStart, dateEnd }) {
+  if (isEeInitialized === true) {
+    const geometry = ee.Geometry.Point([lon, lat]);
+    const collection = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
+      .filterBounds(geometry)
+      .filterDate(dateStart, dateEnd)
+      .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 20));
+    
+    // Cloud mask
+    const maskS2clouds = (image) => {
+      const scl = image.select('SCL');
+      const mask = scl.neq(3).and(scl.neq(8)).and(scl.neq(9)).and(scl.neq(10));
+      return image.updateMask(mask).divide(10000);
+    };
+    
+    const composite = collection.map(maskS2clouds).median();
+    const ndvi = composite.normalizedDifference(['B8', 'B4']).rename('NDVI');
+    
+    const visParams = {
+      min: 0.1,
+      max: 0.85,
+      palette: ['#d73027', '#f46d43', '#fdae61', '#fee08b', '#d9ef8b', '#a6d96a', '#66bd63', '#1a9850']
+    };
+    
+    const projectId = process.env.EARTH_ENGINE_PROJECT || process.env.GOOGLE_CLOUD_PROJECT || 'agrimatenational';
+    
+    // Use getMapId to get tile URL
+    return new Promise((resolve, reject) => {
+      ndvi.getMapId(visParams, (mapId, error) => {
+        if (error) reject(error);
+        else resolve({
+          tileUrl: `https://earthengine.googleapis.com/v1/projects/${projectId}/maps/${mapId.mapid}/tiles/{z}/{x}/{y}`,
+          mapId: mapId.mapid,
+          token: mapId.token,
+          source: 'live_earth_engine'
+        });
+      });
+    });
+  } else {
+    return {
+      tileUrl: null,
+      fallbackTileProviders: [
+        {
+          name: 'Sentinel Hub NDVI',
+          urlTemplate: 'https://services.sentinel-hub.com/ogc/wms/1.0.0/...', // placeholder
+          attribution: 'Sentinel Hub'
+        }
+      ],
+      source: 'standby_fallback',
+      message: 'Earth Engine not authenticated. Using satellite base map with computed NDVI overlays.'
+    };
+  }
+}
+
 export function getEarthEngineStatus() {
   return {
     library: '@google/earthengine',
