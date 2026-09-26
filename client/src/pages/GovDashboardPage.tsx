@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import type { Language, NavigationPage } from '../types';
 import { 
   Network, 
@@ -19,7 +19,11 @@ import {
   ArrowUpRight,
   Terminal,
   Activity,
-  SlidersHorizontal
+  SlidersHorizontal,
+  ChevronLeft,
+  ChevronRight,
+  LayoutGrid,
+  Sparkles
 } from 'lucide-react';
 import { apiUrl } from '../utils/api';
 
@@ -496,6 +500,228 @@ export const GovDashboardPage: React.FC<GovDashboardPageProps> = ({ onNavigate }
   const [selectedNodeModal, setSelectedNodeModal] = useState<StateNode | null>(null);
   const [apiPingStatus, setApiPingStatus] = useState<{ status: number; latency: number } | null>(null);
 
+  // Tab 1 (State Nodes) Carousel & Mouse-Glide State
+  const [nodeViewLayout, setNodeViewLayout] = useState<'carousel' | 'grid'>('carousel');
+  const [activeNodeIndex, setActiveNodeIndex] = useState(0);
+  const nodeCarouselRef = useRef<HTMLDivElement>(null);
+  const isNodeHoveringRef = useRef(false);
+  const nodeTargetScrollRef = useRef(0);
+  const nodeAnimFrameRef = useRef<number | null>(null);
+  const isNodeDraggingRef = useRef(false);
+  const nodeDragStartXRef = useRef(0);
+  const nodeDragStartScrollRef = useRef(0);
+  const nodeHasDraggedRef = useRef(false);
+
+  // Tab 2 (Disease Corridors) Carousel & Mouse-Glide State
+  const [alertViewLayout, setAlertViewLayout] = useState<'carousel' | 'grid'>('carousel');
+  const [activeAlertIndex, setActiveAlertIndex] = useState(0);
+  const alertCarouselRef = useRef<HTMLDivElement>(null);
+  const isAlertHoveringRef = useRef(false);
+  const alertTargetScrollRef = useRef(0);
+  const alertAnimFrameRef = useRef<number | null>(null);
+  const isAlertDraggingRef = useRef(false);
+  const alertDragStartXRef = useRef(0);
+  const alertDragStartScrollRef = useRef(0);
+  const alertHasDraggedRef = useRef(false);
+
+  // Smooth mouse-follow scroll loop for State Nodes
+  useEffect(() => {
+    if (nodeViewLayout !== 'carousel') return;
+    const smoothScrollLoop = () => {
+      const el = nodeCarouselRef.current;
+      if (el && isNodeHoveringRef.current && !isNodeDraggingRef.current) {
+        const current = el.scrollLeft;
+        const target = nodeTargetScrollRef.current;
+        const diff = target - current;
+        if (Math.abs(diff) > 0.5) {
+          el.scrollLeft = current + diff * 0.08;
+        }
+      }
+      nodeAnimFrameRef.current = requestAnimationFrame(smoothScrollLoop);
+    };
+    nodeAnimFrameRef.current = requestAnimationFrame(smoothScrollLoop);
+    return () => {
+      if (nodeAnimFrameRef.current) cancelAnimationFrame(nodeAnimFrameRef.current);
+    };
+  }, [nodeViewLayout]);
+
+  // Smooth mouse-follow scroll loop for Disease Corridors
+  useEffect(() => {
+    if (alertViewLayout !== 'carousel') return;
+    const smoothScrollLoop = () => {
+      const el = alertCarouselRef.current;
+      if (el && isAlertHoveringRef.current && !isAlertDraggingRef.current) {
+        const current = el.scrollLeft;
+        const target = alertTargetScrollRef.current;
+        const diff = target - current;
+        if (Math.abs(diff) > 0.5) {
+          el.scrollLeft = current + diff * 0.08;
+        }
+      }
+      alertAnimFrameRef.current = requestAnimationFrame(smoothScrollLoop);
+    };
+    alertAnimFrameRef.current = requestAnimationFrame(smoothScrollLoop);
+    return () => {
+      if (alertAnimFrameRef.current) cancelAnimationFrame(alertAnimFrameRef.current);
+    };
+  }, [alertViewLayout]);
+
+  // Mouse handlers for State Nodes
+  const handleNodeContainerMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const el = nodeCarouselRef.current;
+    if (!el) return;
+    if (isNodeDraggingRef.current) {
+      const dx = e.clientX - nodeDragStartXRef.current;
+      if (Math.abs(dx) > 5) nodeHasDraggedRef.current = true;
+      el.scrollLeft = nodeDragStartScrollRef.current - dx;
+      nodeTargetScrollRef.current = el.scrollLeft;
+      return;
+    }
+    const rect = el.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const ratio = Math.max(0, Math.min(1, mouseX / rect.width));
+    const maxScroll = el.scrollWidth - el.clientWidth;
+    if (maxScroll > 0) {
+      nodeTargetScrollRef.current = ratio * maxScroll;
+      isNodeHoveringRef.current = true;
+    }
+  };
+
+  const handleNodeContainerMouseEnter = () => {
+    isNodeHoveringRef.current = true;
+    if (nodeCarouselRef.current) {
+      nodeTargetScrollRef.current = nodeCarouselRef.current.scrollLeft;
+    }
+  };
+
+  const handleNodeContainerMouseLeave = () => {
+    isNodeHoveringRef.current = false;
+    isNodeDraggingRef.current = false;
+  };
+
+  const handleNodeMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!nodeCarouselRef.current) return;
+    isNodeDraggingRef.current = true;
+    nodeHasDraggedRef.current = false;
+    nodeDragStartXRef.current = e.clientX;
+    nodeDragStartScrollRef.current = nodeCarouselRef.current.scrollLeft;
+  };
+
+  const handleNodeMouseUp = () => {
+    isNodeDraggingRef.current = false;
+    setTimeout(() => {
+      nodeHasDraggedRef.current = false;
+    }, 60);
+  };
+
+  const handleNodeScroll = () => {
+    if (!nodeCarouselRef.current) return;
+    const scrollLeft = nodeCarouselRef.current.scrollLeft;
+    const cardWidth = 380;
+    const idx = Math.round(scrollLeft / cardWidth);
+    setActiveNodeIndex(Math.max(0, Math.min(idx, nodes.length - 1)));
+  };
+
+  const scrollNodePrev = () => {
+    if (nodeCarouselRef.current) {
+      const cardWidth = nodeCarouselRef.current.clientWidth > 768 ? 390 : 330;
+      nodeCarouselRef.current.scrollBy({ left: -cardWidth, behavior: 'smooth' });
+    }
+  };
+
+  const scrollNodeNext = () => {
+    if (nodeCarouselRef.current) {
+      const cardWidth = nodeCarouselRef.current.clientWidth > 768 ? 390 : 330;
+      nodeCarouselRef.current.scrollBy({ left: cardWidth, behavior: 'smooth' });
+    }
+  };
+
+  // Mouse handlers for Disease Corridors
+  const handleAlertContainerMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const el = alertCarouselRef.current;
+    if (!el) return;
+    if (isAlertDraggingRef.current) {
+      const dx = e.clientX - alertDragStartXRef.current;
+      if (Math.abs(dx) > 5) alertHasDraggedRef.current = true;
+      el.scrollLeft = alertDragStartScrollRef.current - dx;
+      alertTargetScrollRef.current = el.scrollLeft;
+      return;
+    }
+    const rect = el.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const ratio = Math.max(0, Math.min(1, mouseX / rect.width));
+    const maxScroll = el.scrollWidth - el.clientWidth;
+    if (maxScroll > 0) {
+      alertTargetScrollRef.current = ratio * maxScroll;
+      isAlertHoveringRef.current = true;
+    }
+  };
+
+  const handleAlertContainerMouseEnter = () => {
+    isAlertHoveringRef.current = true;
+    if (alertCarouselRef.current) {
+      alertTargetScrollRef.current = alertCarouselRef.current.scrollLeft;
+    }
+  };
+
+  const handleAlertContainerMouseLeave = () => {
+    isAlertHoveringRef.current = false;
+    isAlertDraggingRef.current = false;
+  };
+
+  const handleAlertMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!alertCarouselRef.current) return;
+    isAlertDraggingRef.current = true;
+    alertHasDraggedRef.current = false;
+    alertDragStartXRef.current = e.clientX;
+    alertDragStartScrollRef.current = alertCarouselRef.current.scrollLeft;
+  };
+
+  const handleAlertMouseUp = () => {
+    isAlertDraggingRef.current = false;
+    setTimeout(() => {
+      alertHasDraggedRef.current = false;
+    }, 60);
+  };
+
+  const handleAlertScroll = () => {
+    if (!alertCarouselRef.current) return;
+    const scrollLeft = alertCarouselRef.current.scrollLeft;
+    const cardWidth = 440;
+    const idx = Math.round(scrollLeft / cardWidth);
+    setActiveAlertIndex(Math.max(0, Math.min(idx, diseaseAlerts.length - 1)));
+  };
+
+  const scrollAlertPrev = () => {
+    if (alertCarouselRef.current) {
+      const cardWidth = alertCarouselRef.current.clientWidth > 768 ? 440 : 350;
+      alertCarouselRef.current.scrollBy({ left: -cardWidth, behavior: 'smooth' });
+    }
+  };
+
+  const scrollAlertNext = () => {
+    if (alertCarouselRef.current) {
+      const cardWidth = alertCarouselRef.current.clientWidth > 768 ? 440 : 350;
+      alertCarouselRef.current.scrollBy({ left: cardWidth, behavior: 'smooth' });
+    }
+  };
+
+  // Card spotlight glow effect
+  const handleCardMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const card = e.currentTarget;
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    card.style.setProperty('--spotlight-x', `${x}px`);
+    card.style.setProperty('--spotlight-y', `${y}px`);
+    card.style.setProperty('--spotlight-opacity', '1');
+  }, []);
+
+  const handleCardMouseLeave = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const card = e.currentTarget;
+    card.style.setProperty('--spotlight-opacity', '0');
+  }, []);
+
   useEffect(() => {
     async function loadGovData() {
       setLoading(true);
@@ -841,79 +1067,268 @@ export const GovDashboardPage: React.FC<GovDashboardPageProps> = ({ onNavigate }
                 Under Watch
               </button>
             </div>
-          </div>
-
-          {/* State Nodes Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {filteredNodes.map((node) => (
-              <div
-                key={node.code}
-                onClick={() => setSelectedNodeModal(node)}
-                className="bg-white rounded-[2.2rem] p-6 border border-[#022113]/8 shadow-md hover:shadow-xl transition-all cursor-pointer group flex flex-col justify-between space-y-4 hover:border-[#546C18]/40"
-              >
-                <div className="space-y-3">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-[#F0F2EB] text-[#546C18] border border-[#022113]/5">
-                        {node.code}
-                      </span>
-                      <h3 className="text-xl font-bold font-['Montserrat',sans-serif] text-[#022113] mt-1.5 group-hover:text-[#546C18] transition-colors">
-                        {node.state}
-                      </h3>
-                    </div>
-                    <span className="w-8 h-8 rounded-full bg-[#F0F2EB] group-hover:bg-[#DFEB38] text-[#022113] flex items-center justify-center transition-all">
-                      <ArrowUpRight className="w-4 h-4" />
-                    </span>
-                  </div>
-
-                  <p className="text-xs text-[#022113]/70 font-medium line-clamp-2">
-                    {node.hub}
-                  </p>
-
-                  <div className="p-3 rounded-2xl bg-[#F8FAF6] border border-[#022113]/5 space-y-1.5 text-xs">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold uppercase text-[#022113]/50 font-['Montserrat',sans-serif]">
-                        Dominant Crops:
-                      </span>
-                      <span className="font-semibold text-[#022113]">
-                        {node.dominant_crops.slice(0, 2).join(', ')}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold uppercase text-[#022113]/50 font-['Montserrat',sans-serif]">
-                        Sentinel-2 NDVI:
-                      </span>
-                      <span className="font-mono font-bold text-[#546C18]">
-                        {node.ndvi_mean}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold uppercase text-[#022113]/50 font-['Montserrat',sans-serif]">
-                        Agency:
-                      </span>
-                      <span className="text-[11px] text-[#022113]/70 truncate max-w-[150px]">
-                        {node.agency.split('(')[0]}
-                      </span>
-                    </div>
-                  </div>
+              {/* Carousel / Grid Toggle and Navigation Controls */}
+              <div className="flex items-center gap-2">
+                <div className="flex items-center bg-[#F0F2EB] p-1 rounded-full border border-[#022113]/5">
+                  <button
+                    onClick={() => setNodeViewLayout('carousel')}
+                    title="Spotlight Carousel"
+                    className={`px-3 py-1 rounded-full text-xs font-bold font-['Montserrat',sans-serif] flex items-center gap-1.5 transition-all cursor-pointer ${
+                      nodeViewLayout === 'carousel'
+                        ? 'bg-[#546C18] text-[#DFEB38] shadow-xs'
+                        : 'text-[#022113]/70 hover:text-[#022113]'
+                    }`}
+                  >
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Carousel</span>
+                  </button>
+                  <button
+                    onClick={() => setNodeViewLayout('grid')}
+                    title="Grid View"
+                    className={`px-3 py-1 rounded-full text-xs font-bold font-['Montserrat',sans-serif] flex items-center gap-1.5 transition-all cursor-pointer ${
+                      nodeViewLayout === 'grid'
+                        ? 'bg-[#546C18] text-[#DFEB38] shadow-xs'
+                        : 'text-[#022113]/70 hover:text-[#022113]'
+                    }`}
+                  >
+                    <LayoutGrid className="w-3.5 h-3.5" />
+                    <span>Grid</span>
+                  </button>
                 </div>
 
-                <div className="pt-3 border-t border-[#022113]/8 flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                    <span className="text-[11px] font-mono text-[#022113]/70">{node.latency_ms}ms ping</span>
+                {nodeViewLayout === 'carousel' && (
+                  <div className="flex items-center gap-1 ml-1">
+                    <button
+                      onClick={scrollNodePrev}
+                      className="w-8 h-8 rounded-full bg-[#F0F2EB] hover:bg-[#DFEB38] text-[#022113] flex items-center justify-center transition-all cursor-pointer shadow-xs border border-[#022113]/5"
+                      title="Previous Node"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={scrollNodeNext}
+                      className="w-8 h-8 rounded-full bg-[#F0F2EB] hover:bg-[#DFEB38] text-[#022113] flex items-center justify-center transition-all cursor-pointer shadow-xs border border-[#022113]/5"
+                      title="Next Node"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
                   </div>
-                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold font-['Montserrat',sans-serif] uppercase tracking-wider ${
-                    node.health_status === 'Optimal'
-                      ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
-                      : 'bg-amber-100 text-amber-800 border border-amber-200'
-                  }`}>
-                    {node.health_status}
+                )}
+              </div>
+            </div>
+
+          {/* State Nodes View */}
+          {nodeViewLayout === 'carousel' ? (
+            <div className="space-y-4">
+              <div
+                ref={nodeCarouselRef}
+                onMouseMove={handleNodeContainerMouseMove}
+                onMouseEnter={handleNodeContainerMouseEnter}
+                onMouseLeave={handleNodeContainerMouseLeave}
+                onMouseDown={handleNodeMouseDown}
+                onMouseUp={handleNodeMouseUp}
+                onScroll={handleNodeScroll}
+                className="flex gap-5 overflow-x-auto pb-4 pt-1 px-1 select-none cursor-grab active:cursor-grabbing scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:none"
+              >
+                {filteredNodes.map((node) => (
+                  <div
+                    key={node.code}
+                    onClick={() => {
+                      if (!nodeHasDraggedRef.current) setSelectedNodeModal(node);
+                    }}
+                    onMouseMove={handleCardMouseMove}
+                    onMouseLeave={handleCardMouseLeave}
+                    style={{
+                      '--spotlight-x': '50%',
+                      '--spotlight-y': '50%',
+                      '--spotlight-opacity': '0',
+                    } as React.CSSProperties}
+                    className="group relative bg-white rounded-[2.2rem] p-6 border-2 border-[#022113]/8 hover:border-[#546C18]/40 shadow-md hover:shadow-xl transition-all cursor-pointer flex flex-col justify-between w-[320px] sm:w-[350px] md:w-[370px] h-[340px] shrink-0 overflow-hidden font-['Open_Sans',sans-serif]"
+                  >
+                    {/* Spotlight Glow Overlay */}
+                    <div 
+                      className="pointer-events-none absolute -inset-px rounded-[2.2rem] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                      style={{
+                        background: 'radial-gradient(350px circle at var(--spotlight-x, 50%) var(--spotlight-y, 50%), rgba(223, 235, 56, 0.18), transparent 70%)'
+                      }}
+                    />
+
+                    <div className="space-y-3 relative z-10">
+                      <div className="flex items-start justify-between h-[52px]">
+                        <div className="min-w-0 pr-2">
+                          <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-[#F0F2EB] text-[#546C18] border border-[#022113]/5">
+                            {node.code}
+                          </span>
+                          <h3 className="text-xl font-bold font-['Montserrat',sans-serif] text-[#022113] mt-1 group-hover:text-[#546C18] transition-colors truncate">
+                            {node.state}
+                          </h3>
+                        </div>
+                        <span className="w-8 h-8 rounded-full bg-[#F0F2EB] group-hover:bg-[#DFEB38] text-[#022113] flex items-center justify-center transition-all shrink-0">
+                          <ArrowUpRight className="w-4 h-4" />
+                        </span>
+                      </div>
+
+                      <div className="h-[36px] flex items-center">
+                        <p className="text-xs text-[#022113]/70 font-medium line-clamp-2">
+                          {node.hub}
+                        </p>
+                      </div>
+
+                      <div className="h-[110px] p-3 rounded-2xl bg-[#F8FAF6] border border-[#022113]/5 flex flex-col justify-between text-xs">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold uppercase text-[#022113]/50 font-['Montserrat',sans-serif]">
+                            Dominant Crops:
+                          </span>
+                          <span className="font-semibold text-[#022113] truncate max-w-[170px] text-right">
+                            {node.dominant_crops.slice(0, 2).join(', ')}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold uppercase text-[#022113]/50 font-['Montserrat',sans-serif]">
+                            Sentinel-2 NDVI:
+                          </span>
+                          <span className="font-mono font-bold text-[#546C18]">
+                            {node.ndvi_mean}
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold uppercase text-[#022113]/50 font-['Montserrat',sans-serif]">
+                            Agency:
+                          </span>
+                          <span className="text-[11px] text-[#022113]/70 truncate max-w-[160px] text-right">
+                            {node.agency.split('(')[0]}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="pt-3 border-t border-[#022113]/8 flex items-center justify-between text-xs h-[42px] relative z-10">
+                      <div className="flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                        <span className="text-[11px] font-mono text-[#022113]/70">{node.latency_ms}ms ping</span>
+                      </div>
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold font-['Montserrat',sans-serif] uppercase tracking-wider ${
+                        node.health_status === 'Optimal'
+                          ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                          : 'bg-amber-100 text-amber-800 border border-amber-200'
+                      }`}>
+                        {node.health_status}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Carousel Footer Indicator Bar */}
+              <div className="flex items-center justify-between px-2 pt-1 text-xs text-[#022113]/60">
+                <span className="font-medium flex items-center gap-1.5">
+                  <span className="inline-block w-2 h-2 rounded-full bg-[#546C18] animate-pulse" />
+                  <span>Glide mouse horizontally to explore federated state topologies</span>
+                </span>
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-[11px] font-bold text-[#022113]">
+                    {Math.min(activeNodeIndex + 1, filteredNodes.length)} / {filteredNodes.length} Nodes
                   </span>
+                  <div className="flex items-center gap-1">
+                    {filteredNodes.slice(0, 10).map((_, i) => (
+                      <span
+                        key={i}
+                        className={`inline-block h-1.5 rounded-full transition-all duration-300 ${
+                          i === activeNodeIndex ? 'w-5 bg-[#546C18]' : 'w-1.5 bg-[#022113]/15'
+                        }`}
+                      />
+                    ))}
+                  </div>
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {filteredNodes.map((node) => (
+                <div
+                  key={node.code}
+                  onClick={() => setSelectedNodeModal(node)}
+                  onMouseMove={handleCardMouseMove}
+                  onMouseLeave={handleCardMouseLeave}
+                  style={{
+                    '--spotlight-x': '50%',
+                    '--spotlight-y': '50%',
+                    '--spotlight-opacity': '0',
+                  } as React.CSSProperties}
+                  className="group relative bg-white rounded-[2.2rem] p-6 border-2 border-[#022113]/8 hover:border-[#546C18]/40 shadow-md hover:shadow-xl transition-all cursor-pointer flex flex-col justify-between h-[340px] overflow-hidden font-['Open_Sans',sans-serif]"
+                >
+                  <div 
+                    className="pointer-events-none absolute -inset-px rounded-[2.2rem] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                    style={{
+                      background: 'radial-gradient(350px circle at var(--spotlight-x, 50%) var(--spotlight-y, 50%), rgba(223, 235, 56, 0.18), transparent 70%)'
+                    }}
+                  />
+                  <div className="space-y-3 relative z-10">
+                    <div className="flex items-start justify-between h-[52px]">
+                      <div className="min-w-0 pr-2">
+                        <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-[#F0F2EB] text-[#546C18] border border-[#022113]/5">
+                          {node.code}
+                        </span>
+                        <h3 className="text-xl font-bold font-['Montserrat',sans-serif] text-[#022113] mt-1 group-hover:text-[#546C18] transition-colors truncate">
+                          {node.state}
+                        </h3>
+                      </div>
+                      <span className="w-8 h-8 rounded-full bg-[#F0F2EB] group-hover:bg-[#DFEB38] text-[#022113] flex items-center justify-center transition-all shrink-0">
+                        <ArrowUpRight className="w-4 h-4" />
+                      </span>
+                    </div>
+
+                    <div className="h-[36px] flex items-center">
+                      <p className="text-xs text-[#022113]/70 font-medium line-clamp-2">
+                        {node.hub}
+                      </p>
+                    </div>
+
+                    <div className="h-[110px] p-3 rounded-2xl bg-[#F8FAF6] border border-[#022113]/5 flex flex-col justify-between text-xs">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold uppercase text-[#022113]/50 font-['Montserrat',sans-serif]">
+                          Dominant Crops:
+                        </span>
+                        <span className="font-semibold text-[#022113] truncate max-w-[170px] text-right">
+                          {node.dominant_crops.slice(0, 2).join(', ')}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold uppercase text-[#022113]/50 font-['Montserrat',sans-serif]">
+                          Sentinel-2 NDVI:
+                        </span>
+                        <span className="font-mono font-bold text-[#546C18]">
+                          {node.ndvi_mean}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold uppercase text-[#022113]/50 font-['Montserrat',sans-serif]">
+                          Agency:
+                        </span>
+                        <span className="text-[11px] text-[#022113]/70 truncate max-w-[160px] text-right">
+                          {node.agency.split('(')[0]}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-3 border-t border-[#022113]/8 flex items-center justify-between text-xs h-[42px] relative z-10">
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                      <span className="text-[11px] font-mono text-[#022113]/70">{node.latency_ms}ms ping</span>
+                    </div>
+                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold font-['Montserrat',sans-serif] uppercase tracking-wider ${
+                      node.health_status === 'Optimal'
+                        ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                        : 'bg-amber-100 text-amber-800 border border-amber-200'
+                    }`}>
+                      {node.health_status}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* Detailed State Table */}
           <div className="bg-white rounded-[2.5rem] border border-[#022113]/8 p-6 sm:p-8 shadow-xl space-y-4">
@@ -995,79 +1410,271 @@ export const GovDashboardPage: React.FC<GovDashboardPageProps> = ({ onNavigate }
                   Cross-state alerts dispatched via automated vector forecasting, micro-climate humidity thresholds, and Gemini Diagnostic scans.
                 </p>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3 flex-wrap">
                 <span className="px-3 py-1 rounded-full text-xs font-bold font-['Montserrat',sans-serif] uppercase tracking-wider bg-amber-100 text-amber-900 border border-amber-200">
                   {diseaseAlerts.length} Active Corridors Under ICAR Watch
                 </span>
+
+                {/* Carousel / Grid Toggle and Navigation Controls */}
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center bg-[#F0F2EB] p-1 rounded-full border border-[#022113]/5">
+                    <button
+                      onClick={() => setAlertViewLayout('carousel')}
+                      title="Spotlight Carousel"
+                      className={`px-3 py-1 rounded-full text-xs font-bold font-['Montserrat',sans-serif] flex items-center gap-1.5 transition-all cursor-pointer ${
+                        alertViewLayout === 'carousel'
+                          ? 'bg-[#546C18] text-[#DFEB38] shadow-xs'
+                          : 'text-[#022113]/70 hover:text-[#022113]'
+                      }`}
+                    >
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>Carousel</span>
+                    </button>
+                    <button
+                      onClick={() => setAlertViewLayout('grid')}
+                      title="Grid View"
+                      className={`px-3 py-1 rounded-full text-xs font-bold font-['Montserrat',sans-serif] flex items-center gap-1.5 transition-all cursor-pointer ${
+                        alertViewLayout === 'grid'
+                          ? 'bg-[#546C18] text-[#DFEB38] shadow-xs'
+                          : 'text-[#022113]/70 hover:text-[#022113]'
+                      }`}
+                    >
+                      <LayoutGrid className="w-3.5 h-3.5" />
+                      <span>Grid</span>
+                    </button>
+                  </div>
+
+                  {alertViewLayout === 'carousel' && (
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={scrollAlertPrev}
+                        className="w-8 h-8 rounded-full bg-[#F0F2EB] hover:bg-[#DFEB38] text-[#022113] flex items-center justify-center transition-all cursor-pointer shadow-xs border border-[#022113]/5"
+                        title="Previous Corridor"
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={scrollAlertNext}
+                        className="w-8 h-8 rounded-full bg-[#F0F2EB] hover:bg-[#DFEB38] text-[#022113] flex items-center justify-center transition-all cursor-pointer shadow-xs border border-[#022113]/5"
+                        title="Next Corridor"
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {diseaseAlerts.map((alert) => (
+            {/* Disease Alerts View */}
+            {alertViewLayout === 'carousel' ? (
+              <div className="space-y-4">
                 <div 
-                  key={alert.id}
-                  className="p-6 rounded-[2rem] bg-[#F8FAF6] border border-[#022113]/8 hover:border-[#546C18]/40 transition-all shadow-sm space-y-4 flex flex-col justify-between"
+                  ref={alertCarouselRef}
+                  onMouseMove={handleAlertContainerMouseMove}
+                  onMouseEnter={handleAlertContainerMouseEnter}
+                  onMouseLeave={handleAlertContainerMouseLeave}
+                  onMouseDown={handleAlertMouseDown}
+                  onMouseUp={handleAlertMouseUp}
+                  onScroll={handleAlertScroll}
+                  className="flex gap-6 overflow-x-auto pb-4 pt-1 px-1 select-none cursor-grab active:cursor-grabbing scrollbar-none [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:none"
                 >
-                  <div className="space-y-3">
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <span className="text-[10px] font-mono font-bold text-[#546C18] block">{alert.id}</span>
-                        <h4 className="text-lg font-bold text-[#022113] font-['Montserrat',sans-serif] mt-0.5">
-                          {alert.pathogen}
-                        </h4>
-                        <span className="text-xs font-semibold text-[#546C18]">Host Crop: {alert.crop}</span>
-                      </div>
-                      <span className={`px-3 py-1 rounded-full text-[10px] font-bold font-['Montserrat',sans-serif] uppercase tracking-wider shrink-0 ${
-                        alert.severity === 'high'
-                          ? 'bg-rose-100 text-rose-800 border border-rose-200'
-                          : 'bg-amber-100 text-amber-800 border border-amber-200'
-                      }`}>
-                        {alert.severity} Risk
-                      </span>
-                    </div>
-
-                    {/* Vector Trajectory Corridor */}
-                    <div className="p-3.5 rounded-2xl bg-white border border-[#022113]/5 space-y-2">
-                      <div className="flex items-center justify-between text-xs font-bold font-['Montserrat',sans-serif]">
-                        <span className="text-[#022113]">{alert.originDistrict}, {alert.originState}</span>
-                        <span className="text-[#546C18] flex items-center gap-1 font-mono text-[11px]">
-                          <span>→</span>
-                          <span>{alert.vectorDistanceKm} km</span>
-                          <span>→</span>
-                        </span>
-                        <span className="text-[#022113]">{alert.destinationDistrict}, {alert.destinationState}</span>
-                      </div>
-                      <div className="text-[11px] text-[#022113]/60 flex items-center justify-between pt-1 border-t border-[#022113]/5">
-                        <span>Vector: {alert.vectorType}</span>
-                        <span className="font-mono">Radius: {alert.containmentRadiusKm} km</span>
-                      </div>
-                    </div>
-
-                    <div className="text-xs space-y-1">
-                      <span className="text-[10px] font-bold uppercase text-[#546C18] font-['Montserrat',sans-serif] block">
-                        ICAR Prophylactic Prescription:
-                      </span>
-                      <p className="text-[#022113]/80 leading-relaxed font-normal bg-white p-3 rounded-xl border border-[#022113]/5">
-                        {alert.recommendedAdvisory}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="pt-3 border-t border-[#022113]/8 flex items-center justify-between text-xs">
-                    <span className="text-xs font-mono text-[#022113]/60">
-                      {alert.verifiedReports} Field Scans Verified
-                    </span>
-                    <button
-                      onClick={() => onNavigate('diagnose')}
-                      className="px-4 py-2 rounded-full bg-[#DFEB38] text-[#022113] font-bold text-xs font-['Montserrat',sans-serif] uppercase tracking-wider hover:bg-[#d0df2a] transition-all flex items-center gap-1 cursor-pointer shadow-xs"
+                  {diseaseAlerts.map((alert) => (
+                    <div 
+                      key={alert.id}
+                      onMouseMove={handleCardMouseMove}
+                      onMouseLeave={handleCardMouseLeave}
+                      style={{
+                        '--spotlight-x': '50%',
+                        '--spotlight-y': '50%',
+                        '--spotlight-opacity': '0',
+                      } as React.CSSProperties}
+                      className="group relative p-6 rounded-[2.2rem] bg-[#F8FAF6] border-2 border-[#022113]/8 hover:border-[#546C18]/40 transition-all shadow-sm hover:shadow-xl flex flex-col justify-between w-[360px] sm:w-[420px] md:w-[460px] h-[430px] shrink-0 overflow-hidden font-['Open_Sans',sans-serif]"
                     >
-                      <span>Run Leaf Diagnosis</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </button>
+                      {/* Spotlight Glow Overlay */}
+                      <div 
+                        className="pointer-events-none absolute -inset-px rounded-[2.2rem] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                        style={{
+                          background: 'radial-gradient(400px circle at var(--spotlight-x, 50%) var(--spotlight-y, 50%), rgba(84, 108, 24, 0.14), transparent 70%)'
+                        }}
+                      />
+
+                      <div className="space-y-3 relative z-10">
+                        <div className="flex items-start justify-between gap-3 h-[68px]">
+                          <div className="min-w-0 pr-2">
+                            <span className="text-[10px] font-mono font-bold text-[#546C18] block">{alert.id}</span>
+                            <h4 className="text-lg font-bold text-[#022113] font-['Montserrat',sans-serif] mt-0.5 truncate">
+                              {alert.pathogen}
+                            </h4>
+                            <span className="text-xs font-semibold text-[#546C18] truncate block">Host Crop: {alert.crop}</span>
+                          </div>
+                          <span className={`px-3 py-1 rounded-full text-[10px] font-bold font-['Montserrat',sans-serif] uppercase tracking-wider shrink-0 ${
+                            alert.severity === 'high'
+                              ? 'bg-rose-100 text-rose-800 border border-rose-200'
+                              : 'bg-amber-100 text-amber-800 border border-amber-200'
+                          }`}>
+                            {alert.severity} Risk
+                          </span>
+                        </div>
+
+                        {/* Vector Trajectory Corridor */}
+                        <div className="p-3.5 rounded-2xl bg-white border border-[#022113]/5 flex flex-col justify-between h-[76px]">
+                          <div className="flex items-center justify-between text-xs font-bold font-['Montserrat',sans-serif]">
+                            <span className="text-[#022113] truncate max-w-[140px]">{alert.originDistrict}, {alert.originState}</span>
+                            <span className="text-[#546C18] flex items-center gap-1 font-mono text-[11px] shrink-0 px-1">
+                              <span>→</span>
+                              <span>{alert.vectorDistanceKm} km</span>
+                              <span>→</span>
+                            </span>
+                            <span className="text-[#022113] truncate max-w-[140px] text-right">{alert.destinationDistrict}, {alert.destinationState}</span>
+                          </div>
+                          <div className="text-[11px] text-[#022113]/60 flex items-center justify-between pt-1 border-t border-[#022113]/5">
+                            <span className="truncate max-w-[190px]">Vector: {alert.vectorType}</span>
+                            <span className="font-mono shrink-0">Radius: {alert.containmentRadiusKm} km</span>
+                          </div>
+                        </div>
+
+                        {/* ICAR Prophylactic Prescription */}
+                        <div className="text-xs space-y-1 h-[120px] flex flex-col">
+                          <span className="text-[10px] font-bold uppercase text-[#546C18] font-['Montserrat',sans-serif] block h-[18px]">
+                            ICAR Prophylactic Prescription:
+                          </span>
+                          <div className="h-[96px] overflow-hidden bg-white p-3 rounded-xl border border-[#022113]/5">
+                            <p className="text-[#022113]/80 leading-relaxed font-normal text-xs line-clamp-3">
+                              {alert.recommendedAdvisory}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="pt-3 border-t border-[#022113]/8 flex items-center justify-between text-xs h-[46px] relative z-10">
+                        <span className="text-xs font-mono text-[#022113]/60">
+                          {alert.verifiedReports} Field Scans Verified
+                        </span>
+                        <button
+                          onClick={() => {
+                            if (!alertHasDraggedRef.current) {
+                              onNavigate('diagnose');
+                            }
+                          }}
+                          className="px-4 py-2 rounded-full bg-[#DFEB38] text-[#022113] font-bold text-xs font-['Montserrat',sans-serif] uppercase tracking-wider hover:bg-[#d0df2a] transition-all flex items-center gap-1 cursor-pointer shadow-xs shrink-0"
+                        >
+                          <span>Run Leaf Diagnosis</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Carousel Footer Indicator Bar */}
+                <div className="flex items-center justify-between px-2 pt-1 text-xs text-[#022113]/60">
+                  <span className="font-medium flex items-center gap-1.5">
+                    <span className="inline-block w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+                    <span>Glide mouse horizontally to review inter-state pathogen corridors</span>
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-[11px] font-bold text-[#022113]">
+                      {Math.min(activeAlertIndex + 1, diseaseAlerts.length)} / {diseaseAlerts.length} Corridors
+                    </span>
+                    <div className="flex items-center gap-1">
+                      {diseaseAlerts.map((_, i) => (
+                        <span
+                          key={i}
+                          className={`inline-block h-1.5 rounded-full transition-all duration-300 ${
+                            i === activeAlertIndex ? 'w-5 bg-[#546C18]' : 'w-1.5 bg-[#022113]/15'
+                          }`}
+                        />
+                      ))}
+                    </div>
                   </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {diseaseAlerts.map((alert) => (
+                  <div 
+                    key={alert.id}
+                    onMouseMove={handleCardMouseMove}
+                    onMouseLeave={handleCardMouseLeave}
+                    style={{
+                      '--spotlight-x': '50%',
+                      '--spotlight-y': '50%',
+                      '--spotlight-opacity': '0',
+                    } as React.CSSProperties}
+                    className="group relative p-6 rounded-[2.2rem] bg-[#F8FAF6] border-2 border-[#022113]/8 hover:border-[#546C18]/40 transition-all shadow-sm hover:shadow-xl flex flex-col justify-between h-[430px] overflow-hidden font-['Open_Sans',sans-serif]"
+                  >
+                    <div 
+                      className="pointer-events-none absolute -inset-px rounded-[2.2rem] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                      style={{
+                        background: 'radial-gradient(400px circle at var(--spotlight-x, 50%) var(--spotlight-y, 50%), rgba(84, 108, 24, 0.14), transparent 70%)'
+                      }}
+                    />
+
+                    <div className="space-y-3 relative z-10">
+                      <div className="flex items-start justify-between gap-3 h-[68px]">
+                        <div className="min-w-0 pr-2">
+                          <span className="text-[10px] font-mono font-bold text-[#546C18] block">{alert.id}</span>
+                          <h4 className="text-lg font-bold text-[#022113] font-['Montserrat',sans-serif] mt-0.5 truncate">
+                            {alert.pathogen}
+                          </h4>
+                          <span className="text-xs font-semibold text-[#546C18] truncate block">Host Crop: {alert.crop}</span>
+                        </div>
+                        <span className={`px-3 py-1 rounded-full text-[10px] font-bold font-['Montserrat',sans-serif] uppercase tracking-wider shrink-0 ${
+                          alert.severity === 'high'
+                            ? 'bg-rose-100 text-rose-800 border border-rose-200'
+                            : 'bg-amber-100 text-amber-800 border border-amber-200'
+                        }`}>
+                          {alert.severity} Risk
+                        </span>
+                      </div>
+
+                      {/* Vector Trajectory Corridor */}
+                      <div className="p-3.5 rounded-2xl bg-white border border-[#022113]/5 flex flex-col justify-between h-[76px]">
+                        <div className="flex items-center justify-between text-xs font-bold font-['Montserrat',sans-serif]">
+                          <span className="text-[#022113] truncate max-w-[140px]">{alert.originDistrict}, {alert.originState}</span>
+                          <span className="text-[#546C18] flex items-center gap-1 font-mono text-[11px] shrink-0 px-1">
+                            <span>→</span>
+                            <span>{alert.vectorDistanceKm} km</span>
+                            <span>→</span>
+                          </span>
+                          <span className="text-[#022113] truncate max-w-[140px] text-right">{alert.destinationDistrict}, {alert.destinationState}</span>
+                        </div>
+                        <div className="text-[11px] text-[#022113]/60 flex items-center justify-between pt-1 border-t border-[#022113]/5">
+                          <span className="truncate max-w-[190px]">Vector: {alert.vectorType}</span>
+                          <span className="font-mono shrink-0">Radius: {alert.containmentRadiusKm} km</span>
+                        </div>
+                      </div>
+
+                      {/* ICAR Prophylactic Prescription */}
+                      <div className="text-xs space-y-1 h-[120px] flex flex-col">
+                        <span className="text-[10px] font-bold uppercase text-[#546C18] font-['Montserrat',sans-serif] block h-[18px]">
+                          ICAR Prophylactic Prescription:
+                        </span>
+                        <div className="h-[96px] overflow-hidden bg-white p-3 rounded-xl border border-[#022113]/5">
+                          <p className="text-[#022113]/80 leading-relaxed font-normal text-xs line-clamp-3">
+                            {alert.recommendedAdvisory}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="pt-3 border-t border-[#022113]/8 flex items-center justify-between text-xs h-[46px] relative z-10">
+                      <span className="text-xs font-mono text-[#022113]/60">
+                        {alert.verifiedReports} Field Scans Verified
+                      </span>
+                      <button
+                        onClick={() => onNavigate('diagnose')}
+                        className="px-4 py-2 rounded-full bg-[#DFEB38] text-[#022113] font-bold text-xs font-['Montserrat',sans-serif] uppercase tracking-wider hover:bg-[#d0df2a] transition-all flex items-center gap-1 cursor-pointer shadow-xs shrink-0"
+                      >
+                        <span>Run Leaf Diagnosis</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
