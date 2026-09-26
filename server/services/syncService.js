@@ -368,6 +368,6 @@ export async function getSyncStatus() {
     last_sync: lastSync,
     today_active_quotes: liveCount?.count || 0,
     total_verified_records: totalRecords?.count || 0,
-    api_connected: Boolean(process.env.DATA_GOV_IN_API_KEY)
+    api_connected: Boolean(process.env.DATA_GOV_IN_API_KEY || process.env.DATA_GOV_API_KEY)
   };
 }

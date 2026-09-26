@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "postgresql+asyncpg://agrimate:agrimate@localhost:5432/agrimate"
     GEMINI_API_KEY: str = ""
     EE_PROJECT: str = ""
-    JWT_SECRET: str = "agrimate_super_secret_key_for_hackathon_minimum_32_chars"
+    JWT_SECRET: str = ""
     JWT_ALGORITHM: str = "HS256"
     CORS_ORIGINS: str = '["http://localhost:3000", "http://localhost:5173"]'
     UPLOAD_DIR: str = "uploads"

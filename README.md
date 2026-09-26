@@ -161,7 +161,7 @@ Create a `.env` file in the project root:
 PORT=5001
 GEMINI_API_KEY=your_gemini_api_key_here
 VITE_GOOGLE_MAPS_API_KEY=your_google_maps_api_key_here
-DATA_GOV_API_KEY=579b464db66ec23bdd000001dedacf0e499b49a56823f17ffc58aef1
+DATA_GOV_API_KEY=your_data_gov_api_key_here
 ```
 *(AgriMate includes deterministic fallback engines for Google Satellite, Sentinel-2 NDVI, and Agmarknet rates if external keys are not provided).*
 

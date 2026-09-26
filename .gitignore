@@ -7,37 +7,80 @@ node_modules/
 # Production build artifacts
 dist/
 client/dist/
+build/
+out/
+.vercel
 
-# Environment and secrets
+# Environment and secret credential files
 .env
 .env.*
 *.env
 *.env.*
 **/.env
 **/.env.*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 !.env.example
 !**/.env.example
+!client/.env.example
+!server/.env.example
+!backend/.env.example
+
+# Private keys, certificates, and cloud credentials
+*.pem
+*.key
+*.cert
+*.crt
+*.p12
+*.pfx
+*.pkcs12
+service-account*.json
+credentials.json
+client_secret*.json
+google-services.json
+GoogleService-Info.plist
 
 # Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 *.log
 
 # Editor and OS files
 .vscode/
+!.vscode/extensions.json
 .idea/
 .DS_Store
 Thumbs.db
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 
-# SQLite database files
+# SQLite database and storage files
 *.db
 *.db-shm
 *.db-wal
+*.sqlite
+*.sqlite3
 
-# Uploads
+# Uploads and temporary files
 uploads/
 server/uploads/
+tmp/
+temp/
 
-
-.vercel
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.venv/
+venv/
+ENV/
+env/

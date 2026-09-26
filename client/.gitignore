@@ -7,10 +7,34 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Production build artifacts
 dist
 dist-ssr
-*.local
+
+# Environment files and credentials
+.env
+.env.*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+!.env.example
+*.pem
+*.key
+*.cert
+*.crt
+*.p12
+*.pfx
+service-account*.json
+credentials.json
+client_secret*.json
+google-services.json
+GoogleService-Info.plist
 
 # Editor directories and files
 .vscode/*
