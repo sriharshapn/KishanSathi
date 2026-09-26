@@ -18,7 +18,8 @@ import {
   ChevronLeft,
   ChevronRight,
   LayoutGrid,
-  Sparkles
+  Sparkles,
+  X
 } from 'lucide-react';
 import { apiUrl } from '../utils/api';
 
@@ -1494,7 +1495,7 @@ export const GovDashboardPage: React.FC<GovDashboardPageProps> = ({ onNavigate }
                 onClick={() => setSelectedNodeModal(null)}
                 className="w-8 h-8 rounded-full bg-[#F0F2EB] text-[#022113] flex items-center justify-center font-bold text-xs hover:bg-[#E2ECE3] transition-all cursor-pointer"
               >
-                ✕
+                <X className="w-4 h-4" />
               </button>
             </div>
 

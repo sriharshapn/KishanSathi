@@ -158,6 +158,7 @@ export interface WeatherCurrent {
   wind_speed: number;
   wind_direction: number;
   wind_direction_text: string;
+  wind_cardinal?: string;
   wind_gust: number;
   wind_force: string;
   uv_index: number;
@@ -179,6 +180,26 @@ export interface WeatherDayForecast {
   weather_code?: number;
   condition: string;
   icon: string;
+  wind_speed?: number;
+  wind_gust?: number;
+  wind_direction?: number;
+  wind_cardinal?: string;
+  wind_force?: string;
+  pressure?: number;
+  pressure_trend?: string;
+  humidity?: number;
+  dew_point?: number;
+  visibility_km?: number;
+  visibility_status?: string;
+  aqi?: number;
+  aqi_status?: string;
+  uv_index?: number;
+  uv_status?: string;
+  sunrise?: string;
+  sunset?: string;
+  sun_hours?: string;
+  hourly_trend?: WeatherHourlyItem[];
+  agri_advisory?: WeatherAgriAdvisory;
 }
 
 export interface WeatherHourlyItem {

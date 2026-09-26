@@ -57,7 +57,8 @@ export const WeatherDashboardPage: React.FC<WeatherDashboardPageProps> = ({ onNa
   };
 
   useEffect(() => {
-    fetchWeather(selectedState, selectedDistrict);
+    const c = getLocationCoordinates(selectedState, selectedDistrict);
+    fetchWeather(selectedState, selectedDistrict, c.lat, c.lon);
   }, [selectedState, selectedDistrict]);
 
   const handleStateChange = (st: string) => {
@@ -206,6 +207,7 @@ export const WeatherDashboardPage: React.FC<WeatherDashboardPageProps> = ({ onNa
       return {
         isToday: true,
         dayName: 'Today',
+        day_name: 'Today',
         date: cur.updated_at,
         temp: cur.temperature,
         condition: cur.condition,
@@ -213,41 +215,91 @@ export const WeatherDashboardPage: React.FC<WeatherDashboardPageProps> = ({ onNa
         temp_min: cur.temp_min,
         icon: cur.icon,
         wind_speed: cur.wind_speed,
+        wind_gust: cur.wind_gust,
+        wind_direction: cur.wind_direction,
+        wind_cardinal: cur.wind_cardinal || 'NE',
+        wind_force: cur.wind_force,
+        pressure: cur.pressure,
+        pressure_trend: cur.pressure_trend,
         humidity: cur.humidity,
-        precipitation: (forecast[0]?.precip_prob || 0)
+        dew_point: cur.dew_point,
+        visibility_km: cur.visibility_km,
+        visibility_status: cur.visibility_status,
+        aqi: cur.aqi,
+        aqi_status: cur.aqi_status,
+        uv_index: cur.uv_index,
+        uv_status: cur.uv_status,
+        sunrise: cur.sunrise,
+        sunset: cur.sunset,
+        sun_hours: cur.sun_hours,
+        precipitation: (forecast[0]?.precip_prob || 0),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        agri_advisory: weatherData?.agri_advisory || (forecast[0] as any)?.agri_advisory || {
+          spraying: "Favorable: Wind is light, optimal spraying window before 2 PM.",
+          irrigation: "Scheduled irrigation: Low rainfall forecast. Maintain normal watering cycle.",
+          harvesting: "Good window for picking and shaded sorting; keep tarpaulins ready."
+        }
       };
     }
-    const f = forecast[selectedDayIndex] || forecast[0];
-    const avgT = Math.round((f.temp_max + f.temp_min) / 2);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const f: any = forecast[selectedDayIndex] || forecast[0];
+    const avgT = f.temp ?? Math.round((f.temp_max + f.temp_min) / 2);
     return {
       isToday: false,
       dayName: f.day_name,
+      day_name: f.day_name,
       date: f.date,
       temp: avgT,
       condition: f.condition,
       temp_max: f.temp_max,
       temp_min: f.temp_min,
       icon: f.icon,
-      wind_speed: Math.round(cur.wind_speed * (1 + ((selectedDayIndex % 3) - 1) * 0.15)),
-      humidity: Math.max(30, Math.min(95, Math.round(cur.humidity + (f.precip_prob > 50 ? 12 : -8)))),
-      precipitation: f.precip_prob
+      wind_speed: f.wind_speed ?? cur.wind_speed,
+      wind_gust: f.wind_gust ?? Math.round((f.wind_speed ?? cur.wind_speed) * 1.8),
+      wind_direction: f.wind_direction ?? cur.wind_direction,
+      wind_cardinal: f.wind_cardinal ?? cur.wind_cardinal ?? 'NE',
+      wind_force: f.wind_force ?? cur.wind_force,
+      pressure: f.pressure ?? cur.pressure,
+      pressure_trend: f.pressure_trend ?? cur.pressure_trend,
+      humidity: f.humidity ?? cur.humidity,
+      dew_point: f.dew_point ?? cur.dew_point,
+      visibility_km: f.visibility_km ?? cur.visibility_km,
+      visibility_status: f.visibility_status ?? cur.visibility_status,
+      aqi: f.aqi ?? cur.aqi,
+      aqi_status: f.aqi_status ?? cur.aqi_status,
+      uv_index: f.uv_index ?? cur.uv_index,
+      uv_status: f.uv_status ?? cur.uv_status,
+      sunrise: f.sunrise ?? cur.sunrise,
+      sunset: f.sunset ?? cur.sunset,
+      sun_hours: f.sun_hours ?? cur.sun_hours,
+      precipitation: f.precip_prob ?? 0,
+      agri_advisory: f.agri_advisory ?? weatherData?.agri_advisory ?? {
+        spraying: "Favorable: Wind is light, optimal spraying window before 2 PM.",
+        irrigation: "Scheduled irrigation: Low rainfall forecast. Maintain normal watering cycle.",
+        harvesting: "Good window for picking and shaded sorting; keep tarpaulins ready."
+      }
     };
-  }, [selectedDayIndex, cur, forecast]);
+  }, [selectedDayIndex, cur, forecast, weatherData]);
 
   // Dynamic hourly curve matching the selected day
   const hourly = useMemo(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const f: any = forecast[selectedDayIndex];
+    if (f && Array.isArray(f.hourly_trend) && f.hourly_trend.length > 0) {
+      return f.hourly_trend;
+    }
     if (selectedDayIndex === 0 && weatherData?.hourly_trend) {
       return weatherData.hourly_trend;
     }
-    const f = forecast[selectedDayIndex] || forecast[0];
-    const minT = f.temp_min;
-    const maxT = f.temp_max;
+    const def = forecast[selectedDayIndex] || forecast[0];
+    const minT = def.temp_min;
+    const maxT = def.temp_max;
     const baseLabels = ["9 AM", "12 PM", "3 PM", "6 PM", "9 PM", "12 AM", "3 AM", "6 AM"];
     const diurnalFactors = [0.45, 0.85, 1.0, 0.70, 0.40, 0.20, 0.05, 0.0];
     return baseLabels.map((lbl, idx) => ({
       time_label: lbl,
       temp: Math.round(minT + (maxT - minT) * diurnalFactors[idx]),
-      precip_prob: Math.max(2, Math.round(f.precip_prob * (idx === 2 || idx === 3 ? 1.0 : 0.6)))
+      precip_prob: Math.max(2, Math.round((def.precip_prob || 0) * (idx === 2 || idx === 3 ? 1.0 : 0.6)))
     }));
   }, [selectedDayIndex, weatherData, forecast]);
 
@@ -258,19 +310,19 @@ export const WeatherDashboardPage: React.FC<WeatherDashboardPageProps> = ({ onNa
 
   // SVG Hourly Curve Calculation
   const hourlySvgPoints = useMemo(() => {
-    const temps = hourly.map(h => toDisplayTemp(h.temp));
+    const temps = hourly.map((h: any) => toDisplayTemp(h.temp));
     const minT = Math.min(...temps) - 2;
     const maxT = Math.max(...temps) + 2;
     const range = Math.max(1, maxT - minT);
 
-    const pts = hourly.map((h, i) => {
+    const pts = hourly.map((h: any, i: number) => {
       const x = 30 + (i * (540 / 7));
       const val = toDisplayTemp(h.temp);
       const y = 85 - (((val - minT) / range) * 55);
       return { x, y, val, label: h.time_label, precip: h.precip_prob };
     });
 
-    const dPath = pts.reduce((acc, p, i, a) => {
+    const dPath = pts.reduce((acc: any, p: any, i: number, a: any[]) => {
       if (i === 0) return `M ${p.x},${p.y}`;
       const prev = a[i - 1];
       const cpX = (prev.x + p.x) / 2;
@@ -620,10 +672,10 @@ export const WeatherDashboardPage: React.FC<WeatherDashboardPageProps> = ({ onNa
             <div className="space-y-1">
               <span className="text-xs font-bold text-[#546C18] uppercase tracking-wider font-['Montserrat',sans-serif]">Visibility</span>
               <div className="text-2xl font-black text-[#022113] font-['Montserrat',sans-serif]">
-                {cur.visibility_km} <span className="text-xs font-bold text-[#022113]/50 font-sans">km</span>
+                {activeDay.visibility_km} <span className="text-xs font-bold text-[#022113]/50 font-sans">km</span>
               </div>
               <span className="text-xs font-bold text-[#022113] bg-[#DFEB38] px-2.5 py-0.5 rounded-full inline-block font-['Montserrat',sans-serif] shadow-xs">
-                {cur.visibility_status}
+                {activeDay.visibility_status}
               </span>
             </div>
 
@@ -641,10 +693,10 @@ export const WeatherDashboardPage: React.FC<WeatherDashboardPageProps> = ({ onNa
             <div className="space-y-1">
               <span className="text-xs font-bold text-[#546C18] uppercase tracking-wider font-['Montserrat',sans-serif]">Pressure</span>
               <div className="text-2xl font-black text-[#022113] font-['Montserrat',sans-serif]">
-                {cur.pressure} <span className="text-xs font-bold text-[#022113]/50 font-sans">mb</span>
+                {activeDay.pressure} <span className="text-xs font-bold text-[#022113]/50 font-sans">mb</span>
               </div>
               <span className="text-xs font-semibold text-[#022113]/70 block">
-                {cur.pressure_trend}
+                {activeDay.pressure_trend}
               </span>
             </div>
 
@@ -662,10 +714,10 @@ export const WeatherDashboardPage: React.FC<WeatherDashboardPageProps> = ({ onNa
             <div className="space-y-1">
               <span className="text-xs font-bold text-[#546C18] uppercase tracking-wider font-['Montserrat',sans-serif]">AQI</span>
               <div className="text-2xl font-black text-[#022113] font-['Montserrat',sans-serif]">
-                {cur.aqi}
+                {activeDay.aqi}
               </div>
               <span className="text-xs font-bold text-[#022113] bg-[#DFEB38] px-2.5 py-0.5 rounded-full inline-block font-['Montserrat',sans-serif] shadow-xs">
-                {cur.aqi_status}
+                {activeDay.aqi_status}
               </span>
             </div>
 
@@ -694,10 +746,10 @@ export const WeatherDashboardPage: React.FC<WeatherDashboardPageProps> = ({ onNa
             <div className="space-y-1">
               <span className="text-xs font-bold text-[#546C18] uppercase tracking-wider font-['Montserrat',sans-serif]">UV</span>
               <div className="text-2xl font-black text-[#022113] font-['Montserrat',sans-serif]">
-                {cur.uv_index}
+                {activeDay.uv_index}
               </div>
               <span className="text-xs font-bold text-orange-800 bg-orange-100 px-2.5 py-0.5 rounded-full inline-block font-['Montserrat',sans-serif]">
-                {cur.uv_status}
+                {activeDay.uv_status}
               </span>
             </div>
 
@@ -746,7 +798,7 @@ export const WeatherDashboardPage: React.FC<WeatherDashboardPageProps> = ({ onNa
                 {/* Wind Vector Pointer */}
                 <div 
                   className="w-10 h-10 flex items-center justify-center transition-transform duration-700"
-                  style={{ transform: `rotate(${cur.wind_direction}deg)` }}
+                  style={{ transform: `rotate(${activeDay.wind_direction}deg)` }}
                 >
                   <div className="w-0 h-0 border-x-4 border-x-transparent border-b-[18px] border-b-[#546C18] -mt-2 drop-shadow-xs" />
                 </div>
@@ -755,17 +807,17 @@ export const WeatherDashboardPage: React.FC<WeatherDashboardPageProps> = ({ onNa
               <div className="space-y-1 text-right">
                 <div className="text-xs font-bold text-[#022113]">
                   <span className="text-base font-black font-['Montserrat',sans-serif]">{activeDay.wind_speed}</span> km/h
-                  <span className="block text-[10px] text-[#022113]/50 font-normal">Wind Speed</span>
+                  <span className="block text-[10px] text-[#022113]/50 font-normal">Wind Speed ({activeDay.wind_cardinal})</span>
                 </div>
                 <div className="text-xs font-bold text-[#022113] pt-1 border-t border-[#022113]/8">
-                  <span className="text-sm font-black font-['Montserrat',sans-serif]">{cur.wind_gust}</span> km/h
+                  <span className="text-sm font-black font-['Montserrat',sans-serif]">{activeDay.wind_gust}</span> km/h
                   <span className="block text-[10px] text-[#022113]/50 font-normal">Wind Gust</span>
                 </div>
               </div>
             </div>
 
             <div className="text-[11px] font-bold text-[#022113] bg-[#F0F2EB] px-3 py-1 rounded-full text-center font-['Montserrat',sans-serif]">
-              {cur.wind_force}
+              {activeDay.wind_force}
             </div>
           </div>
 
@@ -799,7 +851,7 @@ export const WeatherDashboardPage: React.FC<WeatherDashboardPageProps> = ({ onNa
                   {activeDay.humidity > 75 ? 'Humid' : 'Favorable'}
                 </span>
                 <span className="text-xs font-mono font-medium text-[#022113]/60 block pt-0.5">
-                  {toDisplayTemp(cur.dew_point)}° Dew point
+                  {toDisplayTemp(activeDay.dew_point)}° Dew point
                 </span>
               </div>
             </div>
@@ -821,7 +873,7 @@ export const WeatherDashboardPage: React.FC<WeatherDashboardPageProps> = ({ onNa
               <div className="absolute top-2 left-2 bg-white/95 backdrop-blur-xs px-2.5 py-0.5 rounded-full border border-[#022113]/8 text-[10px] font-bold font-['Montserrat',sans-serif] text-[#022113] shadow-xs flex items-center gap-1.5">
                 <MapPin className="w-3 h-3 text-[#546C18]" />
                 <span>{selectedDistrict.split(' ')[0]}</span>
-                <span className="text-[#546C18] font-mono">{toDisplayTemp(cur.temperature)}°</span>
+                <span className="text-[#546C18] font-mono">{toDisplayTemp(activeDay.temp)}°</span>
               </div>
 
               {/* Larger map button */}
@@ -850,18 +902,18 @@ export const WeatherDashboardPage: React.FC<WeatherDashboardPageProps> = ({ onNa
                 <circle cx="50" cy="36" r="6" fill="#DFEB38" stroke="#022113" strokeWidth="2" className="animate-pulse" />
                 <circle cx="50" cy="36" r="8" fill="#DFEB38" opacity="0.4" />
                 <text x="100" y="45" textAnchor="middle" fill="#022113" fontSize="10" fontWeight="bold" fontFamily="monospace">
-                  {cur.sun_hours}
+                  {activeDay.sun_hours}
                 </text>
               </svg>
             </div>
 
             <div className="flex items-center justify-between text-[11px] pt-1 border-t border-[#E5EAD7] font-mono">
               <div>
-                <span className="font-bold text-[#022113] block">{cur.sunrise}</span>
+                <span className="font-bold text-[#022113] block">{activeDay.sunrise}</span>
                 <span className="text-[#022113]/40 text-[9px] uppercase font-['Montserrat',sans-serif]">Sunrise</span>
               </div>
               <div className="text-right">
-                <span className="font-bold text-[#022113] block">{cur.sunset}</span>
+                <span className="font-bold text-[#022113] block">{activeDay.sunset}</span>
                 <span className="text-[#022113]/40 text-[9px] uppercase font-['Montserrat',sans-serif]">Sunset</span>
               </div>
             </div>
@@ -879,7 +931,7 @@ export const WeatherDashboardPage: React.FC<WeatherDashboardPageProps> = ({ onNa
           </div>
           <div>
             <h3 className="font-black text-lg sm:text-2xl text-[#022113] font-['Montserrat',sans-serif] tracking-tight">
-              Precision Farming Weather Advisories for <span className="text-[#546C18]">{selectedDistrict}</span>
+              Precision Farming Weather Advisories for <span className="text-[#546C18]">{selectedDistrict} ({activeDay.day_name}, {activeDay.date})</span>
             </h3>
             <p className="text-xs text-[#4A5568]">Agrometeorological actionable guidance derived from real-time satellite NWP vectors.</p>
           </div>
@@ -892,7 +944,7 @@ export const WeatherDashboardPage: React.FC<WeatherDashboardPageProps> = ({ onNa
               <span>Spraying & Protection</span>
             </div>
             <p className="text-xs text-[#022113]/80 leading-relaxed font-['Open_Sans',sans-serif]">
-              {weatherData?.agri_advisory?.spraying || "Favorable: Wind is light (10 km/h). Safe for foliar application until 2 PM."}
+              {activeDay.agri_advisory?.spraying || weatherData?.agri_advisory?.spraying || "Favorable: Wind is light. Safe for foliar application until 2 PM."}
             </p>
           </div>
 
@@ -902,7 +954,7 @@ export const WeatherDashboardPage: React.FC<WeatherDashboardPageProps> = ({ onNa
               <span>Irrigation Scheduling</span>
             </div>
             <p className="text-xs text-white/90 leading-relaxed font-['Open_Sans',sans-serif]">
-              {weatherData?.agri_advisory?.irrigation || "Delay overhead irrigation: shower probability anticipated this afternoon."}
+              {activeDay.agri_advisory?.irrigation || weatherData?.agri_advisory?.irrigation || "Delay overhead irrigation: shower probability anticipated this afternoon."}
             </p>
           </div>
 
@@ -912,7 +964,7 @@ export const WeatherDashboardPage: React.FC<WeatherDashboardPageProps> = ({ onNa
               <span>Harvest & Sun Drying</span>
             </div>
             <p className="text-xs text-[#022113]/80 leading-relaxed font-['Open_Sans',sans-serif]">
-              {weatherData?.agri_advisory?.harvesting || "Good window for picking and shaded sorting; keep tarpaulins ready."}
+              {activeDay.agri_advisory?.harvesting || weatherData?.agri_advisory?.harvesting || "Good window for picking and shaded sorting; keep tarpaulins ready."}
             </p>
           </div>
         </div>

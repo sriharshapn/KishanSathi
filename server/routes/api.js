@@ -28,7 +28,7 @@ import {
 } from '../services/geminiService.js';
 import { GOV_API_REGISTRY, searchGovPlotData } from '../services/govPlotService.js';
 import { processEarthEnginePass, getEarthEngineStatus } from '../services/earthEngineService.js';
-import db from '../database/db.js';
+import db, { saveDocument, getCollection, deleteDocument } from '../database/db.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -195,15 +195,20 @@ router.post('/history', async (req, res) => {
 });
 router.get('/preferences', async (req, res) => {
   try {
-    const pref = await db.get("SELECT * FROM user_preferences WHERE user_id = 'default_farmer';");
-    res.json({ success: true, preferences: pref || null });
+    const list = await getCollection('user_preferences');
+    const pref = list.find(p => p.user_id === 'default_farmer') || list[0] || null;
+    res.json({ success: true, preferences: pref });
   } catch (err) { res.json({ success: false, error: err.message }); }
 });
 router.post('/preferences', async (req, res) => {
   const { language = 'en', location = '', preferredUnits = 'quintal' } = req.body;
   try {
-    await db.run(`INSERT OR REPLACE INTO user_preferences (user_id, language, location, preferred_units, updated_at) VALUES ('default_farmer', ?, ?, ?, ?);`,
-      [language, location, preferredUnits, new Date().toISOString()]);
+    await saveDocument('user_preferences', 'default_farmer', {
+      user_id: 'default_farmer',
+      language,
+      location,
+      preferred_units: preferredUnits
+    });
     res.json({ success: true, message: "Preferences saved" });
   } catch (err) { res.status(500).json({ success: false, error: err.message }); }
 });
@@ -216,23 +221,21 @@ router.post('/advisory', async (req, res) => {
   try {
     const advisory = await generateCropAdvisory({ state, district, crop, soilType, season: currentSeason, language });
     
-    // Persist into SQLite advisories table
-    await db.run(
-      `INSERT INTO advisories (farmer_id, state, district, crop, soil_type, season, language, advisory_json, ndvi_score, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
-      [
-        'default_farmer',
-        state,
-        district,
-        crop || '',
-        soilType || '',
-        currentSeason,
-        language,
-        JSON.stringify(advisory),
-        advisory.ndvi_score || 0.6,
-        new Date().toISOString()
-      ]
-    ).catch(err => console.warn('Advisory DB insert warning:', err.message));
+    // Persist into Cloud Firestore advisories collection
+    const advisoryId = `adv_${Date.now()}`;
+    await saveDocument('advisories', advisoryId, {
+      id: advisoryId,
+      farmer_id: 'default_farmer',
+      state,
+      district,
+      crop: crop || '',
+      soil_type: soilType || '',
+      season: currentSeason,
+      language,
+      advisory,
+      ndvi_score: advisory.ndvi_score || 0.6,
+      created_at: new Date().toISOString()
+    }).catch(err => console.warn('Advisory Firestore insert warning:', err.message));
 
     res.json({ success: true, advisory, season: currentSeason, location: `${district}, ${state}` });
   } catch (err) {
@@ -243,26 +246,20 @@ router.post('/advisory', async (req, res) => {
 // GET /api/advisory/history
 router.get('/advisory/history', async (req, res) => {
   try {
-    const rows = await db.query(
-      "SELECT id, farmer_id, state, district, crop, soil_type, season, language, advisory_json, ndvi_score, created_at FROM advisories ORDER BY id DESC LIMIT 20;"
-    );
-    const history = rows.map(r => {
-      let parsed = {};
-      try { parsed = JSON.parse(r.advisory_json); } catch (_) {}
-      return {
-        id: r.id,
-        farmer_id: r.farmer_id,
-        state: r.state,
-        district: r.district,
-        crop: r.crop,
-        soil_type: r.soil_type,
-        season: r.season,
-        language: r.language,
-        ndvi_score: r.ndvi_score,
-        created_at: r.created_at,
-        advisory: parsed
-      };
-    });
+    const rows = await getCollection('advisories');
+    const history = [...rows].reverse().slice(0, 20).map(r => ({
+      id: r.id,
+      farmer_id: r.farmer_id || 'default_farmer',
+      state: r.state,
+      district: r.district,
+      crop: r.crop,
+      soil_type: r.soil_type,
+      season: r.season,
+      language: r.language,
+      ndvi_score: r.ndvi_score,
+      created_at: r.created_at,
+      advisory: r.advisory || (typeof r.advisory_json === 'string' ? JSON.parse(r.advisory_json) : r.advisory_json)
+    }));
     res.json({ success: true, count: history.length, history });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
@@ -282,22 +279,20 @@ router.post('/disease/diagnose', upload.single('image'), async (req, res) => {
 
     // Persist into Cloud Firestore disease_reports collection
     const primaryDiag = diagnosis.diagnoses?.[0] || {};
-    await db.run(
-      `INSERT INTO disease_reports (farmer_id, crop_identified, disease_name, severity, confidence, overall_health, diagnosis_json, image_name, language, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
-      [
-        'default_farmer',
-        diagnosis.crop_identified || 'Botanical Sample',
-        primaryDiag.disease_name || 'Healthy / Undetermined',
-        primaryDiag.severity || 'low',
-        primaryDiag.confidence || 0.85,
-        diagnosis.overall_health || 'healthy',
-        JSON.stringify(diagnosis),
-        req.file ? req.file.originalname : 'crop_sample.png',
-        language,
-        new Date().toISOString()
-      ]
-    ).catch(err => console.warn('Disease report DB insert warning:', err.message));
+    const reportId = `report_${Date.now()}`;
+    await saveDocument('disease_reports', reportId, {
+      id: reportId,
+      farmer_id: 'default_farmer',
+      crop_identified: diagnosis.crop_identified || 'Botanical Sample',
+      disease_name: primaryDiag.disease_name || 'Healthy / Undetermined',
+      severity: primaryDiag.severity || 'low',
+      confidence: primaryDiag.confidence || 0.85,
+      overall_health: diagnosis.overall_health || 'healthy',
+      diagnosis,
+      image_name: req.file ? req.file.originalname : 'crop_sample.png',
+      language,
+      created_at: new Date().toISOString()
+    }).catch(err => console.warn('Disease report Firestore insert warning:', err.message));
 
     res.json({ success: true, diagnosis });
   } catch (err) {
@@ -311,26 +306,21 @@ router.post('/disease/diagnose', upload.single('image'), async (req, res) => {
 // GET /api/disease/reports
 router.get('/disease/reports', async (req, res) => {
   try {
-    const rows = await db.query(
-      "SELECT id, farmer_id, crop_identified, disease_name, severity, confidence, overall_health, diagnosis_json, image_name, language, created_at FROM disease_reports ORDER BY id DESC LIMIT 20;"
-    );
-    const reports = rows.map(r => {
-      let parsed = {};
-      try { parsed = JSON.parse(r.diagnosis_json); } catch (_) {}
-      return {
-        id: r.id,
-        farmer_id: r.farmer_id,
-        crop_identified: r.crop_identified,
-        disease_name: r.disease_name,
-        severity: r.severity,
-        confidence: r.confidence,
-        overall_health: r.overall_health,
-        image_name: r.image_name,
-        language: r.language,
-        created_at: r.created_at,
-        diagnosis: parsed
-      };
-    });
+    const rows = await getCollection('disease_reports');
+    const reports = [...rows].reverse().slice(0, 20).map(r => ({
+      id: r.id,
+      farmer_id: r.farmer_id || 'default_farmer',
+      crop_identified: r.crop_identified,
+      disease_name: r.disease_name,
+      severity: r.severity,
+      confidence: r.confidence,
+      overall_health: r.overall_health,
+      image_name: r.image_name,
+      image_url: r.image_url,
+      language: r.language,
+      created_at: r.created_at,
+      diagnosis: r.diagnosis || (typeof r.diagnosis_json === 'string' ? JSON.parse(r.diagnosis_json) : r.diagnosis_json)
+    }));
     res.json({ success: true, count: reports.length, reports });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
@@ -341,9 +331,7 @@ router.get('/disease/reports', async (req, res) => {
 // GET /api/fields
 router.get('/fields', async (req, res) => {
   try {
-    const fields = await db.query(
-      "SELECT * FROM farmer_fields WHERE farmer_id = 'default_farmer' ORDER BY created_at DESC;"
-    );
+    const fields = await getCollection('farmer_fields');
     res.json({ success: true, count: fields.length, fields });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
@@ -362,29 +350,29 @@ router.post('/fields', async (req, res) => {
 
   const ndviData = getSatelliteNDVI(state, district);
   const fieldId = `field_${Date.now().toString(36)}`;
+  const fieldRecord = {
+    field_id: fieldId,
+    id: fieldId,
+    farmer_id: 'default_farmer',
+    field_name,
+    state,
+    district,
+    area_hectares: area,
+    latitude: lat,
+    longitude: lon,
+    soil_type,
+    current_crop,
+    ndvi_latest: ndviData.ndvi_mean,
+    ndvi_health: ndviData.health_status,
+    created_at: new Date().toISOString()
+  };
 
   try {
-    await db.run(
-      `INSERT INTO farmer_fields (field_id, farmer_id, field_name, state, district, area_hectares, latitude, longitude, soil_type, current_crop, ndvi_latest, ndvi_health, created_at)
-       VALUES (?, 'default_farmer', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
-      [fieldId, field_name, state, district, area, lat, lon, soil_type, current_crop, ndviData.ndvi_mean, ndviData.health_status, new Date().toISOString()]
-    );
+    await saveDocument('farmer_fields', fieldId, fieldRecord);
     res.json({
       success: true,
       message: "Field registered successfully",
-      field: {
-        field_id: fieldId,
-        field_name,
-        state,
-        district,
-        area_hectares: area,
-        latitude: lat,
-        longitude: lon,
-        soil_type,
-        current_crop,
-        ndvi_latest: ndviData.ndvi_mean,
-        ndvi_health: ndviData.health_status
-      }
+      field: fieldRecord
     });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
@@ -395,7 +383,7 @@ router.post('/fields', async (req, res) => {
 router.delete('/fields/:id', async (req, res) => {
   const { id } = req.params;
   try {
-    await db.run("DELETE FROM farmer_fields WHERE field_id = ? AND farmer_id = 'default_farmer';", [id]);
+    await deleteDocument('farmer_fields', id);
     res.json({ success: true, message: `Field ${id} deleted successfully` });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });

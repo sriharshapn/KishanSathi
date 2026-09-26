@@ -155,6 +155,7 @@ export async function syncMarketData({ simulateLiveData = false } = {}) {
   console.log(`[DATA PIPELINE] Starting verified market data sync at ${syncStartTime}...`);
 
   try {
+    let freshRecords = [];
     const apiKey = process.env.DATA_GOV_IN_API_KEY || process.env.DATA_GOV_API_KEY || '';
 
     // 1. Fetch live Agmarknet daily bulletin from Data.gov.in

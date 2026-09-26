@@ -560,11 +560,17 @@ export const AdvisoryPage: React.FC<AdvisoryPageProps> = ({ language, onNavigate
             <label className="block text-[11px] font-bold uppercase tracking-wider text-[#022113]/70 font-['Montserrat',sans-serif] mb-1.5">Current / Prior Crop</label>
             <input
               type="text"
+              list="crop-datalist"
               value={crop}
               onChange={(e) => setCrop(e.target.value)}
-              placeholder="e.g. Tomato, Cotton"
+              placeholder="e.g. Tomato, Cardamom, Cotton"
               className="w-full bg-[#F8FAF6] border border-[#E5EAD7] rounded-xl px-3.5 py-2.5 text-xs font-semibold text-[#022113] focus:outline-none focus:border-[#59701E]"
             />
+            <datalist id="crop-datalist">
+              {['Tomato', 'Wheat', 'Rice (Paddy)', 'Cotton', 'Sugarcane', 'Soybean', 'Maize', 'Chilli', 'Onion', 'Potato', 'Mustard', 'Groundnut', 'Gram (Chana)', 'Tur (Arhar)', 'Cardamom', 'Black Pepper', 'Coffee', 'Tea', 'Banana', 'Mango', 'Turmeric', 'Ginger', 'Bajra', 'Jowar', 'Ragi', 'Garlic', 'Cumin', 'Coriander', 'Rubber', 'Cashew'].map(c => (
+                <option key={c} value={c} />
+              ))}
+            </datalist>
           </div>
 
           <div>
